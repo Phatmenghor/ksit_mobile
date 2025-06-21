@@ -7,12 +7,14 @@ import '../models/home_item_model.dart';
 class HomeItemWidget extends StatelessWidget {
   final HomeItemModel item;
   final VoidCallback? onTap;
+  final Function(ItemStatus)? onStatusChange; // Added this parameter
 
   const HomeItemWidget({
-    Key? key,
+    super.key,
     required this.item,
     this.onTap,
-  }) : super(key: key);
+    this.onStatusChange, // Added this parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +119,13 @@ class HomeItemWidget extends StatelessWidget {
                       ),
                   ],
                 ),
+
+                // Quick Status Change Actions (Added this section)
+                if (onStatusChange != null &&
+                    item.status != ItemStatus.completed) ...[
+                  const SizedBox(height: 12),
+                  _buildQuickActions(),
+                ],
               ],
             ),
           ),
@@ -197,6 +206,57 @@ class HomeItemWidget extends StatelessWidget {
     );
   }
 
+  // Added this method for quick status change actions
+  Widget _buildQuickActions() {
+    final availableActions = _getAvailableActions();
+
+    if (availableActions.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(
+      spacing: 8,
+      children: availableActions.map((action) {
+        return OutlinedButton(
+          onPressed: () => onStatusChange?.call(action.status),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            minimumSize: Size.zero,
+            side: BorderSide(color: action.color),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            action.label,
+            style: TextStyle(
+              fontSize: 12,
+              color: action.color,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Added this method to get available status change actions
+  List<QuickAction> _getAvailableActions() {
+    switch (item.status) {
+      case ItemStatus.pending:
+        return [
+          QuickAction('Start', ItemStatus.active, AppColors.info),
+          QuickAction('Complete', ItemStatus.completed, AppColors.success),
+        ];
+      case ItemStatus.active:
+        return [
+          QuickAction('Complete', ItemStatus.completed, AppColors.success),
+          QuickAction('Pause', ItemStatus.pending, AppColors.warning),
+        ];
+      case ItemStatus.completed:
+        return []; // No actions for completed items
+      case ItemStatus.cancelled:
+        return [
+          QuickAction('Restart', ItemStatus.pending, AppColors.info),
+        ];
+    }
+  }
+
   Color _getStatusColor() {
     switch (item.status) {
       case ItemStatus.active:
@@ -256,4 +316,13 @@ class HomeItemWidget extends StatelessWidget {
       return 'Just now';
     }
   }
+}
+
+// Added this class for quick actions
+class QuickAction {
+  final String label;
+  final ItemStatus status;
+  final Color color;
+
+  const QuickAction(this.label, this.status, this.color);
 }

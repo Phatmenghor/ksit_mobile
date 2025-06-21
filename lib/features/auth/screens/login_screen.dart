@@ -9,7 +9,7 @@ import '../../../shared/widgets/loading_widget.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,10 +135,10 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 40),
 
                     // Version Info
-                    Center(
+                    const Center(
                       child: Text(
                         'Version ${AppConstants.appVersion}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textHint,
                         ),
