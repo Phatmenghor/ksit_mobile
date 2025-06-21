@@ -17,11 +17,11 @@ class AppConfig {
   static String get baseUrl {
     switch (_environment) {
       case Environment.development:
-        return 'https://dev-api.example.com/api/v1';
+        return 'http://143.198.93.97/api';
       case Environment.staging:
-        return 'https://staging-api.example.com/api/v1';
+        return 'http://143.198.93.97/api';
       case Environment.production:
-        return 'https://api.example.com/api/v1';
+        return 'http://143.198.93.97/api';
     }
   }
 

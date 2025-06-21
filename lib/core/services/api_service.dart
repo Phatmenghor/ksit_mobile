@@ -3,7 +3,6 @@ import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/core/constants/app_storages.dart';
 import '../config/app_config.dart';
-import '../constants/app_constants.dart';
 import '../utils/logger_utils.dart';
 import 'storage_service.dart';
 

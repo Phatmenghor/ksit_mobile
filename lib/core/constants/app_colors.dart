@@ -36,19 +36,6 @@ class AppColors {
   static const Color iconActive = primary;
   static const Color iconInactive = Color(0xFFBDBDBD);
 
-  // Gradient Colors
-  static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryAccent],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const LinearGradient secondaryGradient = LinearGradient(
-    colors: [secondary, secondaryAccent],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
   // Shadow Colors
   static const Color shadowLight = Color(0x1A000000);
   static const Color shadowMedium = Color(0x33000000);
@@ -62,4 +49,17 @@ class AppColors {
   static const Color bottomNavBackground = Colors.white;
   static const Color bottomNavSelected = primary;
   static const Color bottomNavUnselected = Color(0xFFBDBDBD);
+
+  // Gradient Colors
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primary, primaryAccent],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient secondaryGradient = LinearGradient(
+    colors: [secondary, secondaryAccent],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
