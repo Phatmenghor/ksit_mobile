@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ksit_mobile/features/auth/models/login_request/login_request_model.dart';
+import 'package:ksit_mobile/features/auth/models/login_resposne/login_response_model.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/logger_utils.dart';
 import '../../../shared/models/user/user_model.dart';
-import '../models/login_resposne/login_response_model.dart';
 
 class AuthController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -63,53 +63,57 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final request = LoginRequestModel(
-        email: emailController.text.trim(),
-        password: passwordController.text,
+      // Simulate login response since API is not available
+      await Future.delayed(const Duration(seconds: 2));
+
+      final mockResponse = LoginResponseModel(
+        success: true,
+        message: 'Login successful',
+        data: LoginDataModel(
+          token: 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
+          user: UserModel(
+            id: 1,
+            name: 'John Doe',
+            email: emailController.text.trim(),
+            phone: '+1234567890',
+            role: 'user',
+          ),
+        ),
       );
 
-      final response = await _apiService.post<Map<String, dynamic>>(
-        AppConstants.loginEndpoint,
-        data: request.toJson(),
-      );
+      if (mockResponse.success) {
+        // Save token and user data
+        await _storageService.setString(
+          AppConstants.tokenKey,
+          mockResponse.data!.token,
+        );
+        await _storageService.setString(
+          AppConstants.userKey,
+          jsonEncode(mockResponse.data!.user.toJson()),
+        );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final loginResponse = LoginResponseModel.fromJson(response.data!);
+        // Update observables
+        currentUser.value = mockResponse.data!.user;
+        isLoggedIn.value = true;
 
-        if (loginResponse.success) {
-          // Save token and user data
-          await _storageService.setString(
-            AppConstants.tokenKey,
-            loginResponse.data!.token,
-          );
-          await _storageService.setString(
-            AppConstants.userKey,
-            jsonEncode(loginResponse.data!.user.toJson()),
-          );
+        // Clear form
+        _clearForm();
 
-          // Update observables
-          currentUser.value = loginResponse.data!.user;
-          isLoggedIn.value = true;
-
-          // Clear form
-          _clearForm();
-
-          // Navigate to home
-          Get.offAllNamed(AppConstants.homeRoute);
-
-          Fluttertoast.showToast(
-            msg: 'Login successful!',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-          );
-
-          LoggerUtils.info(
-              'Login successful for user: ${loginResponse.data!.user.email}');
-        } else {
-          _showError(loginResponse.message);
+        // Navigate to home using GoRouter
+        if (Get.context != null) {
+          Get.context!.go(AppConstants.homeRoute);
         }
+
+        Fluttertoast.showToast(
+          msg: 'Login successful!',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+
+        LoggerUtils.info(
+            'Login successful for user: ${mockResponse.data!.user.email}');
       } else {
-        _showError('Login failed. Please try again.');
+        _showError(mockResponse.message);
       }
     } catch (e) {
       LoggerUtils.error('Login error', e);
@@ -123,14 +127,16 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Call logout API
-      await _apiService.post(AppConstants.logoutEndpoint);
+      // Simulate logout API call
+      await Future.delayed(const Duration(seconds: 1));
 
       // Clear local data
       await _clearUserData();
 
-      // Navigate to login
-      Get.offAllNamed(AppConstants.loginRoute);
+      // Navigate to login using GoRouter
+      if (Get.context != null) {
+        Get.context!.go(AppConstants.loginRoute);
+      }
 
       Fluttertoast.showToast(
         msg: 'Logged out successfully',
@@ -143,7 +149,9 @@ class AuthController extends GetxController {
       LoggerUtils.error('Logout error', e);
       // Still clear local data even if API call fails
       await _clearUserData();
-      Get.offAllNamed(AppConstants.loginRoute);
+      if (Get.context != null) {
+        Get.context!.go(AppConstants.loginRoute);
+      }
     } finally {
       isLoading.value = false;
     }

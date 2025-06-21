@@ -2,14 +2,10 @@ import 'package:get/get.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/utils/logger_utils.dart';
-import '../../../shared/models/api_response/api_response_model.dart';
 import '../models/home_item_model.dart';
 
 class HomeController extends GetxController {
-  final ApiService _apiService = Get.find<ApiService>();
-
   // Pagination
   final PagingController<int, HomeItemModel> pagingController =
       PagingController(firstPageKey: 1);
@@ -20,6 +16,90 @@ class HomeController extends GetxController {
   final RxInt activeItems = 0.obs;
   final RxInt pendingItems = 0.obs;
   final RxInt completedItems = 0.obs;
+
+  // Static mock data
+  static final List<HomeItemModel> _mockItems = [
+    HomeItemModel(
+      id: 1,
+      title: 'Website Development',
+      description: 'Complete responsive website for client project',
+      status: ItemStatus.active,
+      priority: 3,
+      category: 'Development',
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 3)),
+    ),
+    HomeItemModel(
+      id: 2,
+      title: 'Mobile App Testing',
+      description: 'Test all features and fix bugs in mobile application',
+      status: ItemStatus.pending,
+      priority: 2,
+      category: 'Testing',
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+    ),
+    HomeItemModel(
+      id: 3,
+      title: 'Database Optimization',
+      description: 'Optimize database queries for better performance',
+      status: ItemStatus.completed,
+      priority: 1,
+      category: 'Database',
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    HomeItemModel(
+      id: 4,
+      title: 'UI/UX Design Review',
+      description: 'Review and update user interface designs',
+      status: ItemStatus.active,
+      priority: 2,
+      category: 'Design',
+      createdAt: DateTime.now().subtract(const Duration(days: 3)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 5)),
+    ),
+    HomeItemModel(
+      id: 5,
+      title: 'API Documentation',
+      description: 'Create comprehensive API documentation for developers',
+      status: ItemStatus.pending,
+      priority: 1,
+      category: 'Documentation',
+      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
+    ),
+    HomeItemModel(
+      id: 6,
+      title: 'Security Audit',
+      description: 'Perform security audit and vulnerability assessment',
+      status: ItemStatus.active,
+      priority: 3,
+      category: 'Security',
+      createdAt: DateTime.now().subtract(const Duration(days: 4)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 8)),
+    ),
+    HomeItemModel(
+      id: 7,
+      title: 'Performance Monitoring',
+      description: 'Set up monitoring tools for application performance',
+      status: ItemStatus.completed,
+      priority: 2,
+      category: 'Monitoring',
+      createdAt: DateTime.now().subtract(const Duration(days: 6)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 2)),
+    ),
+    HomeItemModel(
+      id: 8,
+      title: 'User Training',
+      description: 'Conduct training sessions for end users',
+      status: ItemStatus.pending,
+      priority: 1,
+      category: 'Training',
+      createdAt: DateTime.now().subtract(const Duration(hours: 6)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+    ),
+  ];
 
   @override
   void onInit() {
@@ -54,17 +134,20 @@ class HomeController extends GetxController {
 
   Future<void> _loadStats() async {
     try {
-      final response = await _apiService.get<Map<String, dynamic>>(
-        '${AppConstants.homeDataEndpoint}/stats',
-      );
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 1));
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data!;
-        totalItems.value = data['total'] ?? 0;
-        activeItems.value = data['active'] ?? 0;
-        pendingItems.value = data['pending'] ?? 0;
-        completedItems.value = data['completed'] ?? 0;
-      }
+      // Calculate stats from mock data
+      totalItems.value = _mockItems.length;
+      activeItems.value =
+          _mockItems.where((item) => item.status == ItemStatus.active).length;
+      pendingItems.value =
+          _mockItems.where((item) => item.status == ItemStatus.pending).length;
+      completedItems.value = _mockItems
+          .where((item) => item.status == ItemStatus.completed)
+          .length;
+
+      LoggerUtils.info('Stats loaded successfully');
     } catch (e) {
       LoggerUtils.error('Error loading stats', e);
     }
@@ -72,45 +155,33 @@ class HomeController extends GetxController {
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final response = await _apiService.get<Map<String, dynamic>>(
-        AppConstants.homeDataEndpoint,
-        queryParameters: {
-          'pageNo': pageKey - 1, // API uses 0-based indexing
-          'pageSize': AppConstants.defaultPageSize,
-        },
-      );
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 500));
 
-      if (response.statusCode == 200 && response.data != null) {
-        final apiResponse =
-            ApiResponse<PaginatedResponse<HomeItemModel>>.fromJson(
-          response.data!,
-          (json) => PaginatedResponse<HomeItemModel>.fromJson(
-            json as Map<String, dynamic>,
-            (itemJson) =>
-                HomeItemModel.fromJson(itemJson as Map<String, dynamic>),
-          ),
-        );
+      final pageSize = AppConstants.defaultPageSize;
+      final startIndex = (pageKey - 1) * pageSize;
+      final endIndex = startIndex + pageSize;
 
-        if (apiResponse.success && apiResponse.data != null) {
-          final paginatedData = apiResponse.data!;
-          final newItems = paginatedData.content;
-          final isLastPage = paginatedData.last;
-
-          if (isLastPage) {
-            pagingController.appendLastPage(newItems);
-          } else {
-            final nextPageKey = pageKey + 1;
-            pagingController.appendPage(newItems, nextPageKey);
-          }
-
-          // Update total items
-          totalItems.value = paginatedData.totalElements;
-        } else {
-          pagingController.error = apiResponse.message;
-        }
+      List<HomeItemModel> pageItems;
+      if (startIndex >= _mockItems.length) {
+        pageItems = [];
       } else {
-        pagingController.error = 'Failed to load data';
+        pageItems = _mockItems.sublist(
+          startIndex,
+          endIndex > _mockItems.length ? _mockItems.length : endIndex,
+        );
       }
+
+      final isLastPage = endIndex >= _mockItems.length;
+
+      if (isLastPage) {
+        pagingController.appendLastPage(pageItems);
+      } else {
+        final nextPageKey = pageKey + 1;
+        pagingController.appendPage(pageItems, nextPageKey);
+      }
+
+      LoggerUtils.info('Page $pageKey loaded with ${pageItems.length} items');
     } catch (e) {
       LoggerUtils.error('Error fetching page $pageKey', e);
       pagingController.error = e.toString();
@@ -121,6 +192,7 @@ class HomeController extends GetxController {
     try {
       await _loadStats();
       pagingController.refresh();
+      LoggerUtils.info('Data refreshed successfully');
     } catch (e) {
       LoggerUtils.error('Error refreshing data', e);
     }
@@ -128,11 +200,12 @@ class HomeController extends GetxController {
 
   void onItemTap(HomeItemModel item) {
     LoggerUtils.info('Item tapped: ${item.id}');
-    // TODO: Navigate to item details or perform action
+
     Get.snackbar(
       'Item Selected',
       'Tapped on ${item.title}',
       snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
     );
   }
 }

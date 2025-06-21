@@ -4,16 +4,12 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/utils/logger_utils.dart';
-import '../../../shared/models/api_response/api_response_model.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../models/request_model.dart';
 
 class RequestController extends GetxController {
-  final ApiService _apiService = Get.find<ApiService>();
-
   // Pagination
   final PagingController<int, RequestModel> pagingController =
       PagingController(firstPageKey: 1);
@@ -27,6 +23,76 @@ class RequestController extends GetxController {
   final descriptionController = TextEditingController();
   final Rx<RequestPriority> selectedPriority = RequestPriority.medium.obs;
   final formKey = GlobalKey<FormState>();
+
+  // Static mock data
+  static final List<RequestModel> _mockRequests = [
+    RequestModel(
+      id: 1,
+      title: 'New Feature Request',
+      description: 'Add dark mode theme to the application',
+      status: RequestStatus.pending,
+      priority: RequestPriority.high,
+      type: 'Feature',
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
+    ),
+    RequestModel(
+      id: 2,
+      title: 'Bug Fix Request',
+      description: 'Fix login page validation issues',
+      status: RequestStatus.inProgress,
+      priority: RequestPriority.urgent,
+      type: 'Bug',
+      assignedTo: 'John Developer',
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      dueDate: DateTime.now().add(const Duration(days: 1)),
+    ),
+    RequestModel(
+      id: 3,
+      title: 'Documentation Update',
+      description: 'Update API documentation with new endpoints',
+      status: RequestStatus.completed,
+      priority: RequestPriority.medium,
+      type: 'Documentation',
+      assignedTo: 'Jane Writer',
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    RequestModel(
+      id: 4,
+      title: 'Performance Optimization',
+      description: 'Optimize database queries for faster response times',
+      status: RequestStatus.inProgress,
+      priority: RequestPriority.high,
+      type: 'Enhancement',
+      assignedTo: 'Bob Engineer',
+      createdAt: DateTime.now().subtract(const Duration(days: 3)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 4)),
+      dueDate: DateTime.now().add(const Duration(days: 3)),
+    ),
+    RequestModel(
+      id: 5,
+      title: 'Security Audit',
+      description: 'Perform comprehensive security audit of the system',
+      status: RequestStatus.pending,
+      priority: RequestPriority.urgent,
+      type: 'Security',
+      createdAt: DateTime.now().subtract(const Duration(hours: 8)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      dueDate: DateTime.now().add(const Duration(days: 7)),
+    ),
+    RequestModel(
+      id: 6,
+      title: 'UI Improvements',
+      description: 'Improve user interface design and user experience',
+      status: RequestStatus.cancelled,
+      priority: RequestPriority.low,
+      type: 'Design',
+      createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 8)),
+    ),
+  ];
 
   @override
   void onInit() {
@@ -62,49 +128,44 @@ class RequestController extends GetxController {
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      Map<String, dynamic> queryParams = {
-        'pageNo': pageKey - 1, // API uses 0-based indexing
-        'pageSize': AppConstants.defaultPageSize,
-      };
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 800));
 
-      // Add status filter if selected
-      if (selectedStatus.value != null) {
-        queryParams['status'] = selectedStatus.value!.name;
-      }
+      final pageSize = AppConstants.defaultPageSize;
+      final startIndex = (pageKey - 1) * pageSize;
 
-      final response = await _apiService.get<Map<String, dynamic>>(
-        AppConstants.requestsEndpoint,
-        queryParameters: queryParams,
-      );
+      // Filter requests based on selected status
+      List<RequestModel> filteredRequests = selectedStatus.value == null
+          ? _mockRequests
+          : _mockRequests
+              .where((request) => request.status == selectedStatus.value)
+              .toList();
 
-      if (response.statusCode == 200 && response.data != null) {
-        final apiResponse =
-            ApiResponse<PaginatedResponse<RequestModel>>.fromJson(
-          response.data!,
-          (json) => PaginatedResponse<RequestModel>.fromJson(
-            json as Map<String, dynamic>,
-            (itemJson) =>
-                RequestModel.fromJson(itemJson as Map<String, dynamic>),
-          ),
-        );
+      final endIndex = startIndex + pageSize;
+      List<RequestModel> pageItems;
 
-        if (apiResponse.success && apiResponse.data != null) {
-          final paginatedData = apiResponse.data!;
-          final newItems = paginatedData.content;
-          final isLastPage = paginatedData.last;
-
-          if (isLastPage) {
-            pagingController.appendLastPage(newItems);
-          } else {
-            final nextPageKey = pageKey + 1;
-            pagingController.appendPage(newItems, nextPageKey);
-          }
-        } else {
-          pagingController.error = apiResponse.message;
-        }
+      if (startIndex >= filteredRequests.length) {
+        pageItems = [];
       } else {
-        pagingController.error = 'Failed to load requests';
+        pageItems = filteredRequests.sublist(
+          startIndex,
+          endIndex > filteredRequests.length
+              ? filteredRequests.length
+              : endIndex,
+        );
       }
+
+      final isLastPage = endIndex >= filteredRequests.length;
+
+      if (isLastPage) {
+        pagingController.appendLastPage(pageItems);
+      } else {
+        final nextPageKey = pageKey + 1;
+        pagingController.appendPage(pageItems, nextPageKey);
+      }
+
+      LoggerUtils.info(
+          'Page $pageKey loaded with ${pageItems.length} requests');
     } catch (e) {
       LoggerUtils.error('Error fetching page $pageKey', e);
       pagingController.error = e.toString();
@@ -114,6 +175,7 @@ class RequestController extends GetxController {
   Future<void> refreshRequests() async {
     try {
       pagingController.refresh();
+      LoggerUtils.info('Requests refreshed successfully');
     } catch (e) {
       LoggerUtils.error('Error refreshing requests', e);
     }
@@ -122,6 +184,7 @@ class RequestController extends GetxController {
   void setStatusFilter(RequestStatus? status) {
     selectedStatus.value = status;
     pagingController.refresh();
+    LoggerUtils.info('Status filter set to: ${status?.name ?? 'All'}');
   }
 
   void onRequestTap(RequestModel request) {
@@ -200,12 +263,17 @@ class RequestController extends GetxController {
                     _buildDetailRow(
                         'Priority', request.priority.name.toUpperCase()),
                     _buildDetailRow('Type', request.type ?? 'General'),
+                    if (request.assignedTo != null)
+                      _buildDetailRow('Assigned To', request.assignedTo!),
                     if (request.createdAt != null)
                       _buildDetailRow(
                           'Created', _formatDateTime(request.createdAt!)),
                     if (request.updatedAt != null)
                       _buildDetailRow(
                           'Updated', _formatDateTime(request.updatedAt!)),
+                    if (request.dueDate != null)
+                      _buildDetailRow(
+                          'Due Date', _formatDateTime(request.dueDate!)),
                   ],
                 ),
               ),
@@ -251,22 +319,29 @@ class RequestController extends GetxController {
   Future<void> updateRequestStatus(
       RequestModel request, RequestStatus newStatus) async {
     try {
-      final response = await _apiService.patch<Map<String, dynamic>>(
-        '${AppConstants.requestsEndpoint}/${request.id}/status',
-        data: {'status': newStatus.name},
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Find and update the request in mock data
+      final index = _mockRequests.indexWhere((r) => r.id == request.id);
+      if (index != -1) {
+        _mockRequests[index] = request.copyWith(
+          status: newStatus,
+          updatedAt: DateTime.now(),
+        );
+      }
+
+      Fluttertoast.showToast(
+        msg: 'Status updated successfully',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
       );
 
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(
-          msg: 'Status updated successfully',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-
-        pagingController.refresh();
-      } else {
-        throw Exception('Failed to update status');
-      }
+      pagingController.refresh();
+      LoggerUtils.info(
+          'Request ${request.id} status updated to ${newStatus.name}');
     } catch (e) {
       LoggerUtils.error('Error updating request status', e);
       Fluttertoast.showToast(
@@ -370,33 +445,36 @@ class RequestController extends GetxController {
     if (!formKey.currentState!.validate()) return;
 
     try {
-      final requestData = {
-        'title': titleController.text.trim(),
-        'description': descriptionController.text.trim(),
-        'priority': selectedPriority.value.name,
-      };
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 800));
 
-      final response = await _apiService.post<Map<String, dynamic>>(
-        AppConstants.requestsEndpoint,
-        data: requestData,
+      // Create new request and add to mock data
+      final newRequest = RequestModel(
+        id: _mockRequests.length + 1,
+        title: titleController.text.trim(),
+        description: descriptionController.text.trim(),
+        status: RequestStatus.pending,
+        priority: selectedPriority.value,
+        type: 'General',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        Get.back(); // Close dialog
+      _mockRequests.insert(0, newRequest);
 
-        Fluttertoast.showToast(
-          msg: 'Request created successfully',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
+      Get.back(); // Close dialog
 
-        pagingController.refresh();
-        _clearForm();
-      } else {
-        throw Exception('Failed to create request');
-      }
+      Fluttertoast.showToast(
+        msg: 'Request created successfully',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+
+      pagingController.refresh();
+      _clearForm();
+      LoggerUtils.info('New request created: ${newRequest.title}');
     } catch (e) {
       LoggerUtils.error('Error creating request', e);
       Fluttertoast.showToast(

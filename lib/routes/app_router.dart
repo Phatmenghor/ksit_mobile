@@ -14,6 +14,7 @@ import '../shared/screens/main_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
+    navigatorKey: Get.key, // Use GetX navigator key
     initialLocation: AppConstants.splashRoute,
     redirect: _redirect,
     routes: [
@@ -33,6 +34,7 @@ class AppRouter {
 
       // Main App Routes with Bottom Navigation
       ShellRoute(
+        navigatorKey: GlobalKey<NavigatorState>(),
         builder: (context, state, child) => MainScreen(child: child),
         routes: [
           GoRoute(

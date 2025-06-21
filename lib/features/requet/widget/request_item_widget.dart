@@ -10,11 +10,11 @@ class RequestItemWidget extends StatelessWidget {
   final Function(RequestStatus)? onStatusChange;
 
   const RequestItemWidget({
-    Key? key,
+    super.key,
     required this.request,
     this.onTap,
     this.onStatusChange,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_constants.dart';
 import 'package:ksit_mobile/core/services/storage_service.dart';
@@ -58,10 +59,10 @@ class _SplashScreenState extends State<SplashScreen>
 
       if (token != null && token.isNotEmpty) {
         // User is logged in, navigate to home
-        Get.offAllNamed(AppConstants.homeRoute);
+        context.go(AppConstants.homeRoute);
       } else {
         // User is not logged in, navigate to login
-        Get.offAllNamed(AppConstants.loginRoute);
+        context.go(AppConstants.loginRoute);
       }
     }
   }

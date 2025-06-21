@@ -7,7 +7,7 @@ import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';
 import 'core/utils/logger_utils.dart';
 import 'routes/app_router.dart';
-import 'firebase_options.dart'; // This is the missing import!
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,6 @@ void main() async {
     LoggerUtils.info('App started successfully');
   } catch (e) {
     LoggerUtils.error('Failed to initialize app: $e');
-    // You might want to show an error screen or handle this differently
   }
 
   runApp(const MyApp());
@@ -41,7 +40,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return GetMaterialApp.router(
       title: 'KSIT Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -74,7 +73,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      routerConfig: AppRouter.router,
+      routerDelegate: AppRouter.router.routerDelegate,
+      routeInformationParser: AppRouter.router.routeInformationParser,
+      routeInformationProvider: AppRouter.router.routeInformationProvider,
     );
   }
 }

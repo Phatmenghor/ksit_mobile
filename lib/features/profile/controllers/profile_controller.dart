@@ -3,13 +3,11 @@ import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/utils/logger_utils.dart';
 import '../../../features/auth/controllers/auth_controller.dart';
 import '../../../shared/models/user/user_model.dart';
 
 class ProfileController extends GetxController {
-  final ApiService _apiService = Get.find<ApiService>();
   final AuthController _authController = Get.find<AuthController>();
 
   // Observables
@@ -35,16 +33,15 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await _apiService.get<Map<String, dynamic>>(
-        '${AppConstants.profileEndpoint}/stats',
-      );
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 1));
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data!;
-        totalRequests.value = data['totalRequests'] ?? 0;
-        completedRequests.value = data['completedRequests'] ?? 0;
-        totalScans.value = data['totalScans'] ?? 0;
-      }
+      // Mock static data
+      totalRequests.value = 25;
+      completedRequests.value = 18;
+      totalScans.value = 42;
+
+      LoggerUtils.info('Profile stats loaded successfully');
     } catch (e) {
       LoggerUtils.error('Error loading profile stats', e);
       // Set default values
@@ -65,37 +62,33 @@ class ProfileController extends GetxController {
 
   Future<void> _loadUserProfile() async {
     try {
-      final response = await _apiService.get<Map<String, dynamic>>(
-        AppConstants.profileEndpoint,
-      );
+      // Simulate API call delay
+      await Future.delayed(const Duration(milliseconds: 500));
 
-      if (response.statusCode == 200 && response.data != null) {
-        final userData = response.data!['user'] ?? response.data!;
-        user.value = UserModel.fromJson(userData);
+      // Use current user data
+      user.value = _authController.currentUser.value;
 
-        // Update auth controller's user data
-        _authController.currentUser.value = user.value;
-      }
+      LoggerUtils.info('User profile refreshed');
     } catch (e) {
       LoggerUtils.error('Error loading user profile', e);
     }
   }
 
   void editProfile() {
-    // TODO: Navigate to edit profile screen
     Get.snackbar(
       'Edit Profile',
       'Edit profile functionality coming soon',
       snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
     );
   }
 
   void openSettings() {
-    // TODO: Navigate to settings screen
     Get.snackbar(
       'Settings',
       'Settings functionality coming soon',
       snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -112,6 +105,12 @@ class ProfileController extends GetxController {
                 value: true,
                 onChanged: (value) {
                   // TODO: Update notification settings
+                  Get.snackbar(
+                    'Settings',
+                    'Push notifications ${value ? 'enabled' : 'disabled'}',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 1),
+                  );
                 },
               ),
             ),
@@ -121,6 +120,12 @@ class ProfileController extends GetxController {
                 value: false,
                 onChanged: (value) {
                   // TODO: Update notification settings
+                  Get.snackbar(
+                    'Settings',
+                    'Email notifications ${value ? 'enabled' : 'disabled'}',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 1),
+                  );
                 },
               ),
             ),
@@ -130,6 +135,12 @@ class ProfileController extends GetxController {
                 value: true,
                 onChanged: (value) {
                   // TODO: Update notification settings
+                  Get.snackbar(
+                    'Settings',
+                    'Sound ${value ? 'enabled' : 'disabled'}',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 1),
+                  );
                 },
               ),
             ),
@@ -172,7 +183,15 @@ class ProfileController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () {
+              Get.back();
+              Get.snackbar(
+                'Security',
+                'Security settings functionality coming soon',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            },
             child: const Text('Close'),
           ),
         ],
@@ -207,7 +226,15 @@ class ProfileController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () {
+              Get.back();
+              Get.snackbar(
+                'Help',
+                'Help & support functionality coming soon',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            },
             child: const Text('Close'),
           ),
         ],
@@ -216,25 +243,27 @@ class ProfileController extends GetxController {
   }
 
   void showAbout() {
-    showAboutDialog(
-      context: Get.context!,
-      applicationName: AppConstants.appName,
-      applicationVersion: AppConstants.appVersion,
-      applicationLegalese:
-          '© 2024 ${AppConstants.appName}. All rights reserved.',
-      children: [
-        const SizedBox(height: 16),
-        const Text(
-          'A modern Flutter application built with GetX, Go Router, and Firebase.',
-          style: TextStyle(fontSize: 14),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Features include authentication, real-time notifications, QR code scanning, and request management.',
-          style: TextStyle(fontSize: 14),
-        ),
-      ],
-    );
+    if (Get.context != null) {
+      showAboutDialog(
+        context: Get.context!,
+        applicationName: AppConstants.appName,
+        applicationVersion: AppConstants.appVersion,
+        applicationLegalese:
+            '© 2024 ${AppConstants.appName}. All rights reserved.',
+        children: [
+          const SizedBox(height: 16),
+          const Text(
+            'A modern Flutter application built with GetX, Go Router, and Firebase.',
+            style: TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Features include authentication, real-time notifications, QR code scanning, and request management.',
+            style: TextStyle(fontSize: 14),
+          ),
+        ],
+      );
+    }
   }
 
   Future<void> logout() async {
