@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/core/constants/app_storages.dart';
 import '../config/app_config.dart';
 import '../constants/app_constants.dart';
 import '../utils/logger_utils.dart';
@@ -35,7 +37,7 @@ class ApiService extends GetxService {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           // Add auth token if available
-          final token = _storageService.getString(AppConstants.tokenKey);
+          final token = _storageService.getString(AppStorages.tokenKey);
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
@@ -91,9 +93,9 @@ class ApiService extends GetxService {
 
   void _handleUnauthorized() {
     // Clear token and redirect to login
-    _storageService.remove(AppConstants.tokenKey);
-    _storageService.remove(AppConstants.userKey);
-    Get.offAllNamed(AppConstants.loginRoute);
+    _storageService.remove(AppStorages.tokenKey);
+    _storageService.remove(AppStorages.userKey);
+    Get.offAllNamed(AppRoutes.loginRoute);
   }
 
   // GET Request

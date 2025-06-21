@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
@@ -21,25 +22,25 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<BottomNavigationItem> _navigationItems = [
     const BottomNavigationItem(
-      route: AppConstants.homeRoute,
+      route: AppRoutes.homeRoute,
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       label: 'Home',
     ),
     const BottomNavigationItem(
-      route: AppConstants.scanRoute,
+      route: AppRoutes.scanRoute,
       icon: Icons.qr_code_scanner_outlined,
       activeIcon: Icons.qr_code_scanner,
       label: 'Scan',
     ),
     const BottomNavigationItem(
-      route: AppConstants.requestRoute,
+      route: AppRoutes.requestRoute,
       icon: Icons.request_page_outlined,
       activeIcon: Icons.request_page,
       label: 'Requests',
     ),
     const BottomNavigationItem(
-      route: AppConstants.profileRoute,
+      route: AppRoutes.profileRoute,
       icon: Icons.person_outline,
       activeIcon: Icons.person,
       label: 'Profile',

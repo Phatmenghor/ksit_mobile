@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
 
 import '../core/config/app_config.dart';
@@ -16,12 +17,12 @@ import '../shared/screens/main_screen.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: Get.key, // Use GetX navigator key
-    initialLocation: AppConstants.splashRoute,
+    initialLocation: AppRoutes.splashRoute,
     redirect: _redirect,
     routes: [
       // Splash Screen
       GoRoute(
-        path: AppConstants.splashRoute,
+        path: AppRoutes.splashRoute,
         name: 'splash',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
@@ -35,7 +36,7 @@ class AppRouter {
 
       // Auth Routes
       GoRoute(
-        path: AppConstants.loginRoute,
+        path: AppRoutes.loginRoute,
         name: 'login',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
@@ -58,7 +59,7 @@ class AppRouter {
         builder: (context, state, child) => MainScreen(child: child),
         routes: [
           GoRoute(
-            path: AppConstants.homeRoute,
+            path: AppRoutes.homeRoute,
             name: 'home',
             pageBuilder: (context, state) => FadeTransitionPage<void>(
               key: state.pageKey,
@@ -66,7 +67,7 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: AppConstants.scanRoute,
+            path: AppRoutes.scanRoute,
             name: 'scan',
             pageBuilder: (context, state) => FadeTransitionPage<void>(
               key: state.pageKey,
@@ -74,7 +75,7 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: AppConstants.requestRoute,
+            path: AppRoutes.requestRoute,
             name: 'request',
             pageBuilder: (context, state) => FadeTransitionPage<void>(
               key: state.pageKey,
@@ -82,7 +83,7 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: AppConstants.profileRoute,
+            path: AppRoutes.profileRoute,
             name: 'profile',
             pageBuilder: (context, state) => FadeTransitionPage<void>(
               key: state.pageKey,
@@ -115,7 +116,7 @@ class AppRouter {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go(AppConstants.homeRoute),
+              onPressed: () => context.go(AppRoutes.homeRoute),
               child: const Text('Go Home'),
             ),
           ],
@@ -131,18 +132,18 @@ class AppRouter {
     final currentLocation = state.fullPath;
 
     // If on splash screen, don't redirect
-    if (currentLocation == AppConstants.splashRoute) {
+    if (currentLocation == AppRoutes.splashRoute) {
       return null;
     }
 
     // If not logged in and trying to access protected routes
     if (!isLoggedIn && _isProtectedRoute(currentLocation)) {
-      return AppConstants.loginRoute;
+      return AppRoutes.loginRoute;
     }
 
     // If logged in and trying to access auth routes
     if (isLoggedIn && _isAuthRoute(currentLocation)) {
-      return AppConstants.homeRoute;
+      return AppRoutes.homeRoute;
     }
 
     return null;
@@ -152,10 +153,10 @@ class AppRouter {
     if (path == null) return false;
 
     final protectedRoutes = [
-      AppConstants.homeRoute,
-      AppConstants.scanRoute,
-      AppConstants.requestRoute,
-      AppConstants.profileRoute,
+      AppRoutes.homeRoute,
+      AppRoutes.scanRoute,
+      AppRoutes.requestRoute,
+      AppRoutes.profileRoute,
     ];
 
     return protectedRoutes.contains(path);
@@ -165,7 +166,7 @@ class AppRouter {
     if (path == null) return false;
 
     final authRoutes = [
-      AppConstants.loginRoute,
+      AppRoutes.loginRoute,
     ];
 
     return authRoutes.contains(path);

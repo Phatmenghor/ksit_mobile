@@ -2,9 +2,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
 
 import '../config/app_config.dart';
-import '../constants/app_constants.dart';
 import '../utils/logger_utils.dart';
 import 'storage_service.dart';
 
@@ -162,15 +162,15 @@ class FirebaseService extends GetxService {
     switch (type) {
       case 'home_update':
         // Navigate to home and refresh data
-        Get.toNamed(AppConstants.homeRoute);
+        Get.toNamed(AppRoutes.homeRoute);
         break;
       case 'request_update':
         // Navigate to requests
-        Get.toNamed(AppConstants.requestRoute);
+        Get.toNamed(AppRoutes.requestRoute);
         break;
       case 'profile_update':
         // Navigate to profile
-        Get.toNamed(AppConstants.profileRoute);
+        Get.toNamed(AppRoutes.profileRoute);
         break;
       default:
         // Default behavior

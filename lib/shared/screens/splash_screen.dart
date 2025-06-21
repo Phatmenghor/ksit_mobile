@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_constants.dart';
+import 'package:ksit_mobile/core/constants/app_image.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/core/constants/app_storages.dart';
 import 'package:ksit_mobile/core/services/storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,7 +18,6 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -27,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _initializeAnimations() {
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
@@ -36,15 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-    ));
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.2, 0.8, curve: Curves.elasticOut),
+      curve: Curves.easeIn,
     ));
 
     _animationController.forward();
@@ -55,14 +48,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (mounted) {
       final storageService = Get.find<StorageService>();
-      final token = storageService.getString(AppConstants.tokenKey);
+      final token = storageService.getString(AppStorages.tokenKey);
 
       if (token != null && token.isNotEmpty) {
         // User is logged in, navigate to home
-        context.go(AppConstants.homeRoute);
+        context.go(AppRoutes.homeRoute);
       } else {
         // User is not logged in, navigate to login
-        context.go(AppConstants.loginRoute);
+        context.go(AppRoutes.loginRoute);
       }
     }
   }
@@ -76,92 +69,37 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // App Logo
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.apps,
-                        size: 60,
-                        color: AppColors.primary,
-                      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.logoBg),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Spacer(),
+
+              // Loading indicator at bottom
+              Padding(
+                padding: const EdgeInsets.only(bottom: 60),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
-
-                    const SizedBox(height: 30),
-
-                    // App Name
-                    const Text(
-                      AppConstants.appName,
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // App Tagline
-                    const Text(
-                      'Your Digital Companion',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 50),
-
-                    // Loading Indicator
-                    const SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Loading Text
-                    const Text(
-                      'Loading...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );

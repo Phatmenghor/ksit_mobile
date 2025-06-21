@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/core/constants/app_storages.dart';
 import 'package:ksit_mobile/features/auth/models/login_resposne/login_response_model.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -41,8 +43,8 @@ class AuthController extends GetxController {
   }
 
   void _checkLoginStatus() {
-    final token = _storageService.getString(AppConstants.tokenKey);
-    final userJson = _storageService.getString(AppConstants.userKey);
+    final token = _storageService.getString(AppStorages.tokenKey);
+    final userJson = _storageService.getString(AppStorages.userKey);
 
     if (token != null && userJson != null) {
       try {
@@ -84,11 +86,11 @@ class AuthController extends GetxController {
       if (mockResponse.success) {
         // Save token and user data
         await _storageService.setString(
-          AppConstants.tokenKey,
+          AppStorages.tokenKey,
           mockResponse.data!.token,
         );
         await _storageService.setString(
-          AppConstants.userKey,
+          AppStorages.userKey,
           jsonEncode(mockResponse.data!.user.toJson()),
         );
 
@@ -101,7 +103,7 @@ class AuthController extends GetxController {
 
         // Navigate to home using GoRouter
         if (Get.context != null) {
-          Get.context!.go(AppConstants.homeRoute);
+          Get.context!.go(AppRoutes.homeRoute);
         }
 
         Fluttertoast.showToast(
@@ -135,7 +137,7 @@ class AuthController extends GetxController {
 
       // Navigate to login using GoRouter
       if (Get.context != null) {
-        Get.context!.go(AppConstants.loginRoute);
+        Get.context!.go(AppRoutes.loginRoute);
       }
 
       Fluttertoast.showToast(
@@ -150,7 +152,7 @@ class AuthController extends GetxController {
       // Still clear local data even if API call fails
       await _clearUserData();
       if (Get.context != null) {
-        Get.context!.go(AppConstants.loginRoute);
+        Get.context!.go(AppRoutes.loginRoute);
       }
     } finally {
       isLoading.value = false;
@@ -158,8 +160,8 @@ class AuthController extends GetxController {
   }
 
   Future<void> _clearUserData() async {
-    await _storageService.remove(AppConstants.tokenKey);
-    await _storageService.remove(AppConstants.userKey);
+    await _storageService.remove(AppStorages.tokenKey);
+    await _storageService.remove(AppStorages.userKey);
     currentUser.value = null;
     isLoggedIn.value = false;
   }
