@@ -7,20 +7,31 @@ import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';
 import 'core/utils/logger_utils.dart';
 import 'routes/app_router.dart';
+import 'firebase_options.dart'; // This is the missing import!
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  try {
+    // Initialize Firebase with platform-specific options
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    LoggerUtils.info('Firebase initialized successfully');
 
-  // Initialize services
-  await InitialBinding().dependencies();
+    // Initialize services
+    await InitialBinding().dependencies();
+    LoggerUtils.info('Initial bindings completed');
 
-  // Initialize Firebase messaging
-  await Get.find<FirebaseService>().initializeMessaging();
+    // Initialize Firebase messaging
+    await Get.find<FirebaseService>().initializeMessaging();
+    LoggerUtils.info('Firebase messaging initialized');
 
-  LoggerUtils.info('App started successfully');
+    LoggerUtils.info('App started successfully');
+  } catch (e) {
+    LoggerUtils.error('Failed to initialize app: $e');
+    // You might want to show an error screen or handle this differently
+  }
 
   runApp(const MyApp());
 }
@@ -31,7 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Flutter App',
+      title: 'KSIT Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
