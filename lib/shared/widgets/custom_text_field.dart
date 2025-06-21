@@ -164,7 +164,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     } else if (isFocused) {
       borderColor = AppColors.primary;
     } else if (isDisabled) {
-      borderColor = AppColors.borderDark;
+      borderColor = AppColors.borderAccent;
     }
 
     return OutlineInputBorder(

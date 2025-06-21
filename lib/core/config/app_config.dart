@@ -25,17 +25,6 @@ class AppConfig {
     }
   }
 
-  static String get socketUrl {
-    switch (_environment) {
-      case Environment.development:
-        return 'wss://dev-socket.example.com';
-      case Environment.staging:
-        return 'wss://staging-socket.example.com';
-      case Environment.production:
-        return 'wss://socket.example.com';
-    }
-  }
-
   // Firebase Configuration
   static String get firebaseProjectId {
     switch (_environment) {
@@ -80,70 +69,58 @@ class AppConfig {
   }
 
   // Timeouts
-  static int get connectTimeout {
-    switch (_environment) {
-      case Environment.development:
-        return 60000; // 60 seconds for dev
-      case Environment.staging:
-      case Environment.production:
-        return 30000; // 30 seconds for prod
-    }
-  }
-
-  static int get receiveTimeout {
-    switch (_environment) {
-      case Environment.development:
-        return 60000;
-      case Environment.staging:
-      case Environment.production:
-        return 30000;
-    }
-  }
+  static int get connectTimeout => 30000; // 30 seconds
+  static int get receiveTimeout => 30000; // 30 seconds
 
   // Cache Configuration
-  static Duration get cacheExpiration {
-    switch (_environment) {
-      case Environment.development:
-        return const Duration(minutes: 5);
-      case Environment.staging:
-        return const Duration(minutes: 15);
-      case Environment.production:
-        return const Duration(hours: 1);
-    }
-  }
+  static Duration get cacheExpiration => const Duration(hours: 1);
 
   // Pagination
-  static int get defaultPageSize {
-    return 10;
-  }
+  static int get defaultPageSize => 10;
+  static int get maxPageSize => 50;
 
-  static int get maxPageSize {
-    return 50;
-  }
+  // App Configuration
+  static String get appName => 'Flutter App';
+  static String get appVersion => '1.0.0';
 
-  // Security
-  static bool get enableSSLPinning {
-    switch (_environment) {
-      case Environment.development:
-        return false;
-      case Environment.staging:
-      case Environment.production:
-        return true;
-    }
-  }
+  // Firebase FCM Topic
+  static String get fcmTopic => 'all_users';
+
+  // Storage Keys
+  static String get tokenKey => 'auth_token';
+  static String get userKey => 'user_data';
+  static String get fcmTokenKey => 'fcm_token';
+  static String get isFirstTimeKey => 'is_first_time';
+
+  // Validation
+  static int get minPasswordLength => 6;
+  static int get maxPasswordLength => 20;
+
+  // UI Configuration
+  static double get defaultPadding => 16.0;
+  static double get smallPadding => 8.0;
+  static double get largePadding => 24.0;
+  static double get borderRadius => 8.0;
+
+  // Animation Duration
+  static Duration get defaultAnimationDuration =>
+      const Duration(milliseconds: 300);
+  static Duration get splashDuration => const Duration(seconds: 3);
 
   // Debug Information
   static Map<String, dynamic> get debugInfo {
     return {
       'environment': _environment.name,
       'baseUrl': baseUrl,
+      'appName': appName,
+      'appVersion': appVersion,
       'enableLogging': enableLogging,
       'enableCrashReporting': enableCrashReporting,
       'enableAnalytics': enableAnalytics,
       'connectTimeout': connectTimeout,
       'receiveTimeout': receiveTimeout,
       'cacheExpiration': cacheExpiration.inMinutes,
-      'enableSSLPinning': enableSSLPinning,
+      'fcmTopic': fcmTopic,
     };
   }
 
@@ -152,9 +129,6 @@ class AppConfig {
     if (environment != null) {
       setEnvironment(environment);
     }
-
-    // You can add more initialization logic here
-    // such as setting up crash reporting, analytics, etc.
   }
 
   // Check if current environment is development
@@ -165,4 +139,17 @@ class AppConfig {
 
   // Check if current environment is production
   static bool get isProduction => _environment == Environment.production;
+
+  // Get environment-specific endpoint URL
+  static String getEndpointUrl(String endpoint) {
+    return baseUrl + endpoint;
+  }
+
+  // Get API headers
+  static Map<String, String> get defaultHeaders => {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-App-Version': appVersion,
+        'X-Environment': _environment.name,
+      };
 }

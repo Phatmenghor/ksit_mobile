@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
 
+import '../core/config/app_config.dart';
 import '../core/constants/app_constants.dart';
 import '../core/services/storage_service.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -22,17 +23,36 @@ class AppRouter {
       GoRoute(
         path: AppConstants.splashRoute,
         name: 'splash',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const SplashScreen(),
+          transitionDuration: const Duration(milliseconds: 300),
+          transitionsBuilder: (context, animation, _, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
 
       // Auth Routes
       GoRoute(
         path: AppConstants.loginRoute,
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const LoginScreen(),
+          transitionDuration: const Duration(milliseconds: 300),
+          transitionsBuilder: (context, animation, _, child) {
+            return SlideTransition(
+              position: animation.drive(
+                Tween(begin: const Offset(1.0, 0.0), end: Offset.zero),
+              ),
+              child: child,
+            );
+          },
+        ),
       ),
 
-      // Main App Routes with Bottom Navigation
+      // Main App Routes with Bottom Navigation (No Transition)
       ShellRoute(
         navigatorKey: GlobalKey<NavigatorState>(),
         builder: (context, state, child) => MainScreen(child: child),
@@ -40,22 +60,34 @@ class AppRouter {
           GoRoute(
             path: AppConstants.homeRoute,
             name: 'home',
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) => FadeTransitionPage<void>(
+              key: state.pageKey,
+              child: const HomeScreen(),
+            ),
           ),
           GoRoute(
             path: AppConstants.scanRoute,
             name: 'scan',
-            builder: (context, state) => const ScanScreen(),
+            pageBuilder: (context, state) => FadeTransitionPage<void>(
+              key: state.pageKey,
+              child: const ScanScreen(),
+            ),
           ),
           GoRoute(
             path: AppConstants.requestRoute,
             name: 'request',
-            builder: (context, state) => const RequestScreen(),
+            pageBuilder: (context, state) => FadeTransitionPage<void>(
+              key: state.pageKey,
+              child: const RequestScreen(),
+            ),
           ),
           GoRoute(
             path: AppConstants.profileRoute,
             name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) => FadeTransitionPage<void>(
+              key: state.pageKey,
+              child: const ProfileScreen(),
+            ),
           ),
         ],
       ),
@@ -94,7 +126,8 @@ class AppRouter {
 
   static String? _redirect(BuildContext context, GoRouterState state) {
     final storageService = Get.find<StorageService>();
-    final isLoggedIn = storageService.getString(AppConstants.tokenKey) != null;
+    final token = storageService.getString(AppConfig.tokenKey);
+    final isLoggedIn = token != null && token.isNotEmpty;
     final currentLocation = state.fullPath;
 
     // If on splash screen, don't redirect
@@ -136,5 +169,71 @@ class AppRouter {
     ];
 
     return authRoutes.contains(path);
+  }
+}
+
+// Custom page with subtle fade transition for bottom navigation
+class FadeTransitionPage<T> extends Page<T> {
+  const FadeTransitionPage({
+    required this.child,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
+  });
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder: (context, animation, _) => child,
+      transitionDuration:
+          const Duration(milliseconds: 200), // Short fade duration
+      reverseTransitionDuration:
+          const Duration(milliseconds: 150), // Slightly faster reverse
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // Subtle fade transition with easing
+        return FadeTransition(
+          opacity: Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut, // Smooth easing
+            ),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+// Custom page with no transition for bottom navigation
+class NoTransitionPage<T> extends Page<T> {
+  const NoTransitionPage({
+    required this.child,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
+  });
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder: (context, animation, _) => child,
+      transitionDuration: Duration.zero, // No transition duration
+      reverseTransitionDuration: Duration.zero, // No reverse transition
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child; // Return child directly without any transition
+      },
+    );
   }
 }

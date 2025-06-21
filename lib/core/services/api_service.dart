@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+import '../config/app_config.dart';
 import '../constants/app_constants.dart';
 import '../utils/logger_utils.dart';
 import 'storage_service.dart';
@@ -16,9 +17,9 @@ class ApiService extends GetxService {
 
   void _initializeDio() {
     _dio = Dio(BaseOptions(
-      baseUrl: AppConstants.baseUrl,
-      connectTimeout: const Duration(milliseconds: AppConstants.connectTimeout),
-      receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+      baseUrl: AppConfig.baseUrl, // Get from AppConfig instead of AppConstants
+      connectTimeout: Duration(milliseconds: AppConfig.connectTimeout),
+      receiveTimeout: Duration(milliseconds: AppConfig.receiveTimeout),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -251,4 +252,12 @@ class ApiService extends GetxService {
       rethrow;
     }
   }
+
+  // Helper method to get full endpoint URL
+  String getEndpointUrl(String endpoint) {
+    return AppConfig.baseUrl + endpoint;
+  }
+
+  // Helper method to get current environment info
+  Map<String, dynamic> get environmentInfo => AppConfig.debugInfo;
 }

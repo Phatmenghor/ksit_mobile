@@ -3,11 +3,6 @@ class AppConstants {
   static const String appName = 'Flutter App';
   static const String appVersion = '1.0.0';
 
-  // API Configuration
-  static const String baseUrl = 'https://api.example.com/api/v1';
-  static const int connectTimeout = 30000;
-  static const int receiveTimeout = 30000;
-
   // Storage Keys
   static const String tokenKey = 'auth_token';
   static const String userKey = 'user_data';
@@ -29,7 +24,7 @@ class AppConstants {
   // Firebase
   static const String fcmTopic = 'all_users';
 
-  // API Endpoints
+  // API Endpoints (relative paths)
   static const String loginEndpoint = '/auth/login';
   static const String logoutEndpoint = '/auth/logout';
   static const String profileEndpoint = '/auth/profile';

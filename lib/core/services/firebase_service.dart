@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
+import '../config/app_config.dart';
 import '../constants/app_constants.dart';
 import '../utils/logger_utils.dart';
 import 'storage_service.dart';
@@ -64,14 +65,14 @@ class FirebaseService extends GetxService {
     try {
       _fcmToken = await _firebaseMessaging.getToken();
       if (_fcmToken != null) {
-        await _storageService.setString(AppConstants.fcmTokenKey, _fcmToken!);
+        await _storageService.setString(AppConfig.fcmTokenKey, _fcmToken!);
         LoggerUtils.info('FCM Token: $_fcmToken');
       }
 
       // Listen for token refresh
       _firebaseMessaging.onTokenRefresh.listen((newToken) {
         _fcmToken = newToken;
-        _storageService.setString(AppConstants.fcmTokenKey, newToken);
+        _storageService.setString(AppConfig.fcmTokenKey, newToken);
         LoggerUtils.info('FCM Token refreshed: $newToken');
         // TODO: Send new token to backend
       });
@@ -179,8 +180,8 @@ class FirebaseService extends GetxService {
 
   Future<void> _subscribeToTopic() async {
     try {
-      await _firebaseMessaging.subscribeToTopic(AppConstants.fcmTopic);
-      LoggerUtils.info('Subscribed to topic: ${AppConstants.fcmTopic}');
+      await _firebaseMessaging.subscribeToTopic(AppConfig.fcmTopic);
+      LoggerUtils.info('Subscribed to topic: ${AppConfig.fcmTopic}');
     } catch (e) {
       LoggerUtils.error('Error subscribing to topic', e);
     }
@@ -188,8 +189,8 @@ class FirebaseService extends GetxService {
 
   Future<void> unsubscribeFromTopic() async {
     try {
-      await _firebaseMessaging.unsubscribeFromTopic(AppConstants.fcmTopic);
-      LoggerUtils.info('Unsubscribed from topic: ${AppConstants.fcmTopic}');
+      await _firebaseMessaging.unsubscribeFromTopic(AppConfig.fcmTopic);
+      LoggerUtils.info('Unsubscribed from topic: ${AppConfig.fcmTopic}');
     } catch (e) {
       LoggerUtils.error('Error unsubscribing from topic', e);
     }
