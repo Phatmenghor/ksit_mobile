@@ -22,4 +22,8 @@ flutter pub run build_runner build --delete-conflicting-outputs
 echo "🔄 iOS pod install..."
 cd ios && rm -rf Pods Podfile.lock && pod install && cd ..
 
+# Step 4: Patch Flutter iOS configs to include CocoaPods settings and avoid warnings
+echo '#include? "../Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"' >> ios/Flutter/Debug.xcconfig
+echo '#include? "../Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"' >> ios/Flutter/Release.xcconfig
+
 echo "✅ All done! Your project is clean and reinstalled."
