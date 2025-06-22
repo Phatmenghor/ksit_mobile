@@ -6,8 +6,8 @@ import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/core/constants/app_storages.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
-import 'package:ksit_mobile/features/auth/models/login_request/login_request_model.dart';
-import 'package:ksit_mobile/features/auth/models/login_resposne/login_response_model.dart';
+import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
+import 'package:ksit_mobile/features/auth/models/login_response_model.dart';
 import 'package:ksit_mobile/features/auth/services/auth_service.dart';
 
 import '../../../core/constants/app_constants.dart';

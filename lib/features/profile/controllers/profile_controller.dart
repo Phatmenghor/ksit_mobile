@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/logger_utils.dart';
 import '../../../features/auth/controllers/auth_controller.dart';
-import '../../../shared/models/user/user_model.dart';
+import '../../../shared/models/user_model.dart';
 
 class ProfileController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();

@@ -3,8 +3,8 @@ import 'package:ksit_mobile/core/constants/app_endpints.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
-import 'package:ksit_mobile/features/auth/models/login_request/login_request_model.dart';
-import 'package:ksit_mobile/features/auth/models/login_resposne/login_response_model.dart';
+import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
+import 'package:ksit_mobile/features/auth/models/login_response_model.dart';
 
 class AuthService extends GetxService {
   final ApiService _apiService = Get.find<ApiService>();
