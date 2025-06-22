@@ -4,6 +4,8 @@ import 'package:ksit_mobile/core/services/firebase_service.dart';
 import 'package:ksit_mobile/core/services/storage_service.dart';
 import 'package:ksit_mobile/features/auth/controllers/auth_controller.dart';
 import 'package:ksit_mobile/features/auth/services/auth_service.dart';
+import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
+import 'package:ksit_mobile/features/home/services/home_service.dart';
 
 class InitialBinding extends Bindings {
   @override
@@ -19,5 +21,8 @@ class InitialBinding extends Bindings {
     // Initialize auth service and controller login
     Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
     Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+
+    Get.lazyPut<HomeService>(() => HomeService());
+    Get.lazyPut<ScheduleController>(() => ScheduleController());
   }
 }
