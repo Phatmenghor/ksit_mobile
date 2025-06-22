@@ -1,8 +1,11 @@
+// lib/features/auth/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ksit_mobile/features/auth/widgets/help_modal_bottom_sheet.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_image.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/loading_widget.dart';
@@ -16,140 +19,181 @@ class LoginScreen extends StatelessWidget {
     final authController = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Obx(() {
-          return LoadingOverlay(
-            isLoading: authController.isLoading.value,
-            loadingMessage: 'Signing in...',
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Form(
-                key: authController.formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 60),
-
-                    // Logo/App Name
-                    Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.loginBg),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Obx(() {
+            return Column(
+              children: [
+                // Main content with centered form
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding:
+                          const EdgeInsets.all(AppConstants.defaultPadding),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 24,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 30,
+                              offset: const Offset(0, 15),
                             ),
-                            child: const Icon(
-                              Icons.apps,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            AppConstants.appName,
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Welcome back! Please sign in to continue.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                        child: Form(
+                          key: authController.formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                "Welcome,",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 4,
+                              ),
+                              const Text(
+                                "Please login to continue",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 32,
+                              ),
+                              // Username Field
+                              CustomTextField(
+                                hint: 'Enter your username',
+                                controller: authController.usernameController,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.next,
+                                prefixIcon: const Icon(
+                                  Icons.person_outlined,
+                                  color: AppColors.primary,
+                                ),
+                                validator: authController.validateUsername,
+                                fillColor: Colors.white,
+                              ),
 
-                    const SizedBox(height: 60),
+                              const SizedBox(height: 16),
 
-                    // Email Field
-                    CustomTextField(
-                      label: 'Email',
-                      hint: 'Enter your email',
-                      controller: authController.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      prefixIcon: const Icon(
-                        Icons.email_outlined,
-                        color: AppColors.iconPrimary,
-                      ),
-                      validator: authController.validateEmail,
-                    ),
+                              // Password Field
+                              CustomTextField(
+                                hint: 'Enter your password',
+                                controller: authController.passwordController,
+                                obscureText: true,
+                                textInputAction: TextInputAction.done,
+                                prefixIcon: const Icon(
+                                  Icons.lock_outlined,
+                                  color: AppColors.primary,
+                                ),
+                                validator: authController.validatePassword,
+                                onSubmitted: (_) => authController.login(),
+                                fillColor: Colors.white,
+                              ),
 
-                    const SizedBox(height: 20),
+                              const SizedBox(height: 16),
 
-                    // Password Field
-                    CustomTextField(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      controller: authController.passwordController,
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      prefixIcon: const Icon(
-                        Icons.lock_outlined,
-                        color: AppColors.iconPrimary,
-                      ),
-                      validator: authController.validatePassword,
-                      onSubmitted: (_) => authController.login(),
-                    ),
+                              // Login Button
+                              CustomButton(
+                                text: 'Sign In',
+                                onPressed: authController.login,
+                                isLoading: authController.isLoading.value,
+                                height: 44,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
 
-                    const SizedBox(height: 30),
+                              const SizedBox(height: 20),
 
-                    // Login Button
-                    CustomButton(
-                      text: 'Sign In',
-                      onPressed: authController.login,
-                      isLoading: authController.isLoading.value,
-                      height: 50,
-                      fontSize: 18,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Forgot Password
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          // TODO: Implement forgot password
-                        },
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 16,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Forgot username or password?',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      HelpModalBottomSheet.show(context);
+                                    },
+                                    child: const Text(
+                                      'Get help!',
+                                      style: TextStyle(
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: AppColors
+                                            .warning, // Custom underline color
+                                        color: AppColors.warning,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
+                  ),
+                ),
 
-                    const SizedBox(height: 40),
-
-                    // Version Info
-                    const Center(
-                      child: Text(
+                // Version Info at bottom
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
                         'Version ${AppConstants.appVersion}',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textHint,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

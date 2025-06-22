@@ -9,30 +9,23 @@ part of 'login_response_model.dart';
 _$LoginResponseModelImpl _$$LoginResponseModelImplFromJson(
         Map<String, dynamic> json) =>
     _$LoginResponseModelImpl(
-      success: json['success'] as bool,
-      message: json['message'] as String,
-      data: json['data'] == null
-          ? null
-          : LoginDataModel.fromJson(json['data'] as Map<String, dynamic>),
+      accessToken: json['accessToken'] as String,
+      tokenType: json['tokenType'] as String,
+      userId: (json['userId'] as num).toInt(),
+      username: json['username'] as String,
+      email: json['email'] as String,
+      roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
+      fullToken: json['fullToken'] as String,
     );
 
 Map<String, dynamic> _$$LoginResponseModelImplToJson(
         _$LoginResponseModelImpl instance) =>
     <String, dynamic>{
-      'success': instance.success,
-      'message': instance.message,
-      'data': instance.data,
-    };
-
-_$LoginDataModelImpl _$$LoginDataModelImplFromJson(Map<String, dynamic> json) =>
-    _$LoginDataModelImpl(
-      token: json['token'] as String,
-      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
-    );
-
-Map<String, dynamic> _$$LoginDataModelImplToJson(
-        _$LoginDataModelImpl instance) =>
-    <String, dynamic>{
-      'token': instance.token,
-      'user': instance.user,
+      'accessToken': instance.accessToken,
+      'tokenType': instance.tokenType,
+      'userId': instance.userId,
+      'username': instance.username,
+      'email': instance.email,
+      'roles': instance.roles,
+      'fullToken': instance.fullToken,
     };

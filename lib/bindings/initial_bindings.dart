@@ -2,8 +2,8 @@ import 'package:get/get.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/services/firebase_service.dart';
 import 'package:ksit_mobile/core/services/storage_service.dart';
-
-import '../../features/auth/controllers/auth_controller.dart';
+import 'package:ksit_mobile/features/auth/controllers/auth_controller.dart';
+import 'package:ksit_mobile/features/auth/services/auth_service.dart';
 
 class InitialBinding extends Bindings {
   @override
@@ -16,7 +16,8 @@ class InitialBinding extends Bindings {
     Get.put<ApiService>(ApiService(), permanent: true);
     Get.put<FirebaseService>(FirebaseService(), permanent: true);
 
-    // Initialize controllers
-    Get.put<AuthController>(AuthController(), permanent: true);
+    // Initialize auth service and controller login
+    Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
+    Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
   }
 }

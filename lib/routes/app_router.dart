@@ -1,11 +1,10 @@
+// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
-
 import '../core/config/app_config.dart';
-import '../core/constants/app_constants.dart';
 import '../core/services/storage_service.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/home/screens/home_screen.dart';
@@ -34,23 +33,25 @@ class AppRouter {
         ),
       ),
 
-      // Auth Routes
+      // Auth Routes with AuthBinding
       GoRoute(
         path: AppRoutes.loginRoute,
         name: 'login',
-        pageBuilder: (context, state) => CustomTransitionPage<void>(
-          key: state.pageKey,
-          child: const LoginScreen(),
-          transitionDuration: const Duration(milliseconds: 300),
-          transitionsBuilder: (context, animation, _, child) {
-            return SlideTransition(
-              position: animation.drive(
-                Tween(begin: const Offset(1.0, 0.0), end: Offset.zero),
-              ),
-              child: child,
-            );
-          },
-        ),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const LoginScreen(),
+            transitionDuration: const Duration(milliseconds: 300),
+            transitionsBuilder: (context, animation, _, child) {
+              return SlideTransition(
+                position: animation.drive(
+                  Tween(begin: const Offset(1.0, 0.0), end: Offset.zero),
+                ),
+                child: child,
+              );
+            },
+          );
+        },
       ),
 
       // Main App Routes with Bottom Navigation (No Transition)

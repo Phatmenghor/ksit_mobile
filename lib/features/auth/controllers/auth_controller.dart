@@ -2,61 +2,38 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/core/constants/app_storages.dart';
+import 'package:ksit_mobile/core/utils/api_error_utils.dart';
+import 'package:ksit_mobile/core/utils/toast_utils.dart';
+import 'package:ksit_mobile/features/auth/models/login_request/login_request_model.dart';
 import 'package:ksit_mobile/features/auth/models/login_resposne/login_response_model.dart';
+import 'package:ksit_mobile/features/auth/services/auth_service.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/services/storage_service.dart';
-import '../../../core/utils/logger_utils.dart';
-import '../../../shared/models/user/user_model.dart';
 
 class AuthController extends GetxController {
-  final ApiService _apiService = Get.find<ApiService>();
+  final AuthService _authService = Get.find<AuthService>();
   final StorageService _storageService = Get.find<StorageService>();
 
   // Observables
   final RxBool isLoading = false.obs;
   final RxBool isLoggedIn = false.obs;
-  final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  final Rx<LoginResponseModel?> currentUser = Rx<LoginResponseModel?>(null);
 
   // Form controllers
-  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
   // Form key
   final formKey = GlobalKey<FormState>();
 
   @override
-  void onInit() {
-    super.onInit();
-    _checkLoginStatus();
-  }
-
-  @override
   void onClose() {
-    emailController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
     super.onClose();
-  }
-
-  void _checkLoginStatus() {
-    final token = _storageService.getString(AppStorages.tokenKey);
-    final userJson = _storageService.getString(AppStorages.userKey);
-
-    if (token != null && userJson != null) {
-      try {
-        final userMap = jsonDecode(userJson) as Map<String, dynamic>;
-        currentUser.value = UserModel.fromJson(userMap);
-        isLoggedIn.value = true;
-        LoggerUtils.info('User is already logged in');
-      } catch (e) {
-        LoggerUtils.error('Error parsing stored user data', e);
-        _clearUserData();
-      }
-    }
   }
 
   Future<void> login() async {
@@ -65,61 +42,37 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Simulate login response since API is not available
-      await Future.delayed(const Duration(seconds: 2));
-
-      final mockResponse = LoginResponseModel(
-        success: true,
-        message: 'Login successful',
-        data: LoginDataModel(
-          token: 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-          user: UserModel(
-            id: 1,
-            name: 'John Doe',
-            email: emailController.text.trim(),
-            phone: '+1234567890',
-            role: 'user',
-          ),
-        ),
+      // Create login request
+      final loginRequest = LoginRequestModel(
+        username: usernameController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      if (mockResponse.success) {
-        // Save token and user data
-        await _storageService.setString(
-          AppStorages.tokenKey,
-          mockResponse.data!.token,
-        );
-        await _storageService.setString(
-          AppStorages.userKey,
-          jsonEncode(mockResponse.data!.user.toJson()),
-        );
+      // Call login API
+      final loginResponse = await _authService.login(loginRequest);
 
-        // Update observables
-        currentUser.value = mockResponse.data!.user;
-        isLoggedIn.value = true;
+      // Save user data to storage
+      await _saveUserData(loginResponse);
 
-        // Clear form
-        _clearForm();
+      // Update observables
+      currentUser.value = loginResponse;
+      isLoggedIn.value = true;
 
-        // Navigate to home using GoRouter
-        if (Get.context != null) {
-          Get.context!.go(AppRoutes.homeRoute);
-        }
+      // Clear form
+      _clearForm();
 
-        Fluttertoast.showToast(
-          msg: 'Login successful!',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
+      // Show success message
+      ToastUtils.showSuccess(
+          'Login successful! Welcome ${loginResponse.username}');
 
-        LoggerUtils.info(
-            'Login successful for user: ${mockResponse.data!.user.email}');
-      } else {
-        _showError(mockResponse.message);
+      // Navigate to home
+      if (Get.context != null) {
+        Get.context!.go(AppRoutes.homeRoute);
       }
     } catch (e) {
-      LoggerUtils.error('Login error', e);
-      _showError('An error occurred. Please try again.');
+      // Service already throws clean error message
+      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
+      ToastUtils.showError(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -129,28 +82,28 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Simulate logout API call
-      await Future.delayed(const Duration(seconds: 1));
+      // Call logout API
+      final response = await _authService.logout();
 
       // Clear local data
       await _clearUserData();
 
-      // Navigate to login using GoRouter
+      // Show success message from API response
+      final message = response['message'] ?? 'Logged out successfully';
+      ToastUtils.showSuccess(message);
+
+      // Navigate to login
       if (Get.context != null) {
         Get.context!.go(AppRoutes.loginRoute);
       }
-
-      Fluttertoast.showToast(
-        msg: 'Logged out successfully',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-
-      LoggerUtils.info('User logged out successfully');
     } catch (e) {
-      LoggerUtils.error('Logout error', e);
       // Still clear local data even if API call fails
       await _clearUserData();
+
+      // Service already throws clean error message
+      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
+      ToastUtils.showError(errorMessage);
+
       if (Get.context != null) {
         Get.context!.go(AppRoutes.loginRoute);
       }
@@ -159,35 +112,77 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> getProfile() async {
+    try {
+      isLoading.value = true;
+
+      final profileData = await _authService.getProfile();
+
+      // Show success message
+      final message = profileData['message'] ?? 'Profile updated successfully';
+      ToastUtils.showSuccess(message);
+    } catch (e) {
+      // Service already throws clean error message
+      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
+      ToastUtils.showError(errorMessage);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> _saveUserData(LoginResponseModel loginResponse) async {
+    try {
+      // Save access token
+      await _storageService.setString(
+        AppStorages.tokenKey,
+        loginResponse.accessToken,
+      );
+
+      // Save user ID
+      await _storageService.setString(
+        AppStorages.userIdKey,
+        loginResponse.userId.toString(),
+      );
+
+      // Save roles as JSON string
+      await _storageService.setString(
+        AppStorages.rolesKey,
+        jsonEncode(loginResponse.roles),
+      );
+
+      // Save complete user data
+      await _storageService.setString(
+        AppStorages.userKey,
+        jsonEncode(loginResponse.toJson()),
+      );
+    } catch (e) {
+      throw Exception('Failed to save user data: ${e.toString()}');
+    }
+  }
+
   Future<void> _clearUserData() async {
-    await _storageService.remove(AppStorages.tokenKey);
-    await _storageService.remove(AppStorages.userKey);
-    currentUser.value = null;
-    isLoggedIn.value = false;
+    try {
+      await _storageService.remove(AppStorages.tokenKey);
+      await _storageService.remove(AppStorages.userKey);
+      await _storageService.remove(AppStorages.userIdKey);
+      await _storageService.remove(AppStorages.rolesKey);
+
+      currentUser.value = null;
+      isLoggedIn.value = false;
+    } catch (e) {
+      // Ignore storage errors during logout
+    }
   }
 
   void _clearForm() {
-    emailController.clear();
+    usernameController.clear();
     passwordController.clear();
   }
 
-  void _showError(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
-  }
-
   // Validators
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    if (!GetUtils.isEmail(value)) {
-      return 'Please enter a valid email';
+  String? validateUsername(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Username is required';
     }
     return null;
   }

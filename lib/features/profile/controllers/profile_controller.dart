@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
   }
 
   void _loadUserData() {
-    user.value = _authController.currentUser.value;
+    // user.value = _authController.currentUser.value;
   }
 
   Future<void> _loadProfileStats() async {
@@ -66,7 +66,7 @@ class ProfileController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 500));
 
       // Use current user data
-      user.value = _authController.currentUser.value;
+      // user.value = _authController.currentUser.value;
 
       LoggerUtils.info('User profile refreshed');
     } catch (e) {

@@ -20,9 +20,13 @@ LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginResponseModel {
-  bool get success => throw _privateConstructorUsedError;
-  String get message => throw _privateConstructorUsedError;
-  LoginDataModel? get data => throw _privateConstructorUsedError;
+  String get accessToken => throw _privateConstructorUsedError;
+  String get tokenType => throw _privateConstructorUsedError;
+  int get userId => throw _privateConstructorUsedError;
+  String get username => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
+  List<String> get roles => throw _privateConstructorUsedError;
+  String get fullToken => throw _privateConstructorUsedError;
 
   /// Serializes this LoginResponseModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -40,9 +44,14 @@ abstract class $LoginResponseModelCopyWith<$Res> {
           LoginResponseModel value, $Res Function(LoginResponseModel) then) =
       _$LoginResponseModelCopyWithImpl<$Res, LoginResponseModel>;
   @useResult
-  $Res call({bool success, String message, LoginDataModel? data});
-
-  $LoginDataModelCopyWith<$Res>? get data;
+  $Res call(
+      {String accessToken,
+      String tokenType,
+      int userId,
+      String username,
+      String email,
+      List<String> roles,
+      String fullToken});
 }
 
 /// @nodoc
@@ -60,38 +69,44 @@ class _$LoginResponseModelCopyWithImpl<$Res, $Val extends LoginResponseModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? success = null,
-    Object? message = null,
-    Object? data = freezed,
+    Object? accessToken = null,
+    Object? tokenType = null,
+    Object? userId = null,
+    Object? username = null,
+    Object? email = null,
+    Object? roles = null,
+    Object? fullToken = null,
   }) {
     return _then(_value.copyWith(
-      success: null == success
-          ? _value.success
-          : success // ignore: cast_nullable_to_non_nullable
-              as bool,
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
+      accessToken: null == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String,
-      data: freezed == data
-          ? _value.data
-          : data // ignore: cast_nullable_to_non_nullable
-              as LoginDataModel?,
+      tokenType: null == tokenType
+          ? _value.tokenType
+          : tokenType // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int,
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      roles: null == roles
+          ? _value.roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      fullToken: null == fullToken
+          ? _value.fullToken
+          : fullToken // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
-  }
-
-  /// Create a copy of LoginResponseModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $LoginDataModelCopyWith<$Res>? get data {
-    if (_value.data == null) {
-      return null;
-    }
-
-    return $LoginDataModelCopyWith<$Res>(_value.data!, (value) {
-      return _then(_value.copyWith(data: value) as $Val);
-    });
   }
 }
 
@@ -103,10 +118,14 @@ abstract class _$$LoginResponseModelImplCopyWith<$Res>
       __$$LoginResponseModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool success, String message, LoginDataModel? data});
-
-  @override
-  $LoginDataModelCopyWith<$Res>? get data;
+  $Res call(
+      {String accessToken,
+      String tokenType,
+      int userId,
+      String username,
+      String email,
+      List<String> roles,
+      String fullToken});
 }
 
 /// @nodoc
@@ -122,23 +141,43 @@ class __$$LoginResponseModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? success = null,
-    Object? message = null,
-    Object? data = freezed,
+    Object? accessToken = null,
+    Object? tokenType = null,
+    Object? userId = null,
+    Object? username = null,
+    Object? email = null,
+    Object? roles = null,
+    Object? fullToken = null,
   }) {
     return _then(_$LoginResponseModelImpl(
-      success: null == success
-          ? _value.success
-          : success // ignore: cast_nullable_to_non_nullable
-              as bool,
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
+      accessToken: null == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String,
-      data: freezed == data
-          ? _value.data
-          : data // ignore: cast_nullable_to_non_nullable
-              as LoginDataModel?,
+      tokenType: null == tokenType
+          ? _value.tokenType
+          : tokenType // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int,
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      roles: null == roles
+          ? _value._roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      fullToken: null == fullToken
+          ? _value.fullToken
+          : fullToken // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -147,21 +186,42 @@ class __$$LoginResponseModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LoginResponseModelImpl implements _LoginResponseModel {
   const _$LoginResponseModelImpl(
-      {required this.success, required this.message, this.data});
+      {required this.accessToken,
+      required this.tokenType,
+      required this.userId,
+      required this.username,
+      required this.email,
+      required final List<String> roles,
+      required this.fullToken})
+      : _roles = roles;
 
   factory _$LoginResponseModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginResponseModelImplFromJson(json);
 
   @override
-  final bool success;
+  final String accessToken;
   @override
-  final String message;
+  final String tokenType;
   @override
-  final LoginDataModel? data;
+  final int userId;
+  @override
+  final String username;
+  @override
+  final String email;
+  final List<String> _roles;
+  @override
+  List<String> get roles {
+    if (_roles is EqualUnmodifiableListView) return _roles;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_roles);
+  }
+
+  @override
+  final String fullToken;
 
   @override
   String toString() {
-    return 'LoginResponseModel(success: $success, message: $message, data: $data)';
+    return 'LoginResponseModel(accessToken: $accessToken, tokenType: $tokenType, userId: $userId, username: $username, email: $email, roles: $roles, fullToken: $fullToken)';
   }
 
   @override
@@ -169,14 +229,23 @@ class _$LoginResponseModelImpl implements _LoginResponseModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$LoginResponseModelImpl &&
-            (identical(other.success, success) || other.success == success) &&
-            (identical(other.message, message) || other.message == message) &&
-            (identical(other.data, data) || other.data == data));
+            (identical(other.accessToken, accessToken) ||
+                other.accessToken == accessToken) &&
+            (identical(other.tokenType, tokenType) ||
+                other.tokenType == tokenType) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.email, email) || other.email == email) &&
+            const DeepCollectionEquality().equals(other._roles, _roles) &&
+            (identical(other.fullToken, fullToken) ||
+                other.fullToken == fullToken));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, success, message, data);
+  int get hashCode => Object.hash(runtimeType, accessToken, tokenType, userId,
+      username, email, const DeepCollectionEquality().hash(_roles), fullToken);
 
   /// Create a copy of LoginResponseModel
   /// with the given fields replaced by the non-null parameter values.
@@ -197,207 +266,36 @@ class _$LoginResponseModelImpl implements _LoginResponseModel {
 
 abstract class _LoginResponseModel implements LoginResponseModel {
   const factory _LoginResponseModel(
-      {required final bool success,
-      required final String message,
-      final LoginDataModel? data}) = _$LoginResponseModelImpl;
+      {required final String accessToken,
+      required final String tokenType,
+      required final int userId,
+      required final String username,
+      required final String email,
+      required final List<String> roles,
+      required final String fullToken}) = _$LoginResponseModelImpl;
 
   factory _LoginResponseModel.fromJson(Map<String, dynamic> json) =
       _$LoginResponseModelImpl.fromJson;
 
   @override
-  bool get success;
+  String get accessToken;
   @override
-  String get message;
+  String get tokenType;
   @override
-  LoginDataModel? get data;
+  int get userId;
+  @override
+  String get username;
+  @override
+  String get email;
+  @override
+  List<String> get roles;
+  @override
+  String get fullToken;
 
   /// Create a copy of LoginResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LoginResponseModelImplCopyWith<_$LoginResponseModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-LoginDataModel _$LoginDataModelFromJson(Map<String, dynamic> json) {
-  return _LoginDataModel.fromJson(json);
-}
-
-/// @nodoc
-mixin _$LoginDataModel {
-  String get token => throw _privateConstructorUsedError;
-  UserModel get user => throw _privateConstructorUsedError;
-
-  /// Serializes this LoginDataModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $LoginDataModelCopyWith<LoginDataModel> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $LoginDataModelCopyWith<$Res> {
-  factory $LoginDataModelCopyWith(
-          LoginDataModel value, $Res Function(LoginDataModel) then) =
-      _$LoginDataModelCopyWithImpl<$Res, LoginDataModel>;
-  @useResult
-  $Res call({String token, UserModel user});
-
-  $UserModelCopyWith<$Res> get user;
-}
-
-/// @nodoc
-class _$LoginDataModelCopyWithImpl<$Res, $Val extends LoginDataModel>
-    implements $LoginDataModelCopyWith<$Res> {
-  _$LoginDataModelCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? token = null,
-    Object? user = null,
-  }) {
-    return _then(_value.copyWith(
-      token: null == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
-              as String,
-      user: null == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as UserModel,
-    ) as $Val);
-  }
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $UserModelCopyWith<$Res> get user {
-    return $UserModelCopyWith<$Res>(_value.user, (value) {
-      return _then(_value.copyWith(user: value) as $Val);
-    });
-  }
-}
-
-/// @nodoc
-abstract class _$$LoginDataModelImplCopyWith<$Res>
-    implements $LoginDataModelCopyWith<$Res> {
-  factory _$$LoginDataModelImplCopyWith(_$LoginDataModelImpl value,
-          $Res Function(_$LoginDataModelImpl) then) =
-      __$$LoginDataModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String token, UserModel user});
-
-  @override
-  $UserModelCopyWith<$Res> get user;
-}
-
-/// @nodoc
-class __$$LoginDataModelImplCopyWithImpl<$Res>
-    extends _$LoginDataModelCopyWithImpl<$Res, _$LoginDataModelImpl>
-    implements _$$LoginDataModelImplCopyWith<$Res> {
-  __$$LoginDataModelImplCopyWithImpl(
-      _$LoginDataModelImpl _value, $Res Function(_$LoginDataModelImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? token = null,
-    Object? user = null,
-  }) {
-    return _then(_$LoginDataModelImpl(
-      token: null == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
-              as String,
-      user: null == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as UserModel,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$LoginDataModelImpl implements _LoginDataModel {
-  const _$LoginDataModelImpl({required this.token, required this.user});
-
-  factory _$LoginDataModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$LoginDataModelImplFromJson(json);
-
-  @override
-  final String token;
-  @override
-  final UserModel user;
-
-  @override
-  String toString() {
-    return 'LoginDataModel(token: $token, user: $user)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$LoginDataModelImpl &&
-            (identical(other.token, token) || other.token == token) &&
-            (identical(other.user, user) || other.user == user));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, token, user);
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$LoginDataModelImplCopyWith<_$LoginDataModelImpl> get copyWith =>
-      __$$LoginDataModelImplCopyWithImpl<_$LoginDataModelImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$LoginDataModelImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _LoginDataModel implements LoginDataModel {
-  const factory _LoginDataModel(
-      {required final String token,
-      required final UserModel user}) = _$LoginDataModelImpl;
-
-  factory _LoginDataModel.fromJson(Map<String, dynamic> json) =
-      _$LoginDataModelImpl.fromJson;
-
-  @override
-  String get token;
-  @override
-  UserModel get user;
-
-  /// Create a copy of LoginDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$LoginDataModelImplCopyWith<_$LoginDataModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

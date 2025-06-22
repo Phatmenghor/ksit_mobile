@@ -1,6 +1,6 @@
 class AppEndpints {
   // API Endpoints (relative paths)
-  static const String loginEndpoint = '/auth/login';
+  static const String loginEndpoint = '/v1/auth/login';
   static const String logoutEndpoint = '/auth/logout';
   static const String profileEndpoint = '/auth/profile';
   static const String homeDataEndpoint = '/home/data';

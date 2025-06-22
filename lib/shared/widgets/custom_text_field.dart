@@ -29,9 +29,10 @@ class CustomTextField extends StatefulWidget {
   final Color? fillColor;
   final bool filled;
   final FocusNode? focusNode;
+  final double? height; // Add height parameter
 
   const CustomTextField({
-    Key? key,
+    super.key,
     this.label,
     this.hint,
     this.initialValue,
@@ -56,7 +57,8 @@ class CustomTextField extends StatefulWidget {
     this.fillColor,
     this.filled = true,
     this.focusNode,
-  }) : super(key: key);
+    this.height, // Add height parameter
+  });
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -117,9 +119,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
             prefixIcon: widget.prefixIcon,
             suffixIcon: _buildSuffixIcon(),
             contentPadding: widget.contentPadding ??
-                const EdgeInsets.symmetric(
+                EdgeInsets.symmetric(
                   horizontal: AppConstants.defaultPadding,
-                  vertical: 12,
+                  vertical: widget.height ??
+                      12, // Use height parameter or default to 12
                 ),
             filled: widget.filled,
             fillColor: widget.fillColor ?? AppColors.surface,
@@ -169,7 +172,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     return OutlineInputBorder(
       borderRadius: widget.borderRadius ??
-          BorderRadius.circular(AppConstants.borderRadius),
+          BorderRadius.circular(
+            AppConstants.borderRadius,
+          ),
       borderSide: BorderSide(
         color: borderColor,
         width: isFocused ? 2 : 1,

@@ -11,7 +11,7 @@ class AppConstants {
   static const String fcmTopic = 'all_users';
 
   // Validation
-  static const int minPasswordLength = 6;
+  static const int minPasswordLength = 3;
   static const int maxPasswordLength = 20;
 
   // UI

@@ -1,4 +1,5 @@
 class AppImages {
   // Image Assets
-  static const String logoBg = 'assets/images/login_bg.png';
+  static const String spashBg = 'assets/images/splash_bg.png';
+  static const String loginBg = 'assets/images/login_bg.png';
 }

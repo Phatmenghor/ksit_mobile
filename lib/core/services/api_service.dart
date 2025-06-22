@@ -1,3 +1,4 @@
+// lib/core/services/api_service.dart
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:ksit_mobile/core/constants/app_routes.dart';
@@ -18,7 +19,7 @@ class ApiService extends GetxService {
 
   void _initializeDio() {
     _dio = Dio(BaseOptions(
-      baseUrl: AppConfig.baseUrl, // Get from AppConfig instead of AppConstants
+      baseUrl: AppConfig.baseUrl,
       connectTimeout: Duration(milliseconds: AppConfig.connectTimeout),
       receiveTimeout: Duration(milliseconds: AppConfig.receiveTimeout),
       headers: {
@@ -31,7 +32,6 @@ class ApiService extends GetxService {
   }
 
   void _setupInterceptors() {
-    // Request Interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -43,14 +43,16 @@ class ApiService extends GetxService {
 
           LoggerUtils.info('API Request: ${options.method} ${options.path}');
           LoggerUtils.debug('Request Headers: ${options.headers}');
-          LoggerUtils.debug('Request Data: ${options.data}');
+          LoggerUtils.debug(
+              'Request Data: ${_formatRequestData(options.data)}');
 
           handler.next(options);
         },
         onResponse: (response, handler) {
           LoggerUtils.info(
               'API Response: ${response.statusCode} ${response.requestOptions.path}');
-          LoggerUtils.debug('Response Data: ${response.data}');
+          LoggerUtils.debug(
+              'Response Data: ${_formatResponseData(response.data)}');
           handler.next(response);
         },
         onError: (error, handler) {
@@ -60,6 +62,147 @@ class ApiService extends GetxService {
         },
       ),
     );
+  }
+
+  /// Smart formatting for request data
+  String _formatRequestData(dynamic data) {
+    if (data == null) return 'null';
+
+    try {
+      final String dataStr = data.toString();
+      if (dataStr.length > 500) {
+        return '${dataStr.substring(0, 500)}... [Request data truncated - ${dataStr.length} chars total]';
+      }
+      return dataStr;
+    } catch (e) {
+      return 'Error formatting request data: $e';
+    }
+  }
+
+  /// Smart formatting for response data with list handling
+  String _formatResponseData(dynamic data) {
+    if (data == null) return 'null';
+
+    try {
+      // Handle Map responses
+      if (data is Map<String, dynamic>) {
+        return _formatMapResponse(data);
+      }
+
+      // Handle List responses
+      if (data is List) {
+        return _formatListResponse(data);
+      }
+
+      // Handle other types
+      final String dataStr = data.toString();
+      if (dataStr.length > 1000) {
+        return '${dataStr.substring(0, 1000)}... [Response truncated - ${dataStr.length} chars total]';
+      }
+      return dataStr;
+    } catch (e) {
+      return 'Error formatting response data: $e';
+    }
+  }
+
+  /// Format Map response with special handling for common structures
+  String _formatMapResponse(Map<String, dynamic> data) {
+    final buffer = StringBuffer();
+    buffer.write('{');
+
+    bool isFirst = true;
+    for (final entry in data.entries) {
+      if (!isFirst) buffer.write(', ');
+      isFirst = false;
+
+      final key = entry.key;
+      final value = entry.value;
+
+      buffer.write('"$key": ');
+
+      if (value is List) {
+        buffer.write(_formatListValue(value));
+      } else if (value is Map) {
+        if (value.toString().length > 200) {
+          buffer.write('{...${value.length} properties}');
+        } else {
+          buffer.write(value.toString());
+        }
+      } else if (value is String && value.length > 100) {
+        buffer.write('"${value.substring(0, 100)}..."');
+      } else {
+        buffer.write(value is String ? '"$value"' : value.toString());
+      }
+    }
+
+    buffer.write('}');
+
+    final result = buffer.toString();
+    if (result.length > 1500) {
+      return '${result.substring(0, 1500)}... [Map response truncated]';
+    }
+    return result;
+  }
+
+  /// Format List response with smart truncation
+  String _formatListResponse(List data) {
+    if (data.isEmpty) return '[]';
+
+    if (data.length == 1) {
+      return '[${_formatSingleItem(data[0])}]';
+    }
+
+    if (data.length <= 3) {
+      final items = data.map((item) => _formatSingleItem(item)).join(', ');
+      return '[$items]';
+    }
+
+    // For larger lists, show first 2 items and summary
+    final firstItem = _formatSingleItem(data[0]);
+    final secondItem = _formatSingleItem(data[1]);
+
+    return '[$firstItem, $secondItem, ... +${data.length - 2} more items (${data.length} total)]';
+  }
+
+  /// Format List value in Map response
+  String _formatListValue(List value) {
+    if (value.isEmpty) return '[]';
+
+    if (value.length == 1) {
+      return '[${_formatSingleItem(value[0])}]';
+    }
+
+    if (value.length <= 2) {
+      final items = value.map((item) => _formatSingleItem(item)).join(', ');
+      return '[$items]';
+    }
+
+    return '[${_formatSingleItem(value[0])}, ... +${value.length - 1} more (${value.length} total)]';
+  }
+
+  /// Format single item with truncation
+  String _formatSingleItem(dynamic item) {
+    if (item == null) return 'null';
+
+    if (item is Map) {
+      final Map<String, dynamic> map = item as Map<String, dynamic>;
+      if (map.length <= 3) {
+        return map.toString();
+      }
+      final keys = map.keys.take(3).join(', ');
+      return '{$keys... +${map.length - 3} more}';
+    }
+
+    if (item is String && item.length > 50) {
+      return '"${item.substring(0, 50)}..."';
+    }
+
+    final itemStr = item.toString();
+    if (itemStr.length > 100) {
+      return '${itemStr.substring(0, 100)}...';
+    }
+
+    return item is String ? '"$item"' : itemStr;
   }
 
   void _handleError(DioException error) {

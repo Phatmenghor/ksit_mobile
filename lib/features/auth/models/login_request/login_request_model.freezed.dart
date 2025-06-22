@@ -20,7 +20,7 @@ LoginRequestModel _$LoginRequestModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginRequestModel {
-  String get email => throw _privateConstructorUsedError;
+  String get username => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
 
   /// Serializes this LoginRequestModel to a JSON map.
@@ -39,7 +39,7 @@ abstract class $LoginRequestModelCopyWith<$Res> {
           LoginRequestModel value, $Res Function(LoginRequestModel) then) =
       _$LoginRequestModelCopyWithImpl<$Res, LoginRequestModel>;
   @useResult
-  $Res call({String email, String password});
+  $Res call({String username, String password});
 }
 
 /// @nodoc
@@ -57,13 +57,13 @@ class _$LoginRequestModelCopyWithImpl<$Res, $Val extends LoginRequestModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? username = null,
     Object? password = null,
   }) {
     return _then(_value.copyWith(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -81,7 +81,7 @@ abstract class _$$LoginRequestModelImplCopyWith<$Res>
       __$$LoginRequestModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String email, String password});
+  $Res call({String username, String password});
 }
 
 /// @nodoc
@@ -97,13 +97,13 @@ class __$$LoginRequestModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? username = null,
     Object? password = null,
   }) {
     return _then(_$LoginRequestModelImpl(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      username: null == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -116,19 +116,20 @@ class __$$LoginRequestModelImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$LoginRequestModelImpl implements _LoginRequestModel {
-  const _$LoginRequestModelImpl({required this.email, required this.password});
+  const _$LoginRequestModelImpl(
+      {required this.username, required this.password});
 
   factory _$LoginRequestModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginRequestModelImplFromJson(json);
 
   @override
-  final String email;
+  final String username;
   @override
   final String password;
 
   @override
   String toString() {
-    return 'LoginRequestModel(email: $email, password: $password)';
+    return 'LoginRequestModel(username: $username, password: $password)';
   }
 
   @override
@@ -136,14 +137,15 @@ class _$LoginRequestModelImpl implements _LoginRequestModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$LoginRequestModelImpl &&
-            (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.password, password) ||
                 other.password == password));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, email, password);
+  int get hashCode => Object.hash(runtimeType, username, password);
 
   /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
@@ -164,14 +166,14 @@ class _$LoginRequestModelImpl implements _LoginRequestModel {
 
 abstract class _LoginRequestModel implements LoginRequestModel {
   const factory _LoginRequestModel(
-      {required final String email,
+      {required final String username,
       required final String password}) = _$LoginRequestModelImpl;
 
   factory _LoginRequestModel.fromJson(Map<String, dynamic> json) =
       _$LoginRequestModelImpl.fromJson;
 
   @override
-  String get email;
+  String get username;
   @override
   String get password;
 
