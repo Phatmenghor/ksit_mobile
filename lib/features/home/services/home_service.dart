@@ -24,9 +24,6 @@ class HomeService extends GetxService {
           'Fetching schedules - Year: $academyYear, Semester: ${semester.name}, Day: ${dayOfWeek?.name}');
 
       final request = ScheduleRequest(
-        academyYear: academyYear,
-        semester: semester,
-        dayOfWeek: dayOfWeek,
         status: status,
         pageNo: pageNo,
         pageSize: pageSize,

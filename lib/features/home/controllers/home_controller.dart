@@ -1,4 +1,4 @@
-// lib/features/home/controllers/schedule_controller.dart
+// lib/features/home/controllers/home_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -6,18 +6,17 @@ import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
 import '../models/schedule_models.dart';
+import '../screens/home_screen.dart';
 
-class ScheduleController extends GetxController
-    with GetTickerProviderStateMixin {
+class ScheduleController extends GetxController {
   final HomeService _homeService = Get.find<HomeService>();
-
-  // Tab Controller
-  late TabController tabController;
 
   // Observables
   final RxBool isInitialLoading = true.obs;
-  final RxInt selectedAcademyYear = DateTime.now().year.obs;
-  final Rx<Semester> selectedSemester = Semester.semester1.obs;
+  final Rx<FilterType> selectedFilterType = FilterType.all.obs;
+  final RxInt selectedAcademyYear = 0.obs; // No default selection
+  final Rx<Semester?> selectedSemester =
+      Rx<Semester?>(null); // No default selection
   final RxList<int> availableAcademyYears = <int>[].obs;
   final RxList<Semester> availableSemesters = <Semester>[].obs;
 
@@ -29,28 +28,21 @@ class ScheduleController extends GetxController
   final PagingController<int, ScheduleModel> allSchedulesPagingController =
       PagingController(firstPageKey: 1);
 
-  // Statistics
-  final RxInt totalSchedulesToday = 0.obs;
-  final RxInt totalSchedulesAll = 0.obs;
+  // Default values for "show all" state
+  final int _defaultYear = 0; // No default year
+  final Semester? _defaultSemester = null; // No default semester
 
   @override
   void onInit() {
     super.onInit();
-    _initializeTabController();
     _setupPagination();
     _loadInitialData();
   }
 
   @override
   void onClose() {
-    tabController.dispose();
     allSchedulesPagingController.dispose();
     super.onClose();
-  }
-
-  void _initializeTabController() {
-    tabController = TabController(length: 2, vsync: this);
-    tabController.addListener(_onTabChanged);
   }
 
   void _setupPagination() {
@@ -67,11 +59,13 @@ class ScheduleController extends GetxController
       availableAcademyYears.assignAll(_homeService.getAvailableAcademyYears());
       availableSemesters.assignAll(_homeService.getAvailableSemesters());
 
-      // Load today's schedules
-      await _loadTodaySchedules();
+      // Set default filter to show all schedules without year/semester filtering
+      selectedFilterType.value = FilterType.all;
+      selectedAcademyYear.value = 0; // No default selection
+      selectedSemester.value = null; // No default selection
 
-      // Initialize all schedules pagination
-      allSchedulesPagingController.refresh();
+      // Load initial data based on current filter
+      await _refreshCurrentFilter();
 
       LoggerUtils.info('Initial schedule data loaded successfully');
     } catch (e) {
@@ -82,15 +76,41 @@ class ScheduleController extends GetxController
     }
   }
 
-  void _onTabChanged() {
-    if (tabController.index == 0) {
-      // Today tab selected
-      _loadTodaySchedules();
+  void setFilterType(FilterType filterType) {
+    if (selectedFilterType.value != filterType) {
+      selectedFilterType.value = filterType;
+      _refreshCurrentFilter();
+      LoggerUtils.info('Filter type changed to: ${filterType.name}');
+    }
+  }
+
+  void setAcademyYear(int year) {
+    if (selectedAcademyYear.value != year) {
+      selectedAcademyYear.value = year;
+      _refreshCurrentFilter();
+      LoggerUtils.info('Academy year changed to: $year');
+    }
+  }
+
+  void setSemester(Semester semester) {
+    if (selectedSemester.value != semester) {
+      selectedSemester.value = semester;
+      _refreshCurrentFilter();
+      LoggerUtils.info('Semester changed to: ${semester.displayName}');
+    }
+  }
+
+  void clearSemester() {
+    selectedSemester.value = null;
+    _refreshCurrentFilter();
+    LoggerUtils.info('Semester cleared');
+  }
+
+  Future<void> _refreshCurrentFilter() async {
+    if (selectedFilterType.value == FilterType.today) {
+      await _loadTodaySchedules();
     } else {
-      // All schedules tab selected
-      if (allSchedulesPagingController.itemList?.isEmpty ?? true) {
-        allSchedulesPagingController.refresh();
-      }
+      allSchedulesPagingController.refresh();
     }
   }
 
@@ -101,15 +121,16 @@ class ScheduleController extends GetxController
       // Get current day of week
       final currentDay = _getCurrentDayOfWeek();
 
+      // Only apply filters if they are selected (not default/null values)
       final response = await _homeService.getMySchedules(
-        academyYear: selectedAcademyYear.value,
-        semester: selectedSemester.value,
+        academyYear: selectedAcademyYear.value != 0
+            ? selectedAcademyYear.value
+            : DateTime.now().year,
+        semester: selectedSemester.value ?? Semester.semester1,
         dayOfWeek: currentDay,
-        pageSize: 50, // Get more items for today
       );
 
       todaySchedules.assignAll(response.content);
-      totalSchedulesToday.value = response.totalElements;
 
       LoggerUtils.info('Today schedules loaded: ${response.content.length}');
     } catch (e) {
@@ -122,15 +143,16 @@ class ScheduleController extends GetxController
 
   Future<void> _fetchAllSchedulesPage(int pageKey) async {
     try {
+      // Only apply filters if they are selected (not default/null values)
       final response = await _homeService.getMySchedules(
-        academyYear: selectedAcademyYear.value,
-        semester: selectedSemester.value,
+        academyYear: selectedAcademyYear.value != 0
+            ? selectedAcademyYear.value
+            : DateTime.now().year,
+        semester: selectedSemester.value ?? Semester.semester1,
         // dayOfWeek is null for all schedules
         pageNo: pageKey,
         pageSize: 10,
       );
-
-      totalSchedulesAll.value = response.totalElements;
 
       final isLastPage = response.last;
       if (isLastPage) {
@@ -151,13 +173,7 @@ class ScheduleController extends GetxController
   // Public methods for UI interactions
   Future<void> refreshSchedules() async {
     try {
-      if (tabController.index == 0) {
-        // Refresh today's schedules
-        await _loadTodaySchedules();
-      } else {
-        // Refresh all schedules
-        allSchedulesPagingController.refresh();
-      }
+      await _refreshCurrentFilter();
       LoggerUtils.info('Schedules refreshed successfully');
     } catch (e) {
       LoggerUtils.error('Error refreshing schedules', e);
@@ -165,183 +181,28 @@ class ScheduleController extends GetxController
     }
   }
 
-  void setAcademyYear(int year) {
-    if (selectedAcademyYear.value != year) {
-      selectedAcademyYear.value = year;
-      _onFiltersChanged();
-      LoggerUtils.info('Academy year changed to: $year');
-    }
+  // Check if any filters are applied (not default values)
+  bool get hasActiveFilters {
+    return selectedAcademyYear.value != _defaultYear ||
+        selectedSemester.value != _defaultSemester;
   }
 
-  void setSemester(Semester semester) {
-    if (selectedSemester.value != semester) {
-      selectedSemester.value = semester;
-      _onFiltersChanged();
-      LoggerUtils.info('Semester changed to: ${semester.displayName}');
-    }
-  }
+  // Clear all filters to default state
+  void clearAllFilters() {
+    selectedAcademyYear.value = _defaultYear;
+    selectedSemester.value = _defaultSemester;
 
-  void _onFiltersChanged() {
-    // Refresh both today and all schedules when filters change
-    _loadTodaySchedules();
-    allSchedulesPagingController.refresh();
+    // Refresh current filter view
+    _refreshCurrentFilter();
+
+    ToastUtils.showInfo('Filters cleared');
+    LoggerUtils.info('All filters cleared to default values');
   }
 
   void onScheduleTap(ScheduleModel schedule) {
     LoggerUtils.info('Schedule tapped: ${schedule.id}');
-    _showScheduleDetails(schedule);
-  }
-
-  void _showScheduleDetails(ScheduleModel schedule) {
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.8,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Handle
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Schedule Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDetailCard('Course Information', [
-                      _buildDetailRow('Course Name',
-                          schedule.course?.displayName ?? 'Unknown Course'),
-                      _buildDetailRow('Course Code',
-                          schedule.course?.code ?? 'Unknown Code'),
-                      _buildDetailRow(
-                          'Subject',
-                          schedule.course?.subject?.displayName ??
-                              'Unknown Subject'),
-                      _buildDetailRow(
-                          'Credits', '${schedule.course?.displayCredit ?? 0}'),
-                    ]),
-                    const SizedBox(height: 16),
-                    _buildDetailCard('Schedule Information', [
-                      _buildDetailRow('Day', schedule.dayDisplayName),
-                      _buildDetailRow('Time', schedule.timeRange),
-                      _buildDetailRow(
-                          'Room', schedule.room?.displayName ?? 'Unknown Room'),
-                      _buildDetailRow('Class',
-                          schedule.classes?.displayCode ?? 'Unknown Class'),
-                    ]),
-                    const SizedBox(height: 16),
-                    _buildDetailCard('Teacher Information', [
-                      _buildDetailRow('Name',
-                          schedule.teacher?.displayName ?? 'Unknown Teacher'),
-                      _buildDetailRow(
-                          'Email', schedule.teacher?.email ?? 'N/A'),
-                    ]),
-                    const SizedBox(height: 16),
-                    _buildDetailCard('Semester Information', [
-                      _buildDetailRow('Semester',
-                          schedule.semester?.displayName ?? 'Unknown Semester'),
-                      _buildDetailRow('Academy Year',
-                          '${schedule.semester?.academyYear ?? schedule.academyYear ?? 'N/A'}'),
-                      _buildDetailRow(
-                          'Major',
-                          schedule.classes?.major?.displayName ??
-                              'Unknown Major'),
-                    ]),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  Widget _buildDetailCard(String title, List<Widget> children) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
+    // TODO: Navigate to detail screen
+    // Get.toNamed('/schedule-detail', arguments: schedule);
   }
 
   DayOfWeek _getCurrentDayOfWeek() {
