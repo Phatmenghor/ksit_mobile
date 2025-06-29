@@ -46,52 +46,60 @@ class HomeScreen extends StatelessWidget {
                 automaticallyImplyLeading: false,
                 floating: true,
                 snap: true,
-                expandedHeight: 120,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-                    child: Row(
+                toolbarHeight: 70, // Custom height
+                title: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.white,
+                      child: ClipOval(
+                        child: Image.asset(
+                          AppImages.logoSchool,
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor: Colors.white,
-                          child: ClipOval(
-                            child: Image.asset(
-                              AppImages.logoSchool,
-                              width: 44,
-                              height: 44,
-                              fit: BoxFit.cover,
-                            ),
+                        Text(
+                          'Kampong Speu',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Kampong Speu',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Institute of Technology',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Institute of Technology',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
+                          ),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
+                // actions: [
+                //   IconButton(
+                //     icon: const Icon(Icons.notifications_outlined),
+                //     onPressed: () {
+                //       // Handle notifications
+                //     },
+                //   ),
+                //   IconButton(
+                //     icon: const Icon(Icons.more_vert),
+                //     onPressed: () {
+                //       // Handle menu
+                //     },
+                //   ),
+                // ],
               ),
 
               // Header Section

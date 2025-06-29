@@ -207,9 +207,9 @@ class _YearPickerWidgetState extends State<YearPickerWidget> {
 
     // Add "All Academy" option at the beginning
     final allYears = [0, ...widget.availableYears];
-    final initialIndex =
-        tempSelectedYear == 0 ? 0 : allYears.indexOf(tempSelectedYear);
-    scrollController = FixedExtentScrollController(initialItem: initialIndex);
+    final initialIndex = allYears.indexOf(tempSelectedYear);
+    scrollController = FixedExtentScrollController(
+        initialItem: initialIndex >= 0 ? initialIndex : 0);
   }
 
   @override
@@ -302,7 +302,7 @@ class _YearPickerWidgetState extends State<YearPickerWidget> {
   }
 }
 
-// Semester Picker Component
+// Semester Picker Component - FIXED VERSION
 class SemesterPickerWidget extends StatefulWidget {
   final List<Semester> availableSemesters;
   final Semester? selectedSemester;
@@ -330,11 +330,26 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
     super.initState();
     tempSelectedSemester = widget.selectedSemester;
 
-    // Add "All Semester" option at the beginning (represented by null)
-    final allSemesters = [null, ...widget.availableSemesters];
-    final initialIndex = tempSelectedSemester == null
-        ? 0
-        : allSemesters.indexOf(tempSelectedSemester) + 1;
+    // Create list with "All Semester" option at the beginning
+    final allSemesters = <Semester?>[null, ...widget.availableSemesters];
+
+    // Find the correct initial index
+    int initialIndex = 0; // Default to "All Semester"
+    if (widget.selectedSemester != null) {
+      // Find the index of the selected semester (add 1 because null is at index 0)
+      final semesterIndex =
+          widget.availableSemesters.indexOf(widget.selectedSemester!);
+      if (semesterIndex >= 0) {
+        initialIndex =
+            semesterIndex + 1; // +1 because "All Semester" (null) is at index 0
+      }
+    }
+
+    print('DEBUG: selectedSemester = ${widget.selectedSemester}');
+    print('DEBUG: availableSemesters = ${widget.availableSemesters}');
+    print('DEBUG: allSemesters = $allSemesters');
+    print('DEBUG: initialIndex = $initialIndex');
+
     scrollController = FixedExtentScrollController(initialItem: initialIndex);
   }
 
@@ -346,7 +361,7 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final allSemesters = [null, ...widget.availableSemesters];
+    final allSemesters = <Semester?>[null, ...widget.availableSemesters];
 
     return Container(
       height: 300,
@@ -413,6 +428,7 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
               itemExtent: 40,
               onSelectedItemChanged: (index) {
                 tempSelectedSemester = allSemesters[index];
+                print('DEBUG: Selected index $index = ${tempSelectedSemester}');
               },
               children: allSemesters.map((semester) {
                 return Center(
