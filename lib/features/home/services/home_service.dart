@@ -12,26 +12,60 @@ class HomeService extends GetxService {
 
   /// Get my schedules with pagination
   Future<PaginatedResponse<ScheduleModel>> getMySchedules({
-    required int academyYear,
-    required Semester semester,
+    int? academyYear, // Made nullable
+    Semester? semester, // Made nullable
     DayOfWeek? dayOfWeek,
     Status status = Status.active,
     int pageNo = 1,
     int pageSize = 10,
   }) async {
     try {
+      LoggerUtils.info('=== API CALL PARAMETERS ===');
       LoggerUtils.info(
-          'Fetching schedules - Year: $academyYear, Semester: ${semester.name}, Day: ${dayOfWeek?.name}');
+          'academyYear: $academyYear ${academyYear == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info(
+          'semester: ${semester?.name ?? "null"} ${semester == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info(
+          'dayOfWeek: ${dayOfWeek?.name ?? "null"} ${dayOfWeek == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info('status: ${status.name}');
+      LoggerUtils.info('pageNo: $pageNo');
+      LoggerUtils.info('pageSize: $pageSize');
+      LoggerUtils.info('==========================');
 
-      final request = ScheduleRequest(
-        status: status,
-        pageNo: pageNo,
-        pageSize: pageSize,
-      );
+      // Build request data dynamically based on provided parameters
+      final Map<String, dynamic> requestData = {
+        'status': status.name,
+        'pageNo': pageNo,
+        'pageSize': pageSize,
+      };
+
+      // Only add parameters if they are not null
+      if (academyYear != null) {
+        requestData['academyYear'] = academyYear;
+        LoggerUtils.info('✅ Added academyYear filter: $academyYear');
+      } else {
+        LoggerUtils.info('❌ No academyYear filter (will show all years)');
+      }
+
+      if (semester != null) {
+        requestData['semester'] = semester.name;
+        LoggerUtils.info('✅ Added semester filter: ${semester.name}');
+      } else {
+        LoggerUtils.info('❌ No semester filter (will show all semesters)');
+      }
+
+      if (dayOfWeek != null) {
+        requestData['dayOfWeek'] = dayOfWeek.name;
+        LoggerUtils.info('✅ Added dayOfWeek filter: ${dayOfWeek.name}');
+      } else {
+        LoggerUtils.info('❌ No dayOfWeek filter (will show all days)');
+      }
+
+      LoggerUtils.info('📤 Final request data: $requestData');
 
       final response = await _apiService.post(
         '/v1/schedules/my-schedules',
-        data: request.toJson(),
+        data: requestData,
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -46,7 +80,7 @@ class HomeService extends GetxService {
           );
 
           LoggerUtils.info(
-              'Successfully fetched ${paginatedResponse.content.length} schedules');
+              '📥 API Response: ${paginatedResponse.content.length} schedules (${paginatedResponse.totalElements} total)');
           return paginatedResponse;
         } else {
           throw Exception(
@@ -64,8 +98,8 @@ class HomeService extends GetxService {
 
   /// Get today's schedules
   Future<List<ScheduleModel>> getTodaySchedules({
-    required int academyYear,
-    required Semester semester,
+    int? academyYear,
+    Semester? semester,
   }) async {
     try {
       final currentDay = _getCurrentDayOfWeek();
@@ -86,8 +120,8 @@ class HomeService extends GetxService {
 
   /// Get all schedules (paginated)
   Future<PaginatedResponse<ScheduleModel>> getAllSchedules({
-    required int academyYear,
-    required Semester semester,
+    int? academyYear,
+    Semester? semester,
     int pageNo = 1,
     int pageSize = 10,
   }) async {
@@ -108,7 +142,7 @@ class HomeService extends GetxService {
   /// Get available academy years (all years from 2000 to current + 10 years)
   List<int> getAvailableAcademyYears() {
     final currentYear = DateTime.now().year;
-    final startYear = 2000;
+    const int startYear = 2000; // Fixed: Made const
     final endYear = currentYear + 10;
 
     return List.generate(
@@ -125,20 +159,11 @@ class HomeService extends GetxService {
   /// Get home statistics (for dashboard)
   Future<Map<String, int>> getHomeStats() async {
     try {
-      // Get current year and semester
-      final currentYear = DateTime.now().year;
-      final currentSemester = Semester.semester1; // You can make this dynamic
-
       // Get today's schedules count
-      final todaySchedules = await getTodaySchedules(
-        academyYear: currentYear,
-        semester: currentSemester,
-      );
+      final todaySchedules = await getTodaySchedules();
 
       // Get all schedules for total count
       final allSchedules = await getAllSchedules(
-        academyYear: currentYear,
-        semester: currentSemester,
         pageSize: 1, // Just get total count
       );
 
@@ -233,12 +258,7 @@ class HomeService extends GetxService {
     Status? status,
   }) async {
     try {
-      final currentYear = DateTime.now().year;
-      const currentSemester = Semester.semester1;
-
       final response = await getMySchedules(
-        academyYear: currentYear,
-        semester: currentSemester,
         pageNo: page,
         pageSize: limit,
         status: status ?? Status.active,

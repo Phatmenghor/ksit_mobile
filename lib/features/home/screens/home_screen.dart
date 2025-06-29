@@ -26,52 +26,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: Colors.white,
-              child: ClipOval(
-                child: Image.asset(
-                  AppImages.logoSchool,
-                  width: 44,
-                  height: 44,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kampong Speu',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(
-                  height: 2,
-                ),
-                Text(
-                  'Institute of Technology',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading:
-            false, // This removes the default back button
-      ),
       body: Obx(() {
         if (scheduleController.isInitialLoading.value) {
           return const LoadingWidget(
@@ -79,78 +33,148 @@ class HomeScreen extends StatelessWidget {
           );
         }
 
-        return Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              width: double.infinity,
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    'Upcoming Schedules',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
+        return RefreshIndicator(
+          onRefresh: scheduleController.refreshSchedules,
+          color: AppColors.primary,
+          child: CustomScrollView(
+            slivers: [
+              // Custom App Bar
+              SliverAppBar(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                floating: true,
+                snap: true,
+                expandedHeight: 120,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white,
+                          child: ClipOval(
+                            child: Image.asset(
+                              AppImages.logoSchool,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Kampong Speu',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Institute of Technology',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    '4 Schedules',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Obx(
-              () => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    _buildAppBarFilterButton(
-                      text: 'Today',
-                      isSelected: scheduleController.selectedFilterType.value ==
-                          FilterType.today,
-                      onTap: () =>
-                          scheduleController.setFilterType(FilterType.today),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildAppBarFilterButton(
-                      text: 'All Schedule',
-                      isSelected: scheduleController.selectedFilterType.value ==
-                          FilterType.all,
-                      onTap: () =>
-                          scheduleController.setFilterType(FilterType.all),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
                 ),
               ),
-            ),
 
-            ScheduleFilterWidget(
-              availableYears: scheduleController.availableAcademyYears,
-              selectedYear: scheduleController.selectedAcademyYear.value,
-              availableSemesters: scheduleController.availableSemesters,
-              selectedSemester: scheduleController.selectedSemester.value,
-              onYearChanged: scheduleController.setAcademyYear,
-              onSemesterChanged: scheduleController.setSemester,
-              onSemesterCleared: scheduleController.clearSemester,
-              onClearFilters: scheduleController.clearAllFilters,
-            ),
+              // Header Section
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Upcoming Schedules',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Obx(() {
+                        final count =
+                            scheduleController.selectedFilterType.value ==
+                                    FilterType.today
+                                ? scheduleController.todayTotalElements.value
+                                : scheduleController.allTotalElements.value;
 
-            // Schedules List
-            Expanded(
-              child: _buildSchedulesList(scheduleController),
-            ),
+                        return Text(
+                          '$count Schedules',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
 
-            // Bottom Filter Section (Academy Year & Semester)
-          ],
+              // Filter Tabs
+              SliverToBoxAdapter(
+                child: Obx(() => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          _buildAppBarFilterButton(
+                            text: 'Today',
+                            isSelected:
+                                scheduleController.selectedFilterType.value ==
+                                    FilterType.today,
+                            onTap: () => scheduleController
+                                .setFilterType(FilterType.today),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildAppBarFilterButton(
+                            text: 'All Schedule',
+                            isSelected:
+                                scheduleController.selectedFilterType.value ==
+                                    FilterType.all,
+                            onTap: () => scheduleController
+                                .setFilterType(FilterType.all),
+                          ),
+                        ],
+                      ),
+                    )),
+              ),
+
+              // Schedule Filter Widget
+              SliverToBoxAdapter(
+                child: ScheduleFilterWidget(
+                  availableYears: scheduleController.availableAcademyYears,
+                  selectedYear: scheduleController.selectedAcademyYear.value,
+                  availableSemesters: scheduleController.availableSemesters,
+                  selectedSemester: scheduleController.selectedSemester.value,
+                  onYearChanged: scheduleController.setAcademyYear,
+                  onSemesterChanged: scheduleController.setSemester,
+                  onSemesterCleared: scheduleController.clearSemester,
+                  onClearFilters: scheduleController.clearAllFilters,
+                ),
+              ),
+
+              // Schedules List
+              _buildSchedulesList(scheduleController),
+            ],
+          ),
         );
       }),
     );
@@ -202,107 +226,119 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildTodaySchedules(ScheduleController controller) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshSchedules,
-      color: AppColors.primary,
-      child: Obx(() {
-        if (controller.isTodayLoading.value) {
-          return const LoadingWidget(
-            message: 'Loading today\'s schedules...',
-            overlay: false,
-          );
-        }
-
-        if (controller.todaySchedules.isEmpty) {
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+    return PagedSliverList<int, ScheduleModel>(
+      key: const ValueKey('today_schedules'), // Add unique key
+      pagingController: controller.todaySchedulesPagingController,
+      builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
+        itemBuilder: (context, schedule, index) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            index == 0 ? 16 : 0,
+            16,
+            12,
+          ),
+          child: ScheduleClassWidget(
+            schedule: schedule,
+            onTap: () => controller.onScheduleTap(schedule),
+            statusText: controller.getScheduleStatusText(schedule),
+            statusColor: controller.getScheduleStatusColor(schedule),
+          ),
+        ),
+        firstPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
+          controller.todaySchedulesPagingController.error.toString(),
+          () => controller.todaySchedulesPagingController.refresh(),
+        ),
+        newPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
+          controller.todaySchedulesPagingController.error.toString(),
+          () => controller.todaySchedulesPagingController
+              .retryLastFailedRequest(),
+          isNewPage: true,
+        ),
+        firstPageProgressIndicatorBuilder: (context) => const LoadingWidget(
+          message: 'Loading today\'s schedules...',
+          overlay: false,
+        ),
+        newPageProgressIndicatorBuilder: (context) => Container(
+          padding: const EdgeInsets.all(20),
+          child: const Center(
             child: SizedBox(
-              height: MediaQuery.of(Get.context!).size.height * 0.6,
-              child: EmptyStateWidget.noData(
-                title: 'No Classes Today',
-                message:
-                    'You don\'t have any classes scheduled for today.\nEnjoy your free time! 🎉',
-                actionText: 'Refresh',
-                onActionPressed: controller.refreshSchedules,
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
             ),
-          );
-        }
-
-        return ListView.builder(
+          ),
+        ),
+        noItemsFoundIndicatorBuilder: (context) => Container(
           padding: const EdgeInsets.all(16),
-          itemCount: controller.todaySchedules.length,
-          itemBuilder: (context, index) {
-            final schedule = controller.todaySchedules[index];
-            return ScheduleClassWidget(
-              schedule: schedule,
-              onTap: () {
-                // TODO: Navigate to detail screen
-              },
-              statusText: controller.getScheduleStatusText(schedule),
-              statusColor: controller.getScheduleStatusColor(schedule),
-            );
-          },
-        );
-      }),
+          child: EmptyStateWidget.noData(
+            title: 'No Classes Today',
+            message:
+                'You don\'t have any classes scheduled for today.\nEnjoy your free time! 🎉',
+            actionText: 'Refresh',
+            onActionPressed: controller.refreshSchedules,
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildAllSchedules(ScheduleController controller) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshSchedules,
-      color: AppColors.primary,
-      child: PagedListView<int, ScheduleModel>(
-        pagingController: controller.allSchedulesPagingController,
-        padding: const EdgeInsets.all(16),
-        builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
-          itemBuilder: (context, schedule, index) => ScheduleClassWidget(
+    return PagedSliverList<int, ScheduleModel>(
+      key: const ValueKey('all_schedules'), // Add unique key
+      pagingController: controller.allSchedulesPagingController,
+      builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
+        itemBuilder: (context, schedule, index) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            index == 0 ? 16 : 0,
+            16,
+            12,
+          ),
+          child: ScheduleClassWidget(
             schedule: schedule,
-            onTap: () {
-              // TODO: Navigate to detail screen
-            },
+            onTap: () => controller.onScheduleTap(schedule),
             statusText: controller.getScheduleStatusText(schedule),
             statusColor: controller.getScheduleStatusColor(schedule),
           ),
-          firstPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-            controller.allSchedulesPagingController.error.toString(),
-            () => controller.allSchedulesPagingController.refresh(),
-          ),
-          newPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-            controller.allSchedulesPagingController.error.toString(),
-            () => controller.allSchedulesPagingController
-                .retryLastFailedRequest(),
-            isNewPage: true,
-          ),
-          firstPageProgressIndicatorBuilder: (context) => const LoadingWidget(
-            message: 'Loading schedules...',
-            overlay: false,
-          ),
-          newPageProgressIndicatorBuilder: (context) => Container(
-            padding: const EdgeInsets.all(20),
-            child: const Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              ),
-            ),
-          ),
-          noItemsFoundIndicatorBuilder: (context) => SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+        ),
+        firstPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
+          controller.allSchedulesPagingController.error.toString(),
+          () => controller.allSchedulesPagingController.refresh(),
+        ),
+        newPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
+          controller.allSchedulesPagingController.error.toString(),
+          () =>
+              controller.allSchedulesPagingController.retryLastFailedRequest(),
+          isNewPage: true,
+        ),
+        firstPageProgressIndicatorBuilder: (context) => const LoadingWidget(
+          message: 'Loading schedules...',
+          overlay: false,
+        ),
+        newPageProgressIndicatorBuilder: (context) => Container(
+          padding: const EdgeInsets.all(20),
+          child: const Center(
             child: SizedBox(
-              height: MediaQuery.of(Get.context!).size.height * 0.6,
-              child: EmptyStateWidget.noData(
-                title: 'No Schedules Found',
-                message:
-                    'No schedules available for the selected filters.\nTry adjusting your selection.',
-                actionText: 'Refresh',
-                onActionPressed: controller.refreshSchedules,
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
             ),
+          ),
+        ),
+        noItemsFoundIndicatorBuilder: (context) => Container(
+          padding: const EdgeInsets.all(16),
+          child: EmptyStateWidget.noData(
+            title: 'No Schedules Found',
+            message:
+                'No schedules available for the selected filters.\nTry adjusting your selection.',
+            actionText: 'Refresh',
+            onActionPressed: controller.refreshSchedules,
           ),
         ),
       ),

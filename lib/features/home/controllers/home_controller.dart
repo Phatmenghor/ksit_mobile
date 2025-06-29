@@ -13,24 +13,29 @@ class ScheduleController extends GetxController {
 
   // Observables
   final RxBool isInitialLoading = true.obs;
-  final Rx<FilterType> selectedFilterType = FilterType.all.obs;
-  final RxInt selectedAcademyYear = 0.obs; // No default selection
+  final Rx<FilterType> selectedFilterType =
+      FilterType.today.obs; // Default to today
+  final RxInt selectedAcademyYear = 0.obs; // 0 = no filter (like undefined)
   final Rx<Semester?> selectedSemester =
-      Rx<Semester?>(null); // No default selection
+      Rx<Semester?>(null); // null = no filter (like undefined)
   final RxList<int> availableAcademyYears = <int>[].obs;
   final RxList<Semester> availableSemesters = <Semester>[].obs;
 
-  // Today's schedules
-  final RxList<ScheduleModel> todaySchedules = <ScheduleModel>[].obs;
-  final RxBool isTodayLoading = false.obs;
+  // Observables for total counts from API
+  final RxInt todayTotalElements = 0.obs;
+  final RxInt allTotalElements = 0.obs;
+
+  // Today's schedules with pagination
+  final PagingController<int, ScheduleModel> todaySchedulesPagingController =
+      PagingController(firstPageKey: 1);
 
   // All schedules pagination
   final PagingController<int, ScheduleModel> allSchedulesPagingController =
       PagingController(firstPageKey: 1);
 
   // Default values for "show all" state
-  final int _defaultYear = 0; // No default year
-  final Semester? _defaultSemester = null; // No default semester
+  final int _defaultYear = 0; // 0 = no filter
+  final Semester? _defaultSemester = null; // null = no filter
 
   @override
   void onInit() {
@@ -41,11 +46,18 @@ class ScheduleController extends GetxController {
 
   @override
   void onClose() {
+    todaySchedulesPagingController.dispose();
     allSchedulesPagingController.dispose();
     super.onClose();
   }
 
   void _setupPagination() {
+    // Setup today schedules pagination
+    todaySchedulesPagingController.addPageRequestListener((pageKey) {
+      _fetchTodaySchedulesPage(pageKey);
+    });
+
+    // Setup all schedules pagination
     allSchedulesPagingController.addPageRequestListener((pageKey) {
       _fetchAllSchedulesPage(pageKey);
     });
@@ -59,15 +71,22 @@ class ScheduleController extends GetxController {
       availableAcademyYears.assignAll(_homeService.getAvailableAcademyYears());
       availableSemesters.assignAll(_homeService.getAvailableSemesters());
 
-      // Set default filter to show all schedules without year/semester filtering
-      selectedFilterType.value = FilterType.all;
-      selectedAcademyYear.value = 0; // No default selection
-      selectedSemester.value = null; // No default selection
+      // Set default filter to show today's schedules
+      selectedFilterType.value = FilterType.today;
 
-      // Load initial data based on current filter
-      await _refreshCurrentFilter();
+      // NO DEFAULT FILTERS - Let user choose explicitly
+      selectedAcademyYear.value = 0; // 0 = no filter (like undefined)
+      selectedSemester.value = null; // null = no filter (like undefined)
 
-      LoggerUtils.info('Initial schedule data loaded successfully');
+      LoggerUtils.info('=== INITIAL STATE ===');
+      LoggerUtils.info(
+          'App starts with NO FILTERS (like undefined in Next.js)');
+      LoggerUtils.info(
+          'selectedAcademyYear: ${selectedAcademyYear.value} (0 = no filter)');
+      LoggerUtils.info(
+          'selectedSemester: ${selectedSemester.value} (null = no filter)');
+      LoggerUtils.info('selectedFilterType: ${selectedFilterType.value.name}');
+      LoggerUtils.info('=====================');
     } catch (e) {
       LoggerUtils.error('Error loading initial schedule data', e);
       ToastUtils.showError('Failed to load schedules');
@@ -79,80 +98,189 @@ class ScheduleController extends GetxController {
   void setFilterType(FilterType filterType) {
     if (selectedFilterType.value != filterType) {
       selectedFilterType.value = filterType;
-      _refreshCurrentFilter();
+
+      // Immediately trigger refresh for the selected tab
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (filterType == FilterType.today) {
+          // Check if today controller needs to load data
+          if (todaySchedulesPagingController.itemList == null) {
+            // Force the first page request for today tab
+            _fetchTodaySchedulesPage(1);
+            LoggerUtils.info('Today tab - triggering first load');
+          } else {
+            todaySchedulesPagingController.refresh();
+            LoggerUtils.info('Today tab - refreshing existing data');
+          }
+        } else {
+          // Check if all schedules controller needs to load data
+          if (allSchedulesPagingController.itemList == null) {
+            // Force the first page request for all schedules tab
+            _fetchAllSchedulesPage(1);
+            LoggerUtils.info('All schedules tab - triggering first load');
+          } else {
+            allSchedulesPagingController.refresh();
+            LoggerUtils.info('All schedules tab - refreshing existing data');
+          }
+        }
+      });
+
       LoggerUtils.info('Filter type changed to: ${filterType.name}');
     }
   }
 
   void setAcademyYear(int year) {
     if (selectedAcademyYear.value != year) {
+      final oldYear = selectedAcademyYear.value;
       selectedAcademyYear.value = year;
-      _refreshCurrentFilter();
-      LoggerUtils.info('Academy year changed to: $year');
+
+      LoggerUtils.info('=== ACADEMY YEAR FILTER CHANGED ===');
+      LoggerUtils.info('From: $oldYear ${oldYear == 0 ? "(no filter)" : ""}');
+      LoggerUtils.info('To: $year ${year == 0 ? "(no filter)" : ""}');
+      LoggerUtils.info('===================================');
+
+      // Always refresh the currently active tab
+      Future.delayed(Duration.zero, () {
+        if (selectedFilterType.value == FilterType.today) {
+          todaySchedulesPagingController.refresh();
+        } else {
+          allSchedulesPagingController.refresh();
+        }
+      });
     }
   }
 
   void setSemester(Semester semester) {
     if (selectedSemester.value != semester) {
+      final oldSemester = selectedSemester.value;
       selectedSemester.value = semester;
-      _refreshCurrentFilter();
-      LoggerUtils.info('Semester changed to: ${semester.displayName}');
+
+      LoggerUtils.info('=== SEMESTER FILTER CHANGED ===');
+      LoggerUtils.info(
+          'From: ${oldSemester?.name ?? "null"} ${oldSemester == null ? "(no filter)" : ""}');
+      LoggerUtils.info('To: ${semester.name}');
+      LoggerUtils.info('===============================');
+
+      // Always refresh the currently active tab
+      Future.delayed(Duration.zero, () {
+        if (selectedFilterType.value == FilterType.today) {
+          todaySchedulesPagingController.refresh();
+        } else {
+          allSchedulesPagingController.refresh();
+        }
+      });
     }
   }
 
   void clearSemester() {
-    selectedSemester.value = null;
-    _refreshCurrentFilter();
-    LoggerUtils.info('Semester cleared');
-  }
+    if (selectedSemester.value != null) {
+      final oldSemester = selectedSemester.value;
+      selectedSemester.value = null;
 
-  Future<void> _refreshCurrentFilter() async {
-    if (selectedFilterType.value == FilterType.today) {
-      await _loadTodaySchedules();
-    } else {
-      allSchedulesPagingController.refresh();
+      LoggerUtils.info('=== SEMESTER FILTER CLEARED ===');
+      LoggerUtils.info('From: ${oldSemester?.name}');
+      LoggerUtils.info('To: null (no filter)');
+      LoggerUtils.info('===============================');
+
+      // Always refresh the currently active tab
+      Future.delayed(Duration.zero, () {
+        if (selectedFilterType.value == FilterType.today) {
+          todaySchedulesPagingController.refresh();
+        } else {
+          allSchedulesPagingController.refresh();
+        }
+      });
     }
   }
 
-  Future<void> _loadTodaySchedules() async {
+  Future<void> _fetchTodaySchedulesPage(int pageKey) async {
     try {
-      isTodayLoading.value = true;
-
       // Get current day of week
       final currentDay = _getCurrentDayOfWeek();
 
-      // Only apply filters if they are selected (not default/null values)
+      // Use selected academy year or null for all years
+      final academyYear = selectedAcademyYear.value != 0
+          ? selectedAcademyYear.value
+          : null; // null = show all years
+
+      // Use selected semester or null for all semesters
+      final semester = selectedSemester.value; // can be null
+
+      LoggerUtils.info('=== TODAY SCHEDULES CONTROLLER ===');
+      LoggerUtils.info('Controller state:');
+      LoggerUtils.info(
+          '  selectedAcademyYear.value: ${selectedAcademyYear.value}');
+      LoggerUtils.info('  selectedSemester.value: ${selectedSemester.value}');
+      LoggerUtils.info('Passing to service:');
+      LoggerUtils.info(
+          '  academyYear: $academyYear ${academyYear == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info(
+          '  semester: $semester ${semester == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info('  dayOfWeek: ${currentDay.name}');
+      LoggerUtils.info('  pageNo: $pageKey');
+      LoggerUtils.info('===================================');
+
       final response = await _homeService.getMySchedules(
-        academyYear: selectedAcademyYear.value != 0
-            ? selectedAcademyYear.value
-            : DateTime.now().year,
-        semester: selectedSemester.value ?? Semester.semester1,
-        dayOfWeek: currentDay,
+        academyYear: academyYear, // null = all years
+        semester: semester, // null = all semesters
+        dayOfWeek: currentDay, // MONDAY, TUESDAY, etc.
+        pageNo: pageKey,
+        pageSize: 10,
       );
 
-      todaySchedules.assignAll(response.content);
+      // Update total elements count
+      todayTotalElements.value = response.totalElements;
 
-      LoggerUtils.info('Today schedules loaded: ${response.content.length}');
+      final isLastPage = response.last;
+      if (isLastPage) {
+        todaySchedulesPagingController.appendLastPage(response.content);
+      } else {
+        final nextPageKey = pageKey + 1;
+        todaySchedulesPagingController.appendPage(
+            response.content, nextPageKey);
+      }
+
+      LoggerUtils.info(
+          '✅ Today schedules loaded: ${response.content.length} items (${response.totalElements} total)');
     } catch (e) {
-      LoggerUtils.error('Error loading today schedules', e);
-      ToastUtils.showError('Failed to load today\'s schedules');
-    } finally {
-      isTodayLoading.value = false;
+      LoggerUtils.error('❌ Error fetching today schedules page $pageKey', e);
+      todaySchedulesPagingController.error = e.toString();
     }
   }
 
   Future<void> _fetchAllSchedulesPage(int pageKey) async {
     try {
-      // Only apply filters if they are selected (not default/null values)
+      // Use selected academy year or null for all years
+      final academyYear = selectedAcademyYear.value != 0
+          ? selectedAcademyYear.value
+          : null; // null = show all years
+
+      // Use selected semester or null for all semesters
+      final semester = selectedSemester.value; // can be null
+
+      LoggerUtils.info('=== ALL SCHEDULES CONTROLLER ===');
+      LoggerUtils.info('Controller state:');
+      LoggerUtils.info(
+          '  selectedAcademyYear.value: ${selectedAcademyYear.value}');
+      LoggerUtils.info('  selectedSemester.value: ${selectedSemester.value}');
+      LoggerUtils.info('Passing to service:');
+      LoggerUtils.info(
+          '  academyYear: $academyYear ${academyYear == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info(
+          '  semester: $semester ${semester == null ? "(NO FILTER)" : ""}');
+      LoggerUtils.info('  dayOfWeek: null (all days)');
+      LoggerUtils.info('  pageNo: $pageKey');
+      LoggerUtils.info('================================');
+
       final response = await _homeService.getMySchedules(
-        academyYear: selectedAcademyYear.value != 0
-            ? selectedAcademyYear.value
-            : DateTime.now().year,
-        semester: selectedSemester.value ?? Semester.semester1,
-        // dayOfWeek is null for all schedules
+        academyYear: academyYear, // null = all years
+        semester: semester, // null = all semesters
+        // dayOfWeek is null for all schedules (shows all days)
         pageNo: pageKey,
         pageSize: 10,
       );
+
+      // Update total elements count
+      allTotalElements.value = response.totalElements;
 
       final isLastPage = response.last;
       if (isLastPage) {
@@ -163,9 +291,9 @@ class ScheduleController extends GetxController {
       }
 
       LoggerUtils.info(
-          'All schedules page $pageKey loaded with ${response.content.length} items');
+          '✅ All schedules loaded: ${response.content.length} items (${response.totalElements} total)');
     } catch (e) {
-      LoggerUtils.error('Error fetching all schedules page $pageKey', e);
+      LoggerUtils.error('❌ Error fetching all schedules page $pageKey', e);
       allSchedulesPagingController.error = e.toString();
     }
   }
@@ -173,30 +301,58 @@ class ScheduleController extends GetxController {
   // Public methods for UI interactions
   Future<void> refreshSchedules() async {
     try {
-      await _refreshCurrentFilter();
-      LoggerUtils.info('Schedules refreshed successfully');
+      LoggerUtils.info('=== MANUAL REFRESH TRIGGERED ===');
+      LoggerUtils.info('Current filter type: ${selectedFilterType.value.name}');
+
+      // Refresh the currently selected filter
+      if (selectedFilterType.value == FilterType.today) {
+        LoggerUtils.info('Refreshing today schedules...');
+        todaySchedulesPagingController.refresh();
+      } else {
+        LoggerUtils.info('Refreshing all schedules...');
+        allSchedulesPagingController.refresh();
+      }
+
+      LoggerUtils.info('✅ Refresh initiated successfully');
     } catch (e) {
-      LoggerUtils.error('Error refreshing schedules', e);
+      LoggerUtils.error('❌ Error refreshing schedules', e);
       ToastUtils.showError('Failed to refresh schedules');
     }
   }
 
   // Check if any filters are applied (not default values)
   bool get hasActiveFilters {
-    return selectedAcademyYear.value != _defaultYear ||
+    final hasFilters = selectedAcademyYear.value != _defaultYear ||
         selectedSemester.value != _defaultSemester;
+
+    LoggerUtils.debug(
+        'hasActiveFilters: $hasFilters (year: ${selectedAcademyYear.value}, semester: ${selectedSemester.value})');
+    return hasFilters;
   }
 
   // Clear all filters to default state
   void clearAllFilters() {
-    selectedAcademyYear.value = _defaultYear;
-    selectedSemester.value = _defaultSemester;
+    LoggerUtils.info('=== CLEARING ALL FILTERS ===');
+    LoggerUtils.info(
+        'Before - Year: ${selectedAcademyYear.value}, Semester: ${selectedSemester.value}');
 
-    // Refresh current filter view
-    _refreshCurrentFilter();
+    selectedAcademyYear.value = _defaultYear; // 0 = no filter
+    selectedSemester.value = _defaultSemester; // null = no filter
+
+    LoggerUtils.info(
+        'After - Year: ${selectedAcademyYear.value}, Semester: ${selectedSemester.value}');
+    LoggerUtils.info('============================');
+
+    // Always refresh the currently active tab
+    Future.delayed(Duration.zero, () {
+      if (selectedFilterType.value == FilterType.today) {
+        todaySchedulesPagingController.refresh();
+      } else {
+        allSchedulesPagingController.refresh();
+      }
+    });
 
     ToastUtils.showInfo('Filters cleared');
-    LoggerUtils.info('All filters cleared to default values');
   }
 
   void onScheduleTap(ScheduleModel schedule) {
@@ -270,5 +426,30 @@ class ScheduleController extends GetxController {
       default:
         return Colors.orange;
     }
+  }
+
+  // Get the total count from API response (totalElements)
+  int get todaySchedulesCount {
+    return todayTotalElements.value;
+  }
+
+  // Get total schedules count from API response (totalElements)
+  int get totalSchedulesCount {
+    return allTotalElements.value;
+  }
+
+  // Debug method to log current state
+  void debugCurrentState() {
+    LoggerUtils.info('=== CONTROLLER DEBUG STATE ===');
+    LoggerUtils.info('selectedFilterType: ${selectedFilterType.value.name}');
+    LoggerUtils.info(
+        'selectedAcademyYear: ${selectedAcademyYear.value} ${selectedAcademyYear.value == 0 ? "(NO FILTER)" : ""}');
+    LoggerUtils.info(
+        'selectedSemester: ${selectedSemester.value} ${selectedSemester.value == null ? "(NO FILTER)" : ""}');
+    LoggerUtils.info('todayTotalElements: ${todayTotalElements.value}');
+    LoggerUtils.info('allTotalElements: ${allTotalElements.value}');
+    LoggerUtils.info('hasActiveFilters: $hasActiveFilters');
+    LoggerUtils.info('isInitialLoading: ${isInitialLoading.value}');
+    LoggerUtils.info('===============================');
   }
 }
