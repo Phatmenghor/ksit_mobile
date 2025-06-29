@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize service and controller
     Get.put(HomeService());
-    final scheduleController = Get.put(ScheduleController());
+    final scheduleController = Get.put(HomeController());
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -221,7 +221,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSchedulesList(ScheduleController controller) {
+  Widget _buildSchedulesList(HomeController controller) {
     return Obx(() {
       // Show today's schedules when Today filter is selected
       if (controller.selectedFilterType.value == FilterType.today) {
@@ -233,7 +233,7 @@ class HomeScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildTodaySchedules(ScheduleController controller) {
+  Widget _buildTodaySchedules(HomeController controller) {
     return PagedSliverList<int, ScheduleModel>(
       key: const ValueKey('today_schedules'), // Add unique key
       pagingController: controller.todaySchedulesPagingController,
@@ -293,7 +293,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAllSchedules(ScheduleController controller) {
+  Widget _buildAllSchedules(HomeController controller) {
     return PagedSliverList<int, ScheduleModel>(
       key: const ValueKey('all_schedules'), // Add unique key
       pagingController: controller.allSchedulesPagingController,

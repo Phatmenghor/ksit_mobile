@@ -8,7 +8,7 @@ import 'package:ksit_mobile/features/home/services/home_service.dart';
 import '../models/schedule_models.dart';
 import '../screens/home_screen.dart';
 
-class ScheduleController extends GetxController {
+class HomeController extends GetxController {
   final HomeService _homeService = Get.find<HomeService>();
 
   // Observables

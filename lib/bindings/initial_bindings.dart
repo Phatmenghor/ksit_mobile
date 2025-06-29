@@ -23,6 +23,6 @@ class InitialBinding extends Bindings {
     Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
 
     Get.lazyPut<HomeService>(() => HomeService());
-    Get.lazyPut<ScheduleController>(() => ScheduleController());
+    Get.lazyPut<HomeController>(() => HomeController());
   }
 }
