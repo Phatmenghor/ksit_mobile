@@ -86,20 +86,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                // actions: [
-                //   IconButton(
-                //     icon: const Icon(Icons.notifications_outlined),
-                //     onPressed: () {
-                //       // Handle notifications
-                //     },
-                //   ),
-                //   IconButton(
-                //     icon: const Icon(Icons.more_vert),
-                //     onPressed: () {
-                //       // Handle menu
-                //     },
-                //   ),
-                // ],
               ),
 
               // Header Section

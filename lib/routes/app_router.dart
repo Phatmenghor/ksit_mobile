@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/features/home/screens/schedule_detail_screen.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
 import '../core/config/app_config.dart';
 import '../core/services/storage_service.dart';
@@ -90,6 +91,30 @@ class AppRouter {
               key: state.pageKey,
               child: const ProfileScreen(),
             ),
+          ),
+          GoRoute(
+            path: AppRoutes.scheduleDetailRoute,
+            name: 'schedule-detail',
+            pageBuilder: (context, state) {
+              // Get the schedule ID from query parameters
+              final scheduleId = state.uri.queryParameters['id'];
+              if (scheduleId == null) {
+                // Redirect to home if no ID provided
+                return FadeTransitionPage<void>(
+                  key: state.pageKey,
+                  child: const Scaffold(
+                    body: Center(
+                      child: Text('Schedule not found'),
+                    ),
+                  ),
+                );
+              }
+
+              return NoTransitionPage<void>(
+                key: state.pageKey,
+                child: ScheduleDetailScreen(scheduleId: int.parse(scheduleId)),
+              );
+            },
           ),
         ],
       ),

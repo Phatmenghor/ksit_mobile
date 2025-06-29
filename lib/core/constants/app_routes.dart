@@ -6,4 +6,5 @@ class AppRoutes {
   static const String scanRoute = '/scan';
   static const String requestRoute = '/request';
   static const String profileRoute = '/profile';
+  static const String scheduleDetailRoute = '/schedule-detail';
 }

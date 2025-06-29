@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
-import 'package:ksit_mobile/features/home/models/schedule_request_model.dart';
 import 'package:ksit_mobile/shared/models/api_response_model.dart';
 import '../models/schedule_models.dart';
 
@@ -237,8 +236,7 @@ class HomeService extends GetxService {
       if (response.statusCode == 200 && response.data != null) {
         final responseData = response.data;
 
-        if (responseData['status'] == 'success' &&
-            responseData['data'] != null) {
+        if (responseData['data'] != null) {
           return ScheduleModel.fromJson(responseData['data']);
         }
       }
@@ -246,28 +244,6 @@ class HomeService extends GetxService {
     } catch (e) {
       LoggerUtils.error('Error fetching schedule by ID: $id', e);
       return null;
-    }
-  }
-
-  /// Legacy method for backward compatibility
-  @Deprecated('Use getMySchedules instead')
-  Future<List<ScheduleModel>> getHomeItems({
-    required int page,
-    required int limit,
-    String? search,
-    Status? status,
-  }) async {
-    try {
-      final response = await getMySchedules(
-        pageNo: page,
-        pageSize: limit,
-        status: status ?? Status.active,
-      );
-
-      return response.content;
-    } catch (e) {
-      LoggerUtils.error('Error in legacy getHomeItems', e);
-      rethrow;
     }
   }
 }

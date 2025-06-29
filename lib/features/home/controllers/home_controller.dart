@@ -1,7 +1,9 @@
 // lib/features/home/controllers/home_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
@@ -357,8 +359,15 @@ class HomeController extends GetxController {
 
   void onScheduleTap(ScheduleModel schedule) {
     LoggerUtils.info('Schedule tapped: ${schedule.id}');
-    // TODO: Navigate to detail screen
-    // Get.toNamed('/schedule-detail', arguments: schedule);
+
+    if (schedule.id != null) {
+      // Navigate to schedule detail with ID as query parameter
+      Get.context?.push('${AppRoutes.scheduleDetailRoute}?id=${schedule.id}');
+      LoggerUtils.info('Navigating to schedule detail for ID: ${schedule.id}');
+    } else {
+      LoggerUtils.warning('Schedule ID is null, cannot navigate to detail');
+      ToastUtils.showError('Schedule ID not available');
+    }
   }
 
   DayOfWeek _getCurrentDayOfWeek() {
