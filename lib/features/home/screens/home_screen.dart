@@ -6,7 +6,7 @@ import 'package:ksit_mobile/core/constants/app_image.dart';
 import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
 import 'package:ksit_mobile/features/home/widget/schedule_filter_widget.dart';
-import 'package:ksit_mobile/features/home/widget/schedule_item_widget.dart';
+import 'package:ksit_mobile/features/home/widget/schedule_class_widget.dart';
 import 'package:ksit_mobile/shared/widgets/empty_state_widget.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -75,7 +75,6 @@ class HomeScreen extends StatelessWidget {
       body: Obx(() {
         if (scheduleController.isInitialLoading.value) {
           return const LoadingWidget(
-            message: 'Loading schedules...',
             overlay: false,
           );
         }
@@ -134,12 +133,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // Schedules List
-            Expanded(
-              child: _buildSchedulesList(scheduleController),
-            ),
-
-            // Bottom Filter Section (Academy Year & Semester)
             ScheduleFilterWidget(
               availableYears: scheduleController.availableAcademyYears,
               selectedYear: scheduleController.selectedAcademyYear.value,
@@ -150,6 +143,13 @@ class HomeScreen extends StatelessWidget {
               onSemesterCleared: scheduleController.clearSemester,
               onClearFilters: scheduleController.clearAllFilters,
             ),
+
+            // Schedules List
+            Expanded(
+              child: _buildSchedulesList(scheduleController),
+            ),
+
+            // Bottom Filter Section (Academy Year & Semester)
           ],
         );
       }),
@@ -234,7 +234,7 @@ class HomeScreen extends StatelessWidget {
           itemCount: controller.todaySchedules.length,
           itemBuilder: (context, index) {
             final schedule = controller.todaySchedules[index];
-            return ScheduleItemWidget(
+            return ScheduleClassWidget(
               schedule: schedule,
               onTap: () {
                 // TODO: Navigate to detail screen
@@ -256,7 +256,7 @@ class HomeScreen extends StatelessWidget {
         pagingController: controller.allSchedulesPagingController,
         padding: const EdgeInsets.all(16),
         builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
-          itemBuilder: (context, schedule, index) => ScheduleItemWidget(
+          itemBuilder: (context, schedule, index) => ScheduleClassWidget(
             schedule: schedule,
             onTap: () {
               // TODO: Navigate to detail screen

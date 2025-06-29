@@ -29,18 +29,10 @@ class ScheduleFilterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
         children: [
@@ -99,7 +91,7 @@ class ScheduleFilterWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(8),
@@ -126,12 +118,11 @@ class ScheduleFilterWidget extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    const TextSpan(text: ' '), // Space
                     TextSpan(
                       text: value,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textPrimary.withOpacity(0.8),
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
