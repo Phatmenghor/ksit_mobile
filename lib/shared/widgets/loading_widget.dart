@@ -11,7 +11,7 @@ class LoadingWidget extends StatelessWidget {
   const LoadingWidget({
     super.key,
     this.message,
-    this.size = 40,
+    this.size = 24,
     this.color,
     this.overlay = true,
   });
@@ -53,32 +53,5 @@ class LoadingWidget extends StatelessWidget {
     }
 
     return Center(child: loadingContent);
-  }
-}
-
-class LoadingOverlay extends StatelessWidget {
-  final Widget child;
-  final bool isLoading;
-  final String? loadingMessage;
-
-  const LoadingOverlay({
-    super.key,
-    required this.child,
-    required this.isLoading,
-    this.loadingMessage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        if (isLoading)
-          LoadingWidget(
-            message: loadingMessage,
-            overlay: true,
-          ),
-      ],
-    );
   }
 }
