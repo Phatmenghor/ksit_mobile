@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:ksit_mobile/core/constants/app_image.dart';
+import 'package:ksit_mobile/core/utils/enums_utils.dart';
 import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
 import 'package:ksit_mobile/features/home/widget/schedule_filter_widget.dart';
@@ -16,8 +17,6 @@ import '../../../core/utils/ui_utils.dart';
 import '../../../core/utils/pagination_utils.dart';
 
 import '../models/schedule_models.dart';
-
-enum FilterType { all, today }
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

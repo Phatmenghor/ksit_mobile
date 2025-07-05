@@ -13,7 +13,6 @@ import 'package:ksit_mobile/core/utils/schedule_utils.dart';
 import 'package:ksit_mobile/core/utils/pagination_utils.dart';
 
 import '../models/schedule_models.dart';
-import '../screens/home_screen.dart';
 
 class HomeController extends GetxController {
   final HomeService _homeService = Get.find<HomeService>();

@@ -137,6 +137,8 @@ enum Status {
   deleted,
 }
 
+enum FilterType { all, today }
+
 extension StatusExtension on Status {
   String get name {
     switch (this) {

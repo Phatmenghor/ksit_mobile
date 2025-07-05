@@ -315,51 +315,6 @@ class UIUtils {
     );
   }
 
-  /// Build detail row for info display
-  static Widget buildDetailRow({
-    required String label,
-    required String value,
-    EdgeInsetsGeometry? padding,
-  }) {
-    return Container(
-      padding: padding ?? const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border,
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary.withOpacity(0.5),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// Build app bar filter button
   static Widget buildAppBarFilterButton({
     required String text,

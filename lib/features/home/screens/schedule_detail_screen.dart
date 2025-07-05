@@ -6,11 +6,11 @@ import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_image.dart';
 import 'package:ksit_mobile/features/home/controllers/schedule_detail_controller.dart';
 import 'package:ksit_mobile/features/home/models/schedule_models.dart';
+import 'package:ksit_mobile/features/home/widget/build_detail_row_widget.dart';
 import 'package:ksit_mobile/shared/widgets/loading_widget.dart';
 
 // Import the new utils
 import '../../../core/utils/format_utils.dart';
-import '../../../core/utils/ui_utils.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
   final int scheduleId;
@@ -60,7 +60,7 @@ class ScheduleDetailScreen extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoading.value) {
           return const LoadingWidget(
-            message: 'Loading schedule details...',
+            message: '',
             overlay: false,
           );
         }
@@ -144,80 +144,80 @@ class ScheduleDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Use UIUtils.buildDetailRow for all detail rows
-          UIUtils.buildDetailRow(
+          // Use BuildDetailRowWidget for all detail rows
+          BuildDetailRowWidget(
             label: 'Day',
             value: schedule.dayDisplayName,
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Instructor',
             value: schedule.teacher?.displayName ?? 'N/A',
           ),
           if (schedule.teacher?.email != null)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Instructor Email',
               value: schedule.teacher!.email!,
             ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Room',
             value: schedule.room?.displayName ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Time',
             value: FormatUtils.formatTimeRange(
                 schedule.startTime, schedule.endTime),
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Duration',
             value: FormatUtils.calculateDuration(
                 schedule.startTime, schedule.endTime),
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Academy Year',
             value:
                 '${schedule.academyYear ?? schedule.classes?.academyYear ?? 'N/A'}',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Semester',
             value: schedule.semester?.displayName ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Year Level',
             value: FormatUtils.formatYearLevel(
                 schedule.yearLevel ?? schedule.classes?.yearLevel),
           ),
           if (schedule.classes?.degree != null)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Degree',
               value: FormatUtils.formatDegree(schedule.classes!.degree!),
             ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Department',
             value: schedule.classes?.major?.department?.displayName ??
                 schedule.course?.department?.displayName ??
                 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Major',
             value: schedule.classes?.major?.displayName ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Course Code',
             value: schedule.course?.code ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Course Name (EN)',
             value: schedule.course?.nameEn ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Course Name (KH)',
             value: schedule.course?.nameKH ?? 'N/A',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Credits',
             value: '${schedule.course?.credit ?? 0}',
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Credit Structure',
             value: FormatUtils.formatCreditStructure(
               schedule.course?.theory,
@@ -225,40 +225,40 @@ class ScheduleDetailScreen extends StatelessWidget {
               schedule.course?.apply,
             ),
           ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Total Hours',
             value: '${schedule.course?.totalHour ?? 0} hours',
           ),
           if (schedule.course?.subject?.displayName != null)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Subject',
               value: schedule.course!.subject!.displayName,
             ),
           if (schedule.course?.description != null &&
               schedule.course!.description!.isNotEmpty)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Description',
               value: schedule.course!.description!,
             ),
           if (schedule.course?.purpose != null &&
               schedule.course!.purpose!.isNotEmpty)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Purpose',
               value: schedule.course!.purpose!,
             ),
           if (schedule.course?.expectedOutcome != null &&
               schedule.course!.expectedOutcome!.isNotEmpty)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Expected Outcome',
               value: schedule.course!.expectedOutcome!,
             ),
-          UIUtils.buildDetailRow(
+          BuildDetailRowWidget(
             label: 'Status',
             value: FormatUtils.formatStatus(schedule.status),
           ),
           if (schedule.semester?.startDate != null &&
               schedule.semester?.endDate != null)
-            UIUtils.buildDetailRow(
+            BuildDetailRowWidget(
               label: 'Semester Period',
               value:
                   '${schedule.semester!.startDate!} to ${schedule.semester!.endDate!}',
