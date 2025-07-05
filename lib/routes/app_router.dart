@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/home/screens/schedule_detail_screen.dart';
+import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
 import '../core/config/app_config.dart';
 import '../core/services/storage_service.dart';
@@ -53,6 +54,25 @@ class AppRouter {
             },
           );
         },
+      ),
+
+      // Profile View Screen (outside main navigation)
+      GoRoute(
+        path: AppRoutes.profileViewRoute,
+        name: 'profile-view',
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const ProfileViewScreen(),
+          transitionDuration: const Duration(milliseconds: 300),
+          transitionsBuilder: (context, animation, _, child) {
+            return SlideTransition(
+              position: animation.drive(
+                Tween(begin: const Offset(1.0, 0.0), end: Offset.zero),
+              ),
+              child: child,
+            );
+          },
+        ),
       ),
 
       // Main App Routes with Bottom Navigation (No Transition)

@@ -1,7 +1,9 @@
 // lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/config/app_config.dart';
+import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/profile/widgets/profile_menu_item_widget.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -18,99 +20,96 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(profileController),
-      body: Obx(() {
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // View Profile Card
-                    _buildViewProfileCard(),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // View Profile Card
+                  _buildViewProfileCard(context),
 
-                    const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                    // Menu Items
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 1,
+                  // Menu Items
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: AppColors.border,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: Column(
-                        children: [
-                          _buildMenuItem(
-                            icon: Icons.person_outline,
-                            title: 'Edit Profile',
-                            onTap: () => _handleEditProfile(profileController),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.description_outlined,
-                            title: 'Transcript',
-                            onTap: () => _handleTranscript(),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.history,
-                            title: 'Attendance History',
-                            onTap: () => _handleAttendanceHistory(),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.lock_outline,
-                            title: 'Change Password',
-                            onTap: () => _handleChangePassword(),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.info_outline,
-                            title: 'About KSIT',
-                            iconUrl:
-                                'assets/images/logo_screen.png', // Using your app logo
-                            onTap: () => _handleAboutKSIT(),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.settings_outlined,
-                            title: 'Configuration',
-                            onTap: () => _handleConfiguration(),
-                          ),
-                          _buildMenuItem(
-                            icon: Icons.logout,
-                            title: 'Logout',
-                            titleColor: AppColors.error,
-                            iconColor: AppColors.error,
-                            showArrow: false,
-                            onTap: () => _handleLogout(profileController),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: Column(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.person_outline,
+                          title: 'Edit Profile',
+                          onTap: () => _handleEditProfile(profileController),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.description_outlined,
+                          title: 'Transcript',
+                          onTap: () => _handleTranscript(),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.history,
+                          title: 'Attendance History',
+                          onTap: () => _handleAttendanceHistory(),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.lock_outline,
+                          title: 'Change Password',
+                          onTap: () => _handleChangePassword(),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.info_outline,
+                          title: 'About KSIT',
+                          iconUrl:
+                              'assets/images/logo_screen.png', // Using your app logo
+                          onTap: () => _handleAboutKSIT(),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.settings_outlined,
+                          title: 'Configuration',
+                          onTap: () => _handleConfiguration(),
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.logout,
+                          title: 'Logout',
+                          titleColor: AppColors.error,
+                          iconColor: AppColors.error,
+                          showArrow: false,
+                          onTap: () => _handleLogout(profileController),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
               ),
-            ],
-          ),
-        );
-      }),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(ProfileController controller) {
     return AppBar(
       backgroundColor: AppColors.primary,
-      elevation: 0,
       automaticallyImplyLeading: false, // Remove back button if not needed
       title: Obx(() => Row(
             children: [
@@ -176,34 +175,39 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildViewProfileCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.border,
-          width: 1,
+  Widget _buildViewProfileCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        context.push(AppRoutes.profileViewRoute);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: AppColors.border,
+            width: 1,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      ),
-      child: const Column(
-        children: [
-          Icon(
-            Icons.person,
-            size: 20,
-            color: AppColors.primary,
-          ),
-          SizedBox(height: 8),
-          Text(
-            'View Profile',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+        child: const Column(
+          children: [
+            Icon(
+              Icons.person,
+              size: 20,
+              color: AppColors.primary,
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Text(
+              'View Profile',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
