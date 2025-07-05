@@ -9,7 +9,7 @@ class AppColors {
   static const Color secondary = Color(0xFF4CAF50);
   static const Color secondaryAccent = Color(0xFF388E3C);
 
-  // Background Colors
+  // Bac`kground Colors
   static const Color background = Color(0xFFF5F5F5);
   static const Color surface = Colors.white;
   static const Color cardBackground = Colors.white;
