@@ -1,14 +1,14 @@
+// lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ksit_mobile/core/config/app_config.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../shared/widgets/custom_button.dart';
-import '../../../shared/widgets/loading_widget.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,399 +16,343 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: profileController.editProfile,
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: profileController.openSettings,
-          ),
-        ],
-      ),
       body: Obx(() {
-        if (profileController.isLoading.value) {
-          return const LoadingWidget(
-            message: 'Loading profile...',
-            overlay: false,
-          );
-        }
+        return Column(
+          children: [
+            // Header Section
+            _buildHeader(profileController),
 
-        return RefreshIndicator(
-          onRefresh: profileController.refreshProfile,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: Column(
-              children: [
-                // Profile Header
-                _buildProfileHeader(profileController),
+            // Content Section
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          // View Profile Card
+                          _buildViewProfileCard(),
 
-                const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                // Profile Stats
-                _buildProfileStats(profileController),
-
-                const SizedBox(height: 24),
-
-                // Menu Items
-                _buildMenuSection(profileController),
-
-                const SizedBox(height: 24),
-
-                // Logout Button
-                _buildLogoutSection(profileController),
-              ],
+                          // Menu Items
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: AppColors.border,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            child: Column(
+                              children: [
+                                _buildMenuItem(
+                                  icon: Icons.person_outline,
+                                  title: 'Edit Profile',
+                                  onTap: () =>
+                                      _handleEditProfile(profileController),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.description_outlined,
+                                  title: 'Transcript',
+                                  onTap: () => _handleTranscript(),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.history,
+                                  title: 'Attendance History',
+                                  onTap: () => _handleAttendanceHistory(),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.lock_outline,
+                                  title: 'Change Password',
+                                  onTap: () => _handleChangePassword(),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.info_outline,
+                                  title: 'About KSIT',
+                                  iconUrl:
+                                      'assets/images/logo_screen.png', // Using your app logo
+                                  onTap: () => _handleAboutKSIT(),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.settings_outlined,
+                                  title: 'Configuration',
+                                  onTap: () => _handleConfiguration(),
+                                ),
+                                _buildMenuItem(
+                                  icon: Icons.logout,
+                                  title: 'Logout',
+                                  titleColor: AppColors.error,
+                                  iconColor: AppColors.error,
+                                  showArrow: false,
+                                  onTap: () => _handleLogout(profileController),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         );
       }),
     );
   }
 
-  Widget _buildProfileHeader(ProfileController controller) {
+  Widget _buildHeader(ProfileController controller) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.largePadding),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+      padding: const EdgeInsets.fromLTRB(16, 60, 16, 24),
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+      ),
+      child: Row(
+        children: [
+          // Profile Avatar
+
+          Obx(() {
+            final imageUrl = controller.currentUserProfileUrl;
+
+            print('Profile Image URL: $imageUrl');
+
+            if (imageUrl != null && imageUrl.isNotEmpty) {
+              return CircleAvatar(
+                radius: 22,
+                backgroundImage:
+                    NetworkImage(AppConfig.baseImageUrl + imageUrl),
+                backgroundColor: Colors.white,
+                // Add error handling for network images
+                child: null,
+                onBackgroundImageError: (exception, stackTrace) {
+                  // If image fails to load, show default icon
+                },
+              );
+            } else {
+              return const CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.person,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
+              );
+            }
+          }),
+
+          const SizedBox(width: 16),
+
+          // User Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Hello,',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.white,
+                  ),
+                ),
+                Text(
+                  controller.currentUserDisplayName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      child: Column(
+    );
+  }
+
+  Widget _buildViewProfileCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        // color: Colors.white,
+        //border all
+        border: Border.all(
+          color: AppColors.border,
+          width: 1,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      ),
+      child: const Column(
         children: [
-          // Avatar
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: controller.user.value?.avatar != null
-                    ? NetworkImage(controller.user.value!.avatar!)
-                    : null,
-                child: controller.user.value?.avatar == null
-                    ? Icon(
-                        Icons.person,
-                        size: 50,
-                        color: AppColors.primary,
-                      )
-                    : null,
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ],
+          Icon(
+            Icons.person,
+            size: 20,
+            color: AppColors.primary,
           ),
-
-          const SizedBox(height: 16),
-
-          // Name
+          SizedBox(height: 8),
           Text(
-            controller.user.value?.name ?? 'User Name',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+            'View Profile',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
-
-          const SizedBox(height: 4),
-
-          // Email
-          Text(
-            controller.user.value?.email ?? 'user@example.com',
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.textSecondary,
-            ),
-          ),
-
-          // Phone (if available)
-          if (controller.user.value?.phone != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              controller.user.value!.phone!,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textHint,
-              ),
-            ),
-          ],
-
-          // Role (if available)
-          if (controller.user.value?.role != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                controller.user.value!.role!.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildProfileStats(ProfileController controller) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Total Requests',
-            controller.totalRequests.value.toString(),
-            Icons.request_page_outlined,
-            AppColors.info,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'Completed',
-            controller.completedRequests.value.toString(),
-            Icons.check_circle_outline,
-            AppColors.success,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'Active Scans',
-            controller.totalScans.value.toString(),
-            Icons.qr_code_scanner,
-            AppColors.warning,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? titleColor,
+    Color? iconColor,
+    String? iconUrl,
+    bool showArrow = true,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 4,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
+      margin: const EdgeInsets.only(bottom: 1),
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: showArrow
+                  ? const Border(
+                      bottom: BorderSide(
+                        color: AppColors.border,
+                        width: 1,
+                      ),
+                    )
+                  : null,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuSection(ProfileController controller) {
-    final menuItems = [
-      MenuItemData(
-        icon: Icons.person_outline,
-        title: 'Edit Profile',
-        subtitle: 'Update your personal information',
-        onTap: controller.editProfile,
-      ),
-      MenuItemData(
-        icon: Icons.notifications_outlined,
-        title: 'Notifications',
-        subtitle: 'Manage notification preferences',
-        onTap: controller.openNotificationSettings,
-      ),
-      MenuItemData(
-        icon: Icons.security_outlined,
-        title: 'Privacy & Security',
-        subtitle: 'Password and security settings',
-        onTap: controller.openSecuritySettings,
-      ),
-      MenuItemData(
-        icon: Icons.help_outline,
-        title: 'Help & Support',
-        subtitle: 'Get help and contact support',
-        onTap: controller.openHelp,
-      ),
-      MenuItemData(
-        icon: Icons.info_outline,
-        title: 'About',
-        subtitle: 'App version and information',
-        onTap: controller.showAbout,
-      ),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: menuItems.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          final isLast = index == menuItems.length - 1;
-
-          return Column(
-            children: [
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    item.icon,
-                    color: AppColors.primary,
+            child: Row(
+              children: [
+                // Icon
+                if (iconUrl != null)
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Image.asset(
+                      iconUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          icon,
+                          size: 24,
+                          color: iconColor ?? AppColors.primary,
+                        );
+                      },
+                    ),
+                  )
+                else
+                  Icon(
+                    icon,
                     size: 20,
+                    color: iconColor ?? AppColors.primary,
                   ),
-                ),
-                title: Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  item.subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.iconSecondary,
-                ),
-                onTap: item.onTap,
-              ),
-              if (!isLast)
-                const Divider(
-                  height: 1,
-                  indent: 16,
-                  endIndent: 16,
-                ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
 
-  Widget _buildLogoutSection(ProfileController controller) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          CustomButton(
-            text: 'Logout',
-            onPressed: controller.logout,
-            backgroundColor: AppColors.error,
-            width: double.infinity,
-            icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-            isLoading: controller.isLoggingOut.value,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Version ${AppConstants.appVersion}',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textHint,
+                const SizedBox(width: 16),
+
+                // Title
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: titleColor ?? AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+
+                // Arrow
+                Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: Colors.grey[400],
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
 
-class MenuItemData {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
+  // Action Handlers - Add your logic here
+  void _handleEditProfile(ProfileController controller) {
+    ToastUtils.showInfo('Edit Profile clicked');
+    // TODO: Add edit profile logic here
+    // Example: Get.toNamed('/edit-profile');
+    // Or show a dialog, bottom sheet, etc.
+  }
 
-  const MenuItemData({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
+  void _handleTranscript() {
+    ToastUtils.showInfo('Transcript clicked');
+    // TODO: Add transcript logic here
+    // Example: Get.toNamed('/transcript');
+    // Or open a document viewer, etc.
+  }
+
+  void _handleAttendanceHistory() {
+    ToastUtils.showInfo('Attendance History clicked');
+    // TODO: Add attendance history logic here
+    // Example: Get.toNamed('/attendance-history');
+    // Or show attendance data, etc.
+  }
+
+  void _handleChangePassword() {
+    ToastUtils.showInfo('Change Password clicked');
+    // TODO: Add change password logic here
+    // Example: _showChangePasswordDialog();
+    // Or navigate to change password screen
+  }
+
+  void _handleAboutKSIT() {
+    ToastUtils.showInfo('About KSIT clicked');
+    // TODO: Add about KSIT logic here
+    // Example: Get.toNamed('/about-ksit');
+    // Or show information dialog
+  }
+
+  void _handleConfiguration() {
+    ToastUtils.showInfo('Configuration clicked');
+    // TODO: Add configuration logic here
+    // Example: Get.toNamed('/settings');
+    // Or show settings screen
+  }
+
+  void _handleLogout(ProfileController controller) {
+    ToastUtils.showInfo('Logout clicked');
+    // TODO: Add logout logic here
+    // Example: controller.logout();
+    // Or show confirmation dialog
+  }
 }

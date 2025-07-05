@@ -102,7 +102,7 @@ class AppRouter {
                 // Redirect to home if no ID provided
                 return FadeTransitionPage<void>(
                   key: state.pageKey,
-                  child: const Scaffold(
+                  child: Scaffold(
                     body: Center(
                       child: Text('Schedule not found'),
                     ),

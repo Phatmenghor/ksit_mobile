@@ -25,6 +25,17 @@ class AppConfig {
     }
   }
 
+  static String get baseImageUrl {
+    switch (_environment) {
+      case Environment.development:
+        return 'http://143.198.93.97';
+      case Environment.staging:
+        return 'http://143.198.93.97';
+      case Environment.production:
+        return 'http://143.198.93.97';
+    }
+  }
+
   // Firebase Configuration
   static String get firebaseProjectId {
     switch (_environment) {
