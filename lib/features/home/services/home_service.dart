@@ -1,9 +1,13 @@
 // lib/features/home/services/home_service.dart
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
-import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/shared/models/api_response_model.dart';
+
+// Import the new utils
+import 'package:ksit_mobile/core/utils/enums_utils.dart';
+import 'package:ksit_mobile/core/utils/schedule_utils.dart';
+
 import '../models/schedule_models.dart';
 
 class HomeService extends GetxService {
@@ -11,26 +15,14 @@ class HomeService extends GetxService {
 
   /// Get my schedules with pagination
   Future<PaginatedResponse<ScheduleModel>> getMySchedules({
-    int? academyYear, // Made nullable
-    Semester? semester, // Made nullable
+    int? academyYear,
+    Semester? semester,
     DayOfWeek? dayOfWeek,
     Status status = Status.active,
     int pageNo = 1,
     int pageSize = 10,
   }) async {
     try {
-      LoggerUtils.info('=== API CALL PARAMETERS ===');
-      LoggerUtils.info(
-          'academyYear: $academyYear ${academyYear == null ? "(NO FILTER)" : ""}');
-      LoggerUtils.info(
-          'semester: ${semester?.name ?? "null"} ${semester == null ? "(NO FILTER)" : ""}');
-      LoggerUtils.info(
-          'dayOfWeek: ${dayOfWeek?.name ?? "null"} ${dayOfWeek == null ? "(NO FILTER)" : ""}');
-      LoggerUtils.info('status: ${status.name}');
-      LoggerUtils.info('pageNo: $pageNo');
-      LoggerUtils.info('pageSize: $pageSize');
-      LoggerUtils.info('==========================');
-
       // Build request data dynamically based on provided parameters
       final Map<String, dynamic> requestData = {
         'status': status.name,
@@ -41,26 +33,15 @@ class HomeService extends GetxService {
       // Only add parameters if they are not null
       if (academyYear != null) {
         requestData['academyYear'] = academyYear;
-        LoggerUtils.info('✅ Added academyYear filter: $academyYear');
-      } else {
-        LoggerUtils.info('❌ No academyYear filter (will show all years)');
       }
 
       if (semester != null) {
         requestData['semester'] = semester.name;
-        LoggerUtils.info('✅ Added semester filter: ${semester.name}');
-      } else {
-        LoggerUtils.info('❌ No semester filter (will show all semesters)');
       }
 
       if (dayOfWeek != null) {
         requestData['dayOfWeek'] = dayOfWeek.name;
-        LoggerUtils.info('✅ Added dayOfWeek filter: ${dayOfWeek.name}');
-      } else {
-        LoggerUtils.info('❌ No dayOfWeek filter (will show all days)');
       }
-
-      LoggerUtils.info('📤 Final request data: $requestData');
 
       final response = await _apiService.post(
         '/v1/schedules/my-schedules',
@@ -78,8 +59,6 @@ class HomeService extends GetxService {
             (json) => ScheduleModel.fromJson(json),
           );
 
-          LoggerUtils.info(
-              '📥 API Response: ${paginatedResponse.content.length} schedules (${paginatedResponse.totalElements} total)');
           return paginatedResponse;
         } else {
           throw Exception(
@@ -89,31 +68,8 @@ class HomeService extends GetxService {
         throw Exception('Failed to fetch schedules: ${response.statusCode}');
       }
     } catch (e) {
-      LoggerUtils.error('Error fetching schedules', e);
       ApiErrorUtils.throwApiError(
           e, 'Failed to fetch schedules. Please try again.');
-    }
-  }
-
-  /// Get today's schedules
-  Future<List<ScheduleModel>> getTodaySchedules({
-    int? academyYear,
-    Semester? semester,
-  }) async {
-    try {
-      final currentDay = _getCurrentDayOfWeek();
-
-      final response = await getMySchedules(
-        academyYear: academyYear,
-        semester: semester,
-        dayOfWeek: currentDay,
-        pageSize: 50, // Get more items for today
-      );
-
-      return response.content;
-    } catch (e) {
-      LoggerUtils.error('Error fetching today schedules', e);
-      rethrow;
     }
   }
 
@@ -133,47 +89,44 @@ class HomeService extends GetxService {
         pageSize: pageSize,
       );
     } catch (e) {
-      LoggerUtils.error('Error fetching all schedules', e);
       rethrow;
     }
   }
 
   /// Get available academy years (all years from 2000 to current + 10 years)
   List<int> getAvailableAcademyYears() {
-    final currentYear = DateTime.now().year;
-    const int startYear = 2000; // Fixed: Made const
-    final endYear = currentYear + 10;
-
-    return List.generate(
-      endYear - startYear + 1,
-      (index) => endYear - index,
-    );
+    return ScheduleUtils.generateAcademyYears();
   }
 
   /// Get available semesters
   List<Semester> getAvailableSemesters() {
-    return [Semester.semester1, Semester.semester2];
+    return ScheduleUtils.getAvailableSemesters();
   }
 
   /// Get home statistics (for dashboard)
   Future<Map<String, int>> getHomeStats() async {
     try {
-      // Get today's schedules count
-      final todaySchedules = await getTodaySchedules();
-
       // Get all schedules for total count
       final allSchedules = await getAllSchedules(
         pageSize: 1, // Just get total count
       );
 
+      // Get today's schedules count
+      final currentDay = DayOfWeekExtension.getCurrentDay();
+      final todaySchedules = await getMySchedules(
+        dayOfWeek: currentDay,
+        pageSize: 50,
+      );
+
       return {
-        'today': todaySchedules.length,
+        'today': todaySchedules.content.length,
         'total': allSchedules.totalElements,
-        'active': todaySchedules.where((s) => s.status == 'ACTIVE').length,
-        'completed': todaySchedules.where((s) => _isCompleted(s)).length,
+        'active':
+            todaySchedules.content.where((s) => s.status == 'ACTIVE').length,
+        'completed':
+            todaySchedules.content.where((s) => _isCompleted(s)).length,
       };
     } catch (e) {
-      LoggerUtils.error('Error fetching home stats', e);
       return {
         'today': 0,
         'total': 0,
@@ -185,47 +138,10 @@ class HomeService extends GetxService {
 
   /// Check if schedule is completed (for stats)
   bool _isCompleted(ScheduleModel schedule) {
-    if (schedule.startTime == null || schedule.endTime == null) return false;
-
-    final now = DateTime.now();
-    final endTime = _parseTimeString(schedule.endTime!);
-    return now.isAfter(endTime) && schedule.isToday;
-  }
-
-  /// Parse time string to DateTime
-  DateTime _parseTimeString(String timeString) {
-    final parts = timeString.split(':');
-    final now = DateTime.now();
-    return DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.tryParse(parts[0]) ?? 0,
-      parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0,
+    return ScheduleUtils.isScheduleCompleted(
+      endTime: schedule.endTime,
+      day: schedule.day,
     );
-  }
-
-  /// Helper method to get current day of week
-  DayOfWeek _getCurrentDayOfWeek() {
-    final weekday = DateTime.now().weekday;
-    switch (weekday) {
-      case 1:
-        return DayOfWeek.monday;
-      case 2:
-        return DayOfWeek.tuesday;
-      case 3:
-        return DayOfWeek.wednesday;
-      case 4:
-        return DayOfWeek.thursday;
-      case 5:
-        return DayOfWeek.friday;
-      case 6:
-        return DayOfWeek.saturday;
-      case 7:
-        return DayOfWeek.sunday;
-      default:
-        return DayOfWeek.monday;
-    }
   }
 
   /// Get schedule by ID
@@ -242,7 +158,6 @@ class HomeService extends GetxService {
       }
       return null;
     } catch (e) {
-      LoggerUtils.error('Error fetching schedule by ID: $id', e);
       return null;
     }
   }

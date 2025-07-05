@@ -1,8 +1,11 @@
-// lib/features/home/widgets/schedule_filter_widget.dart
+// lib/features/home/widget/schedule_filter_widget.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
-import '../models/schedule_models.dart';
+
+// Import the new utils
+import '../../../core/utils/enums_utils.dart';
+import '../../../core/utils/ui_utils.dart';
 
 class ScheduleFilterWidget extends StatelessWidget {
   final List<int> availableYears;
@@ -154,10 +157,10 @@ class ScheduleFilterWidget extends StatelessWidget {
   }
 
   void _showYearPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => YearPickerWidget(
+    // Use UIUtils for bottom sheet
+    UIUtils.showCustomBottomSheet(
+      height: 300,
+      child: YearPickerWidget(
         availableYears: availableYears,
         selectedYear: selectedYear,
         onYearSelected: onYearChanged,
@@ -166,10 +169,10 @@ class ScheduleFilterWidget extends StatelessWidget {
   }
 
   void _showSemesterPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SemesterPickerWidget(
+    // Use UIUtils for bottom sheet
+    UIUtils.showCustomBottomSheet(
+      height: 300,
+      child: SemesterPickerWidget(
         availableSemesters: availableSemesters,
         selectedSemester: selectedSemester,
         onSemesterSelected: onSemesterChanged,
@@ -222,87 +225,77 @@ class _YearPickerWidgetState extends State<YearPickerWidget> {
   Widget build(BuildContext context) {
     final allYears = [0, ...widget.availableYears];
 
-    return Container(
-      height: 300,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.border),
-              ),
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.border),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: AppColors.error),
-                  ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: AppColors.error),
                 ),
-                const Text(
-                  'Select Academy Year',
+              ),
+              const Text(
+                'Select Academy Year',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  widget.onYearSelected(tempSelectedYear);
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Done',
                   style: TextStyle(
-                    fontSize: 16,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    widget.onYearSelected(tempSelectedYear);
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Done',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+              ),
+            ],
+          ),
+        ),
+
+        // Picker
+        Expanded(
+          child: CupertinoPicker(
+            scrollController: scrollController,
+            itemExtent: 40,
+            onSelectedItemChanged: (index) {
+              tempSelectedYear = allYears[index];
+            },
+            children: allYears.map((year) {
+              return Center(
+                child: Text(
+                  year == 0 ? 'All Academy' : year.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              );
+            }).toList(),
           ),
-
-          // Picker
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: scrollController,
-              itemExtent: 40,
-              onSelectedItemChanged: (index) {
-                tempSelectedYear = allYears[index];
-              },
-              children: allYears.map((year) {
-                return Center(
-                  child: Text(
-                    year == 0 ? 'All Academy' : year.toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-// Semester Picker Component - FIXED VERSION
+// Semester Picker Component
 class SemesterPickerWidget extends StatefulWidget {
   final List<Semester> availableSemesters;
   final Semester? selectedSemester;
@@ -330,9 +323,6 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
     super.initState();
     tempSelectedSemester = widget.selectedSemester;
 
-    // Create list with "All Semester" option at the beginning
-    final allSemesters = <Semester?>[null, ...widget.availableSemesters];
-
     // Find the correct initial index
     int initialIndex = 0; // Default to "All Semester"
     if (widget.selectedSemester != null) {
@@ -344,11 +334,6 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
             semesterIndex + 1; // +1 because "All Semester" (null) is at index 0
       }
     }
-
-    print('DEBUG: selectedSemester = ${widget.selectedSemester}');
-    print('DEBUG: availableSemesters = ${widget.availableSemesters}');
-    print('DEBUG: allSemesters = $allSemesters');
-    print('DEBUG: initialIndex = $initialIndex');
 
     scrollController = FixedExtentScrollController(initialItem: initialIndex);
   }
@@ -363,88 +348,77 @@ class _SemesterPickerWidgetState extends State<SemesterPickerWidget> {
   Widget build(BuildContext context) {
     final allSemesters = <Semester?>[null, ...widget.availableSemesters];
 
-    return Container(
-      height: 300,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.border),
-              ),
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.border),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: AppColors.error),
-                  ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: AppColors.error),
                 ),
-                const Text(
-                  'Select Semester',
+              ),
+              const Text(
+                'Select Semester',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (tempSelectedSemester != null) {
+                    widget.onSemesterSelected(tempSelectedSemester!);
+                  } else {
+                    // Clear semester selection
+                    widget.onSemesterCleared?.call();
+                  }
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Done',
                   style: TextStyle(
-                    fontSize: 16,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    if (tempSelectedSemester != null) {
-                      widget.onSemesterSelected(tempSelectedSemester!);
-                    } else {
-                      // Clear semester selection
-                      widget.onSemesterCleared?.call();
-                    }
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Done',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+              ),
+            ],
+          ),
+        ),
+
+        // Picker
+        Expanded(
+          child: CupertinoPicker(
+            scrollController: scrollController,
+            itemExtent: 40,
+            onSelectedItemChanged: (index) {
+              tempSelectedSemester = allSemesters[index];
+            },
+            children: allSemesters.map((semester) {
+              return Center(
+                child: Text(
+                  semester == null ? 'All Semester' : semester.displayName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              );
+            }).toList(),
           ),
-
-          // Picker
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: scrollController,
-              itemExtent: 40,
-              onSelectedItemChanged: (index) {
-                tempSelectedSemester = allSemesters[index];
-                print('DEBUG: Selected index $index = ${tempSelectedSemester}');
-              },
-              children: allSemesters.map((semester) {
-                return Center(
-                  child: Text(
-                    semester == null ? 'All Semester' : semester.displayName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,6 @@
+// lib/features/home/controllers/schedule_detail_controller.dart
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ksit_mobile/core/constants/app_routes.dart';
-import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
 import 'package:ksit_mobile/features/home/models/schedule_models.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
@@ -28,20 +27,15 @@ class ScheduleDetailController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      LoggerUtils.info('Loading schedule details for ID: $scheduleId');
-
       final scheduleData = await _homeService.getScheduleById(scheduleId);
 
       if (scheduleData != null) {
         schedule.value = scheduleData;
-        LoggerUtils.info('Schedule details loaded successfully');
       } else {
         errorMessage.value = 'Schedule not found';
-        LoggerUtils.warning('Schedule not found for ID: $scheduleId');
       }
     } catch (e) {
       errorMessage.value = 'Failed to load schedule details. Please try again.';
-      LoggerUtils.error('Error loading schedule details', e);
       ToastUtils.showError('Failed to load schedule details');
     } finally {
       isLoading.value = false;
@@ -51,16 +45,10 @@ class ScheduleDetailController extends GetxController {
   void refreshSchedule() {
     loadScheduleDetails();
   }
-}
 
-// 5. Update home_controller.dart - Replace the onScheduleTap method
-void onScheduleTap(ScheduleModel schedule) {
-  LoggerUtils.info('Schedule tapped: ${schedule.id}');
-
-  if (schedule.id != null) {
-    // Navigate to schedule detail with ID as query parameter
-    Get.context?.go('${AppRoutes.scheduleDetailRoute}?id=${schedule.id}');
-  } else {
-    ToastUtils.showError('Schedule ID not available');
+  void navigateBack() {
+    if (Get.context != null) {
+      Get.context!.pop();
+    }
   }
 }

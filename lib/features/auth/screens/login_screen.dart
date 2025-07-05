@@ -8,7 +8,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_image.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_field.dart';
-import '../../../shared/widgets/loading_widget.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {

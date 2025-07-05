@@ -1,4 +1,4 @@
-// lib/features/home/widgets/schedule_item_widget.dart
+// lib/features/home/widget/schedule_class_widget.dart
 import 'package:flutter/material.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_image.dart';
@@ -51,7 +51,7 @@ class ScheduleClassWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Class ${schedule.classes?.code ?? ''}',
+                          'Class ${schedule.classes?.displayCode ?? 'N/A'}',
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.textPrimary,
@@ -61,7 +61,7 @@ class ScheduleClassWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${schedule.day ?? ''} (${schedule.startTime ?? ''} - ${schedule.endTime ?? ''})',
+                          '${schedule.dayDisplayName} (${schedule.timeRange})',
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.textSecondary,
@@ -79,13 +79,16 @@ class ScheduleClassWidget extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
+
+              // Use course displayWithCredits from model
               Text(
-                '${schedule.course?.nameEn ?? ''} - ${schedule.course?.credit ?? ''}(${schedule.course?.theory ?? ''}.${schedule.course?.execute ?? ''}.${schedule.course?.apply ?? ''})',
+                schedule.course?.displayWithCredits ?? 'N/A',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.primary,
                 ),
               ),
+
               const SizedBox(height: 8),
               const Divider(
                 color: AppColors.border,
@@ -94,7 +97,7 @@ class ScheduleClassWidget extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  // Instructor Info
+                  // Instructor Info using displayName from model
                   Row(
                     children: [
                       Image.asset(
@@ -105,10 +108,7 @@ class ScheduleClassWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        schedule.teacher?.englishFirstName != null ||
-                                schedule.teacher?.englishLastName != null
-                            ? '${schedule.teacher?.englishFirstName ?? ''} ${schedule.teacher?.englishLastName ?? ''}'
-                            : 'N/A',
+                        schedule.teacher?.displayName ?? 'N/A',
                         style: const TextStyle(
                           fontSize: 10,
                           color: AppColors.textPrimary,
@@ -119,7 +119,7 @@ class ScheduleClassWidget extends StatelessWidget {
 
                   const SizedBox(width: 8),
 
-                  // Location Info
+                  // Location Info using displayName from model
                   Row(
                     children: [
                       Image.asset(
@@ -130,7 +130,7 @@ class ScheduleClassWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        schedule.room?.name ?? 'N/A',
+                        schedule.room?.displayName ?? 'N/A',
                         style: const TextStyle(
                           fontSize: 10,
                           color: AppColors.textPrimary,

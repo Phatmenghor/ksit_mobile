@@ -1,7 +1,7 @@
+// lib/features/auth/services/auth_service.dart
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_endpints.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
-import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
 import 'package:ksit_mobile/features/auth/models/login_response_model.dart';
@@ -39,8 +39,6 @@ class AuthService extends GetxService {
   /// Logout user
   Future<Map<String, dynamic>> logout() async {
     try {
-      LoggerUtils.info('Attempting logout');
-
       final response = await _apiService.post(AppEndpints.logoutEndpoint);
 
       if (response.statusCode == 200) {
@@ -56,8 +54,6 @@ class AuthService extends GetxService {
   /// Get user profile
   Future<Map<String, dynamic>> getProfile() async {
     try {
-      LoggerUtils.info('Fetching user profile');
-
       final response = await _apiService.get(AppEndpints.profileEndpoint);
 
       if (response.statusCode == 200) {

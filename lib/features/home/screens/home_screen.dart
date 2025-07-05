@@ -7,10 +7,14 @@ import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
 import 'package:ksit_mobile/features/home/widget/schedule_filter_widget.dart';
 import 'package:ksit_mobile/features/home/widget/schedule_class_widget.dart';
-import 'package:ksit_mobile/shared/widgets/empty_state_widget.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/loading_widget.dart';
+
+// Import the new utils
+import '../../../core/utils/ui_utils.dart';
+import '../../../core/utils/pagination_utils.dart';
+
 import '../models/schedule_models.dart';
 
 enum FilterType { all, today }
@@ -46,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                 automaticallyImplyLeading: false,
                 floating: true,
                 snap: true,
-                toolbarHeight: 70, // Custom height
+                toolbarHeight: 70,
                 title: Row(
                   children: [
                     CircleAvatar(
@@ -129,7 +133,8 @@ class HomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          _buildAppBarFilterButton(
+                          // Use UIUtils for filter buttons
+                          UIUtils.buildAppBarFilterButton(
                             text: 'Today',
                             isSelected:
                                 scheduleController.selectedFilterType.value ==
@@ -138,7 +143,7 @@ class HomeScreen extends StatelessWidget {
                                 .setFilterType(FilterType.today),
                           ),
                           const SizedBox(width: 8),
-                          _buildAppBarFilterButton(
+                          UIUtils.buildAppBarFilterButton(
                             text: 'All Schedule',
                             isSelected:
                                 scheduleController.selectedFilterType.value ==
@@ -174,39 +179,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBarFilterButton({
-    required String text,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 36,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: AppColors.textPrimary.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isSelected
-                ? AppColors.white
-                : AppColors.textPrimary.withOpacity(0.5),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSchedulesList(HomeController controller) {
     return Obx(() {
       // Show today's schedules when Today filter is selected
@@ -221,9 +193,9 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildTodaySchedules(HomeController controller) {
     return PagedSliverList<int, ScheduleModel>(
-      key: const ValueKey('today_schedules'), // Add unique key
+      key: const ValueKey('today_schedules'),
       pagingController: controller.todaySchedulesPagingController,
-      builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
+      builderDelegate: PaginationUtils.getCommonBuilderDelegate<ScheduleModel>(
         itemBuilder: (context, schedule, index) => Padding(
           padding: EdgeInsets.fromLTRB(
             16,
@@ -238,52 +210,22 @@ class HomeScreen extends StatelessWidget {
             statusColor: controller.getScheduleStatusColor(schedule),
           ),
         ),
-        firstPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-          controller.todaySchedulesPagingController.error.toString(),
-          () => controller.todaySchedulesPagingController.refresh(),
-        ),
-        newPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-          controller.todaySchedulesPagingController.error.toString(),
-          () => controller.todaySchedulesPagingController
-              .retryLastFailedRequest(),
-          isNewPage: true,
-        ),
-        firstPageProgressIndicatorBuilder: (context) => const LoadingWidget(
-          message: 'Loading today\'s schedules...',
-          overlay: false,
-        ),
-        newPageProgressIndicatorBuilder: (context) => Container(
-          padding: const EdgeInsets.all(20),
-          child: const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-              ),
-            ),
-          ),
-        ),
-        noItemsFoundIndicatorBuilder: (context) => Container(
-          padding: const EdgeInsets.all(16),
-          child: EmptyStateWidget.noData(
-            title: 'No Classes Today',
-            message:
-                'You don\'t have any classes scheduled for today.\nEnjoy your free time! 🎉',
-            actionText: 'Refresh',
-            onActionPressed: controller.refreshSchedules,
-          ),
-        ),
+        loadingMessage: 'Loading today\'s schedules...',
+        emptyTitle: 'No Classes Today',
+        emptyMessage:
+            'You don\'t have any classes scheduled for today.\nEnjoy your free time! 🎉',
+        emptyActionText: 'Refresh',
+        onEmptyActionPressed: controller.refreshSchedules,
+        onErrorRetry: () => controller.todaySchedulesPagingController.refresh(),
       ),
     );
   }
 
   Widget _buildAllSchedules(HomeController controller) {
     return PagedSliverList<int, ScheduleModel>(
-      key: const ValueKey('all_schedules'), // Add unique key
+      key: const ValueKey('all_schedules'),
       pagingController: controller.allSchedulesPagingController,
-      builderDelegate: PagedChildBuilderDelegate<ScheduleModel>(
+      builderDelegate: PaginationUtils.getCommonBuilderDelegate<ScheduleModel>(
         itemBuilder: (context, schedule, index) => Padding(
           padding: EdgeInsets.fromLTRB(
             16,
@@ -298,92 +240,13 @@ class HomeScreen extends StatelessWidget {
             statusColor: controller.getScheduleStatusColor(schedule),
           ),
         ),
-        firstPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-          controller.allSchedulesPagingController.error.toString(),
-          () => controller.allSchedulesPagingController.refresh(),
-        ),
-        newPageErrorIndicatorBuilder: (context) => _buildErrorWidget(
-          controller.allSchedulesPagingController.error.toString(),
-          () =>
-              controller.allSchedulesPagingController.retryLastFailedRequest(),
-          isNewPage: true,
-        ),
-        firstPageProgressIndicatorBuilder: (context) => const LoadingWidget(
-          message: 'Loading schedules...',
-          overlay: false,
-        ),
-        newPageProgressIndicatorBuilder: (context) => Container(
-          padding: const EdgeInsets.all(20),
-          child: const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-              ),
-            ),
-          ),
-        ),
-        noItemsFoundIndicatorBuilder: (context) => Container(
-          padding: const EdgeInsets.all(16),
-          child: EmptyStateWidget.noData(
-            title: 'No Schedules Found',
-            message:
-                'No schedules available for the selected filters.\nTry adjusting your selection.',
-            actionText: 'Refresh',
-            onActionPressed: controller.refreshSchedules,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String error, VoidCallback onRetry,
-      {bool isNewPage = false}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isNewPage) ...[
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: AppColors.error,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Something went wrong',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-            Text(
-              isNewPage ? 'Failed to load more' : error,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(isNewPage ? 'Retry' : 'Try Again'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
+        loadingMessage: 'Loading schedules...',
+        emptyTitle: 'No Schedules Found',
+        emptyMessage:
+            'No schedules available for the selected filters.\nTry adjusting your selection.',
+        emptyActionText: 'Refresh',
+        onEmptyActionPressed: controller.refreshSchedules,
+        onErrorRetry: () => controller.allSchedulesPagingController.refresh(),
       ),
     );
   }

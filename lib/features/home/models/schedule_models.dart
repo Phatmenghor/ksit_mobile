@@ -1,127 +1,9 @@
 // lib/features/home/models/schedule_models.dart
 
-enum DayOfWeek {
-  monday,
-  tuesday,
-  wednesday,
-  thursday,
-  friday,
-  saturday,
-  sunday,
-}
-
-extension DayOfWeekExtension on DayOfWeek {
-  String get name {
-    switch (this) {
-      case DayOfWeek.monday:
-        return 'MONDAY';
-      case DayOfWeek.tuesday:
-        return 'TUESDAY';
-      case DayOfWeek.wednesday:
-        return 'WEDNESDAY';
-      case DayOfWeek.thursday:
-        return 'THURSDAY';
-      case DayOfWeek.friday:
-        return 'FRIDAY';
-      case DayOfWeek.saturday:
-        return 'SATURDAY';
-      case DayOfWeek.sunday:
-        return 'SUNDAY';
-    }
-  }
-
-  static DayOfWeek fromString(String? value) {
-    if (value == null) return DayOfWeek.monday;
-    switch (value.toUpperCase()) {
-      case 'MONDAY':
-        return DayOfWeek.monday;
-      case 'TUESDAY':
-        return DayOfWeek.tuesday;
-      case 'WEDNESDAY':
-        return DayOfWeek.wednesday;
-      case 'THURSDAY':
-        return DayOfWeek.thursday;
-      case 'FRIDAY':
-        return DayOfWeek.friday;
-      case 'SATURDAY':
-        return DayOfWeek.saturday;
-      case 'SUNDAY':
-        return DayOfWeek.sunday;
-      default:
-        return DayOfWeek.monday;
-    }
-  }
-}
-
-enum Semester {
-  semester1,
-  semester2,
-}
-
-extension SemesterExtension on Semester {
-  String get name {
-    switch (this) {
-      case Semester.semester1:
-        return 'SEMESTER_1';
-      case Semester.semester2:
-        return 'SEMESTER_2';
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case Semester.semester1:
-        return 'Semester 1';
-      case Semester.semester2:
-        return 'Semester 2';
-    }
-  }
-
-  static Semester fromString(String? value) {
-    if (value == null) return Semester.semester1;
-    switch (value.toUpperCase()) {
-      case 'SEMESTER_1':
-        return Semester.semester1;
-      case 'SEMESTER_2':
-        return Semester.semester2;
-      default:
-        return Semester.semester1;
-    }
-  }
-}
-
-enum Status {
-  active,
-  inactive,
-  deleted,
-}
-
-extension StatusExtension on Status {
-  String get name {
-    switch (this) {
-      case Status.active:
-        return 'ACTIVE';
-      case Status.inactive:
-        return 'INACTIVE';
-      case Status.deleted:
-        return 'DELETED';
-    }
-  }
-
-  static Status fromString(String? value) {
-    if (value == null) return Status.active;
-    switch (value.toUpperCase()) {
-      case 'ACTIVE':
-        return Status.active;
-      case 'INACTIVE':
-        return Status.inactive;
-      case 'DELETED':
-        return Status.deleted;
-      default:
-        return Status.active;
-    }
-  }
-}
+// Import the new utils instead of defining enums here
+import 'package:ksit_mobile/core/utils/enums_utils.dart';
+import 'package:ksit_mobile/core/utils/format_utils.dart';
+import 'package:ksit_mobile/core/utils/schedule_utils.dart';
 
 class DepartmentModel {
   final int? id;
@@ -164,7 +46,8 @@ class DepartmentModel {
     };
   }
 
-  String get displayName => name ?? 'Unknown Department';
+  String get displayName =>
+      FormatUtils.formatDisplayName(name, fallback: 'Unknown Department');
 }
 
 class MajorModel {
@@ -211,7 +94,8 @@ class MajorModel {
     };
   }
 
-  String get displayName => name ?? 'Unknown Major';
+  String get displayName =>
+      FormatUtils.formatDisplayName(name, fallback: 'Unknown Major');
 }
 
 class ClassModel {
@@ -265,7 +149,8 @@ class ClassModel {
     };
   }
 
-  String get displayCode => code ?? 'Unknown Class';
+  String get displayCode =>
+      FormatUtils.formatDisplayName(code, fallback: 'Unknown Class');
 }
 
 class TeacherModel {
@@ -360,15 +245,15 @@ class TeacherModel {
     };
   }
 
-  String get displayName {
-    if (englishFirstName != null && englishLastName != null) {
-      return '$englishFirstName $englishLastName';
-    }
-    if (khmerFirstName != null && khmerLastName != null) {
-      return '$khmerFirstName $khmerLastName';
-    }
-    return username ?? email ?? 'Unknown Teacher';
-  }
+  // Updated to use FormatUtils
+  String get displayName => FormatUtils.formatTeacherName(
+        englishFirstName: englishFirstName,
+        englishLastName: englishLastName,
+        khmerFirstName: khmerFirstName,
+        khmerLastName: khmerLastName,
+        username: username,
+        email: email,
+      );
 }
 
 class SubjectModel {
@@ -404,7 +289,8 @@ class SubjectModel {
     };
   }
 
-  String get displayName => name ?? 'Unknown Subject';
+  String get displayName =>
+      FormatUtils.formatDisplayName(name, fallback: 'Unknown Subject');
 }
 
 class CourseModel {
@@ -495,6 +381,15 @@ class CourseModel {
 
   String get displayName => nameEn ?? nameKH ?? 'Unknown Course';
   int get displayCredit => credit ?? 0;
+
+  // Updated to use FormatUtils
+  String get displayWithCredits => FormatUtils.formatCourseWithCredits(
+        courseName: displayName,
+        credits: credit,
+        theory: theory,
+        execute: execute,
+        apply: apply,
+      );
 }
 
 class RoomModel {
@@ -530,7 +425,8 @@ class RoomModel {
     };
   }
 
-  String get displayName => name ?? 'Unknown Room';
+  String get displayName =>
+      FormatUtils.formatDisplayName(name, fallback: 'Unknown Room');
 }
 
 class SemesterModel {
@@ -582,14 +478,12 @@ class SemesterModel {
     };
   }
 
+  // Updated to use SemesterExtension
   String get displayName {
-    switch (semester) {
-      case 'SEMESTER_1':
-        return 'Semester 1';
-      case 'SEMESTER_2':
-        return 'Semester 2';
-      default:
-        return semester ?? 'Unknown Semester';
+    try {
+      return SemesterExtension.fromString(semester).displayName;
+    } catch (e) {
+      return semester ?? 'Unknown Semester';
     }
   }
 }
@@ -685,54 +579,45 @@ class ScheduleModel {
     };
   }
 
-  String get timeRange => '${startTime ?? '00:00'} - ${endTime ?? '00:00'}';
+  // Updated getters to use utils
+  String get timeRange => FormatUtils.formatTimeRange(startTime, endTime);
 
   String get dayDisplayName {
-    final dayEnum = DayOfWeekExtension.fromString(day);
-    switch (dayEnum) {
-      case DayOfWeek.monday:
-        return 'Monday';
-      case DayOfWeek.tuesday:
-        return 'Tuesday';
-      case DayOfWeek.wednesday:
-        return 'Wednesday';
-      case DayOfWeek.thursday:
-        return 'Thursday';
-      case DayOfWeek.friday:
-        return 'Friday';
-      case DayOfWeek.saturday:
-        return 'Saturday';
-      case DayOfWeek.sunday:
-        return 'Sunday';
+    try {
+      return DayOfWeekExtension.fromString(day).displayName;
+    } catch (e) {
+      return day ?? 'Unknown Day';
     }
   }
 
-  bool get isToday {
-    final now = DateTime.now();
-    final currentDay = DayOfWeekExtension.fromString(_getCurrentDayName());
-    final scheduleDay = DayOfWeekExtension.fromString(day);
-    return scheduleDay == currentDay;
-  }
+  bool get isToday => ScheduleUtils.isScheduleToday(day);
 
-  String _getCurrentDayName() {
-    final weekday = DateTime.now().weekday;
-    switch (weekday) {
-      case 1:
-        return 'MONDAY';
-      case 2:
-        return 'TUESDAY';
-      case 3:
-        return 'WEDNESDAY';
-      case 4:
-        return 'THURSDAY';
-      case 5:
-        return 'FRIDAY';
-      case 6:
-        return 'SATURDAY';
-      case 7:
-        return 'SUNDAY';
-      default:
-        return 'MONDAY';
-    }
-  }
+  String get statusText => ScheduleUtils.getScheduleStatusText(
+        startTime: startTime,
+        endTime: endTime,
+        day: day,
+      );
+
+  // Additional utility getters
+  bool get isUpcoming => ScheduleUtils.isScheduleUpcoming(
+        startTime: startTime,
+        day: day,
+      );
+
+  bool get isOngoing => ScheduleUtils.isScheduleOngoing(
+        startTime: startTime,
+        endTime: endTime,
+        day: day,
+      );
+
+  bool get isCompleted => ScheduleUtils.isScheduleCompleted(
+        endTime: endTime,
+        day: day,
+      );
+
+  double get progress => ScheduleUtils.getScheduleProgress(
+        startTime: startTime,
+        endTime: endTime,
+        day: day,
+      );
 }
