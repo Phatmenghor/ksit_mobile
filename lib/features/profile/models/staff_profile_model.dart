@@ -415,7 +415,7 @@ class StaffProfileModel {
     if (khmerFirstName != null && khmerLastName != null) {
       return '$khmerFirstName $khmerLastName';
     }
-    return username ?? 'Unknown Staff';
+    return username ?? '';
   }
 
   String get primaryRole {

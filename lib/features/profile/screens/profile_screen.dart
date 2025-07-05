@@ -110,7 +110,6 @@ class ProfileScreen extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(ProfileController controller) {
     return AppBar(
       backgroundColor: AppColors.primary,
-      automaticallyImplyLeading: false, // Remove back button if not needed
       title: Obx(() => Row(
             children: [
               // Profile Avatar
@@ -150,8 +149,6 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildProfileAvatar(ProfileController controller) {
     final imageUrl = controller.currentUserProfileUrl;
-
-    print('Profile Image URL: $imageUrl');
 
     if (imageUrl != null && imageUrl.isNotEmpty) {
       return CircleAvatar(

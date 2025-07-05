@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 
-class BuildDetailRowWidget extends StatelessWidget {
+class DisplayRowWidget extends StatelessWidget {
   final String label;
   final String value;
   final EdgeInsetsGeometry? padding;
 
-  const BuildDetailRowWidget({
+  const DisplayRowWidget({
     super.key,
     required this.label,
     required this.value,
@@ -16,20 +16,20 @@ class BuildDetailRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding ?? const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border,
-            width: 0.5,
-          ),
-        ),
-      ),
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 6),
+      // decoration: const BoxDecoration(
+      //   border: Border(
+      //     bottom: BorderSide(
+      //       color: AppColors.border,
+      //       width: 0.5,
+      //     ),
+      //   ),
+      // ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 140,
             child: Text(
               label,
               style: TextStyle(

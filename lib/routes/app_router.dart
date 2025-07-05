@@ -62,7 +62,7 @@ class AppRouter {
         name: 'profile-view',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
-          child: const ProfileViewScreen(),
+          child: const StduentViewScreen(),
           transitionDuration: const Duration(milliseconds: 300),
           transitionsBuilder: (context, animation, _, child) {
             return SlideTransition(

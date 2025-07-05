@@ -215,16 +215,6 @@ class ProfileController extends GetxController {
     return 'unknown@example.com';
   }
 
-  /// Get current user's phone
-  String? get currentUserPhone {
-    if (userRole.value == 'STUDENT') {
-      return studentProfile.value?.phoneNumber;
-    } else if (userRole.value == 'STAFF') {
-      return staffProfile.value?.phoneNumber;
-    }
-    return null;
-  }
-
   /// Get current user's profile URL
   String? get currentUserProfileUrl {
     if (userRole.value == 'STUDENT') {

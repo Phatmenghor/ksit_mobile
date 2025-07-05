@@ -6,7 +6,7 @@ import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_image.dart';
 import 'package:ksit_mobile/features/home/controllers/schedule_detail_controller.dart';
 import 'package:ksit_mobile/features/home/models/schedule_models.dart';
-import 'package:ksit_mobile/features/home/widget/build_detail_row_widget.dart';
+import 'package:ksit_mobile/features/home/widget/diaplay_row_widget.dart';
 import 'package:ksit_mobile/shared/widgets/loading_widget.dart';
 
 // Import the new utils
@@ -145,79 +145,79 @@ class ScheduleDetailScreen extends StatelessWidget {
       child: Column(
         children: [
           // Use BuildDetailRowWidget for all detail rows
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Day',
             value: schedule.dayDisplayName,
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Instructor',
             value: schedule.teacher?.displayName ?? 'N/A',
           ),
           if (schedule.teacher?.email != null)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Instructor Email',
               value: schedule.teacher!.email!,
             ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Room',
             value: schedule.room?.displayName ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Time',
             value: FormatUtils.formatTimeRange(
                 schedule.startTime, schedule.endTime),
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Duration',
             value: FormatUtils.calculateDuration(
                 schedule.startTime, schedule.endTime),
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Academy Year',
             value:
                 '${schedule.academyYear ?? schedule.classes?.academyYear ?? 'N/A'}',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Semester',
             value: schedule.semester?.displayName ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Year Level',
             value: FormatUtils.formatYearLevel(
                 schedule.yearLevel ?? schedule.classes?.yearLevel),
           ),
           if (schedule.classes?.degree != null)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Degree',
               value: FormatUtils.formatDegree(schedule.classes!.degree!),
             ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Department',
             value: schedule.classes?.major?.department?.displayName ??
                 schedule.course?.department?.displayName ??
                 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Major',
             value: schedule.classes?.major?.displayName ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Course Code',
             value: schedule.course?.code ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Course Name (EN)',
             value: schedule.course?.nameEn ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Course Name (KH)',
             value: schedule.course?.nameKH ?? 'N/A',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Credits',
             value: '${schedule.course?.credit ?? 0}',
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Credit Structure',
             value: FormatUtils.formatCreditStructure(
               schedule.course?.theory,
@@ -225,40 +225,40 @@ class ScheduleDetailScreen extends StatelessWidget {
               schedule.course?.apply,
             ),
           ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Total Hours',
             value: '${schedule.course?.totalHour ?? 0} hours',
           ),
           if (schedule.course?.subject?.displayName != null)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Subject',
               value: schedule.course!.subject!.displayName,
             ),
           if (schedule.course?.description != null &&
               schedule.course!.description!.isNotEmpty)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Description',
               value: schedule.course!.description!,
             ),
           if (schedule.course?.purpose != null &&
               schedule.course!.purpose!.isNotEmpty)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Purpose',
               value: schedule.course!.purpose!,
             ),
           if (schedule.course?.expectedOutcome != null &&
               schedule.course!.expectedOutcome!.isNotEmpty)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Expected Outcome',
               value: schedule.course!.expectedOutcome!,
             ),
-          BuildDetailRowWidget(
+          DisplayRowWidget(
             label: 'Status',
             value: FormatUtils.formatStatus(schedule.status),
           ),
           if (schedule.semester?.startDate != null &&
               schedule.semester?.endDate != null)
-            BuildDetailRowWidget(
+            DisplayRowWidget(
               label: 'Semester Period',
               value:
                   '${schedule.semester!.startDate!} to ${schedule.semester!.endDate!}',
