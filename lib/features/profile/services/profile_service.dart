@@ -165,4 +165,56 @@ class ProfileService extends GetxService {
           e, 'Failed to fetch profile statistics. Please try again.');
     }
   }
+
+  /// Update staff profile by token
+  Future<StaffProfileModel> updateStaffProfileByToken(
+      Map<String, dynamic> updateData) async {
+    try {
+      final response =
+          await _apiService.put('/v1/staff/token', data: updateData);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final responseData = response.data;
+
+        if (responseData['data'] != null) {
+          return StaffProfileModel.fromJson(responseData['data']);
+        } else {
+          throw Exception(
+              'API Error: ${responseData['message'] ?? 'Unknown error'}');
+        }
+      } else {
+        throw Exception(
+            'Failed to update staff profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      ApiErrorUtils.throwApiError(
+          e, 'Failed to update staff profile. Please try again.');
+    }
+  }
+
+  /// Update staff profile by token
+  Future<StudentProfileModel> updateStudentProfileByToken(
+      Map<String, dynamic> updateData) async {
+    try {
+      final response =
+          await _apiService.put('/v1/students/token', data: updateData);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final responseData = response.data;
+
+        if (responseData['data'] != null) {
+          return StudentProfileModel.fromJson(responseData['data']);
+        } else {
+          throw Exception(
+              'API Error: ${responseData['message'] ?? 'Unknown error'}');
+        }
+      } else {
+        throw Exception(
+            'Failed to update student profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      ApiErrorUtils.throwApiError(
+          e, 'Failed to update student profile. Please try again.');
+    }
+  }
 }

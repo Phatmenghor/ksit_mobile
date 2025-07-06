@@ -29,7 +29,8 @@ class CustomTextField extends StatefulWidget {
   final Color? fillColor;
   final bool filled;
   final FocusNode? focusNode;
-  final double? height; // Add height parameter
+  final double? height; // For vertical padding
+  final double? cursorHeight; // Add cursor height parameter
 
   const CustomTextField({
     super.key,
@@ -57,7 +58,8 @@ class CustomTextField extends StatefulWidget {
     this.fillColor,
     this.filled = true,
     this.focusNode,
-    this.height, // Add height parameter
+    this.height,
+    this.cursorHeight, // Add cursor height parameter
   });
 
   @override
@@ -106,6 +108,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           minLines: widget.minLines,
           maxLength: widget.maxLength,
           focusNode: widget.focusNode,
+          cursorHeight: widget.cursorHeight ?? 20,
           style: const TextStyle(
             fontSize: 16,
             color: AppColors.textPrimary,
@@ -121,8 +124,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             contentPadding: widget.contentPadding ??
                 EdgeInsets.symmetric(
                   horizontal: AppConstants.defaultPadding,
-                  vertical: widget.height ??
-                      12, // Use height parameter or default to 12
+                  vertical: widget.height ?? 12,
                 ),
             filled: widget.filled,
             fillColor: widget.fillColor ?? AppColors.surface,

@@ -7,5 +7,6 @@ class AppRoutes {
   static const String requestRoute = '/request';
   static const String profileRoute = '/profile';
   static const String profileViewRoute = '/profile-view';
+  static const String editProfileRoute = '/edit-profile';
   static const String scheduleDetailRoute = '/schedule-detail';
 }

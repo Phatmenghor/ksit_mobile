@@ -10,6 +10,8 @@ enum DayOfWeek {
   sunday,
 }
 
+enum GenderEnum { male, female, other }
+
 extension DayOfWeekExtension on DayOfWeek {
   String get name {
     switch (this) {

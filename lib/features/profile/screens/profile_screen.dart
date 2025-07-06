@@ -58,7 +58,9 @@ class ProfileScreen extends StatelessWidget {
                         _buildMenuItem(
                           icon: Icons.person_outline,
                           title: 'Edit Profile',
-                          onTap: () => _handleEditProfile(profileController),
+                          onTap: () => {
+                            context.push(AppRoutes.editProfileRoute),
+                          },
                         ),
                         _buildMenuItem(
                           icon: Icons.description_outlined,
@@ -228,14 +230,6 @@ class ProfileScreen extends StatelessWidget {
       showArrow: showArrow,
     );
   }
-}
-
-// Action Handlers - Add your logic here
-void _handleEditProfile(ProfileController controller) {
-  ToastUtils.showInfo('Edit Profile clicked');
-  // TODO: Add edit profile logic here
-  // Example: Get.toNamed('/edit-profile');
-  // Or show a dialog, bottom sheet, etc.
 }
 
 void _handleTranscript() {
