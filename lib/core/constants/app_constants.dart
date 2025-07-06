@@ -3,6 +3,8 @@ class AppConstants {
   static const String appName = 'Flutter App';
   static const String appVersion = '1.0.0';
 
+  static const String websiteKSIT = 'https://ksit.edu.kh/';
+
   // Pagination
   static const int defaultPageSize = 10;
   static const int maxPageSize = 50;

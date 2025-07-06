@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/config/app_config.dart';
+import 'package:ksit_mobile/core/constants/app_constants.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/profile/widgets/profile_menu_item_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/toast_utils.dart';
@@ -255,11 +257,25 @@ void _handleChangePassword() {
   // Or navigate to change password screen
 }
 
-void _handleAboutKSIT() {
-  ToastUtils.showInfo('About KSIT clicked');
-  // TODO: Add about KSIT logic here
-  // Example: Get.toNamed('/about-ksit');
-  // Or show information dialog
+Future<void> _handleAboutKSIT() async {
+  try {
+    final Uri url = Uri.parse(AppConstants.websiteKSIT);
+
+    // Check if URL can be launched
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication, // Opens in external browser
+      );
+    } else {
+      // Fallback: try to launch in any available way
+      await launchUrl(url);
+    }
+  } catch (e) {
+    // Handle error if URL cannot be opened
+    ToastUtils.showError(
+        'Unable to open KSIT website. Please check your internet connection.');
+  }
 }
 
 void _handleLogout(ProfileController controller) {
