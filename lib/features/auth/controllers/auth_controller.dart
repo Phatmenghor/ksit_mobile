@@ -149,24 +149,6 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Get user profile information
-  Future<void> getProfile() async {
-    try {
-      isLoading.value = true;
-
-      final profileData = await _authService.getProfile();
-
-      // Show success message
-      final message = profileData['message'] ?? 'Profile updated successfully';
-      ToastUtils.showSuccess(message);
-    } catch (e) {
-      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
-      ToastUtils.showError(errorMessage);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   /// Save user data to local storage
   Future<void> _saveUserData(LoginResponseModel loginResponse) async {
     try {
@@ -210,6 +192,40 @@ class AuthController extends GetxController {
       isLoggedIn.value = false;
     } catch (e) {
       // Ignore storage errors during logout
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      isLoading.value = true;
+
+      // Call delete account API
+      final response = await _authService.deleteAccount();
+
+      // Clear local data
+      await _clearUserData();
+
+      // Show success message from API response
+      final message = response['message'] ?? 'Account deleted successfully';
+      ToastUtils.showSuccess(message);
+
+      // Navigate to login
+      if (Get.context != null) {
+        Get.context!.go(AppRoutes.loginRoute);
+      }
+    } catch (e) {
+      // Still clear local data even if API call fails
+      await _clearUserData();
+
+      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
+      ToastUtils.showError(errorMessage);
+
+      // Navigate to login anyway since account might be deleted
+      if (Get.context != null) {
+        Get.context!.go(AppRoutes.loginRoute);
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 

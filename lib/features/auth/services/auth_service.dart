@@ -1,6 +1,5 @@
 // lib/features/auth/services/auth_service.dart
 import 'package:get/get.dart';
-import 'package:ksit_mobile/core/constants/app_endpints.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
@@ -13,7 +12,7 @@ class AuthService extends GetxService {
   Future<LoginResponseModel> login(LoginRequestModel request) async {
     try {
       final response = await _apiService.post(
-        AppEndpints.loginEndpoint,
+        '/v1/auth/login',
         data: request.toJson(),
       );
 
@@ -39,7 +38,7 @@ class AuthService extends GetxService {
   /// Logout user
   Future<Map<String, dynamic>> logout() async {
     try {
-      final response = await _apiService.post(AppEndpints.logoutEndpoint);
+      final response = await _apiService.post('/v1/auth/logout');
 
       if (response.statusCode == 200) {
         return response.data ?? {'message': 'Logged out successfully'};
@@ -52,19 +51,20 @@ class AuthService extends GetxService {
   }
 
   /// Get user profile
-  Future<Map<String, dynamic>> getProfile() async {
+
+  Future<Map<String, dynamic>> deleteAccount() async {
     try {
-      final response = await _apiService.get(AppEndpints.profileEndpoint);
+      final response = await _apiService.post('/v1/auth/delete-account/token');
 
       if (response.statusCode == 200) {
-        return response.data;
+        return {'message': 'Account deleted successfully'};
       } else {
         throw Exception(
-            'Failed to fetch profile with status: ${response.statusCode}');
+            'Delete account failed with status: ${response.statusCode}');
       }
     } catch (e) {
       ApiErrorUtils.throwApiError(
-          e, 'Failed to fetch profile. Please try again.');
+          e, 'Delete account failed. Please try again.');
     }
   }
 }

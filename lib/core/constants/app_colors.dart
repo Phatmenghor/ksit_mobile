@@ -11,6 +11,7 @@ class AppColors {
 
   // Bac`kground Colors
   static const Color background = Color(0xFFFFFFFF);
+  static const Color body = Color(0xFFF8F8F8);
   static const Color surface = Colors.white;
   static const Color cardBackground = Colors.white;
 

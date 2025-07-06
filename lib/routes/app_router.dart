@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/home/screens/schedule_detail_screen.dart';
+import 'package:ksit_mobile/features/profile/screens/configuration_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/edit_profile_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
@@ -48,6 +49,12 @@ class AppRouter {
         path: AppRoutes.editProfileRoute,
         name: 'edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.configurationRoute,
+        name: 'configuration',
+        builder: (context, state) => const ConfigurationScreen(),
       ),
 
       // Main App Routes with Bottom Navigation

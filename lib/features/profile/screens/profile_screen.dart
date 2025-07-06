@@ -87,7 +87,9 @@ class ProfileScreen extends StatelessWidget {
                         _buildMenuItem(
                           icon: Icons.settings_outlined,
                           title: 'Configuration',
-                          onTap: () => _handleConfiguration(),
+                          onTap: () => {
+                            context.push(AppRoutes.configurationRoute),
+                          },
                         ),
                         _buildMenuItem(
                           icon: Icons.logout,
@@ -260,16 +262,6 @@ void _handleAboutKSIT() {
   // Or show information dialog
 }
 
-void _handleConfiguration() {
-  ToastUtils.showInfo('Configuration clicked');
-  // TODO: Add configuration logic here
-  // Example: Get.toNamed('/settings');
-  // Or show settings screen
-}
-
 void _handleLogout(ProfileController controller) {
-  ToastUtils.showInfo('Logout clicked');
-  // TODO: Add logout logic here
-  // Example: controller.logout();
-  // Or show confirmation dialog
+  controller.logout();
 }

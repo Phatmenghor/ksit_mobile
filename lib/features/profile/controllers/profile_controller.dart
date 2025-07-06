@@ -10,6 +10,8 @@ import 'package:ksit_mobile/features/auth/controllers/auth_controller.dart';
 import 'package:ksit_mobile/features/profile/models/student_profile_model.dart';
 import 'package:ksit_mobile/features/profile/models/staff_profile_model.dart';
 import 'package:ksit_mobile/features/profile/services/profile_service.dart';
+import 'package:ksit_mobile/features/profile/widgets/logout_modal_bottom_sheet.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/logger_utils.dart';
@@ -62,6 +64,25 @@ class ProfileController extends GetxController {
     } catch (e) {
       LoggerUtils.error('Error determining user role', e);
       userRole.value = 'UNKNOWN';
+    }
+  }
+
+  Future<void> logout() async {
+    if (Get.context != null) {
+      showModalLogout(Get.context!, performLogout);
+    }
+  }
+
+  Future<void> performLogout() async {
+    try {
+      isLoggingOut.value = true;
+      await _authController.logout();
+    } catch (e) {
+      LoggerUtils.error('Error during logout', e);
+      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
+      ToastUtils.showError(errorMessage);
+    } finally {
+      isLoggingOut.value = false;
     }
   }
 
@@ -651,42 +672,6 @@ class ProfileController extends GetxController {
           ),
         ],
       );
-    }
-  }
-
-  Future<void> logout() async {
-    try {
-      // Show confirmation dialog
-      final confirmed = await Get.dialog<bool>(
-        AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
-              child: const Text('Logout'),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmed == true) {
-        isLoggingOut.value = true;
-        await _authController.logout();
-      }
-    } catch (e) {
-      LoggerUtils.error('Error during logout', e);
-      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
-      ToastUtils.showError(errorMessage);
-    } finally {
-      isLoggingOut.value = false;
     }
   }
 
