@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/features/attandance/screens/attendance_history_screen.dart';
 import 'package:ksit_mobile/features/home/screens/schedule_detail_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/change_password_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/configuration_screen.dart';
@@ -62,6 +63,12 @@ class AppRouter {
         path: AppRoutes.changePasswordRoute,
         name: 'change-password',
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.attendanceHistoryRoute,
+        name: 'attendance-history',
+        builder: (context, state) => const AttendanceHistoryScreen(),
       ),
 
       // Main App Routes with Bottom Navigation

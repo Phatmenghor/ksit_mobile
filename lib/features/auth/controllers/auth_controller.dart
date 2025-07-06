@@ -108,40 +108,24 @@ class AuthController extends GetxController {
   /// Logout user and clear session
   Future<void> logout() async {
     try {
-      // Use UIUtils for confirmation dialog
-      final confirmed = await UIUtils.showConfirmationDialog(
-        title: 'Logout',
-        message: 'Are you sure you want to logout?',
-        confirmText: 'Logout',
-        isDangerous: true,
-      );
+      isLoading.value = true;
 
-      if (confirmed == true) {
-        isLoading.value = true;
+      final response = await _authService.logout();
 
-        // Call logout API
-        final response = await _authService.logout();
+      await _clearUserData();
+      final message = response['message'] ?? 'Logged out successfully';
 
-        // Clear local data
-        await _clearUserData();
-
-        // Show success message from API response
-        final message = response['message'] ?? 'Logged out successfully';
+      // Navigate to login
+      if (Get.context != null) {
         ToastUtils.showSuccess(message);
-
-        // Navigate to login
-        if (Get.context != null) {
-          Get.context!.go(AppRoutes.loginRoute);
-        }
+        Get.context!.go(AppRoutes.loginRoute);
       }
     } catch (e) {
       // Still clear local data even if API call fails
       await _clearUserData();
 
-      final errorMessage = ApiErrorUtils.extractApiErrorMessage(e);
-      ToastUtils.showError(errorMessage);
-
       if (Get.context != null) {
+        ToastUtils.showSuccess("Logged out successfully");
         Get.context!.go(AppRoutes.loginRoute);
       }
     } finally {
@@ -240,7 +224,7 @@ class AuthController extends GetxController {
     return ValidationUtils.validateUsername(
       value,
       minLength: 3,
-      maxLength: 20,
+      maxLength: 50,
     );
   }
 

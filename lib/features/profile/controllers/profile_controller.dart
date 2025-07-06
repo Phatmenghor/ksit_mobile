@@ -11,7 +11,6 @@ import 'package:ksit_mobile/features/profile/models/student_profile_model.dart';
 import 'package:ksit_mobile/features/profile/models/staff_profile_model.dart';
 import 'package:ksit_mobile/features/profile/services/profile_service.dart';
 import 'package:ksit_mobile/features/profile/widgets/logout_modal_bottom_sheet.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/logger_utils.dart';

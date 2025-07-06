@@ -328,7 +328,7 @@ class ValidationUtils {
 
   /// Username validation
   static String? validateUsername(String? value,
-      {int minLength = 3, int maxLength = 20}) {
+      {int minLength = 3, int maxLength = 50}) {
     if (value == null || value.trim().isEmpty) {
       return 'Username is required';
     }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
-import 'package:ksit_mobile/core/constants/app_image.dart';
 import 'package:ksit_mobile/features/profile/controllers/configuration_controller.dart';
 import 'package:ksit_mobile/features/profile/widgets/configuration_dangerous_setting_item.dart';
 import 'package:ksit_mobile/features/profile/widgets/configuration_setting_item_widget.dart';

@@ -73,7 +73,9 @@ class ProfileScreen extends StatelessWidget {
                         _buildMenuItem(
                           icon: Icons.history,
                           title: 'Attendance History',
-                          onTap: () => _handleAttendanceHistory(),
+                          onTap: () => {
+                            context.push(AppRoutes.attendanceHistoryRoute),
+                          },
                         ),
                         _buildMenuItem(
                           icon: Icons.lock_outline,
@@ -244,13 +246,6 @@ void _handleTranscript() {
   // TODO: Add transcript logic here
   // Example: Get.toNamed('/transcript');
   // Or open a document viewer, etc.
-}
-
-void _handleAttendanceHistory() {
-  ToastUtils.showInfo('Attendance History clicked');
-  // TODO: Add attendance history logic here
-  // Example: Get.toNamed('/attendance-history');
-  // Or show attendance data, etc.
 }
 
 Future<void> _handleAboutKSIT() async {
