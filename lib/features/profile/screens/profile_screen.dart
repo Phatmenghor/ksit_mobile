@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/config/app_config.dart';
 import 'package:ksit_mobile/core/constants/app_constants.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
+import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/features/profile/widgets/profile_menu_item_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -77,7 +78,9 @@ class ProfileScreen extends StatelessWidget {
                         _buildMenuItem(
                           icon: Icons.lock_outline,
                           title: 'Change Password',
-                          onTap: () => _handleChangePassword(),
+                          onTap: () => {
+                            context.push(AppRoutes.changePasswordRoute),
+                          },
                         ),
                         _buildMenuItem(
                           icon: Icons.info_outline,
@@ -250,31 +253,50 @@ void _handleAttendanceHistory() {
   // Or show attendance data, etc.
 }
 
-void _handleChangePassword() {
-  ToastUtils.showInfo('Change Password clicked');
-  // TODO: Add change password logic here
-  // Example: _showChangePasswordDialog();
-  // Or navigate to change password screen
-}
-
 Future<void> _handleAboutKSIT() async {
   try {
-    final Uri url = Uri.parse(AppConstants.websiteKSIT);
+    const String websiteUrl = AppConstants.websiteKSIT;
 
-    // Check if URL can be launched
-    if (await canLaunchUrl(url)) {
-      await launchUrl(
+    // Log the URL for debugging
+    print('Attempting to open URL: $websiteUrl');
+
+    final Uri url = Uri.parse(websiteUrl);
+
+    // First check if the URL can be launched
+    final bool canLaunch = await canLaunchUrl(url);
+    LoggerUtils.info('Can launch URL: $canLaunch');
+
+    if (canLaunch) {
+      // Try to launch with external application (opens in browser)
+      final bool launched = await launchUrl(
         url,
-        mode: LaunchMode.externalApplication, // Opens in external browser
+        mode: LaunchMode.externalApplication, // Correct enum value
       );
+
+      if (!launched) {
+        // If external application fails, try platform default
+        await launchUrl(
+          url,
+          mode: LaunchMode.platformDefault, // Correct enum value
+        );
+      }
     } else {
-      // Fallback: try to launch in any available way
-      await launchUrl(url);
+      // Show more specific error message
+      ToastUtils.showError(
+          'Cannot open ${websiteUrl}. This URL is not supported on this device.');
     }
   } catch (e) {
-    // Handle error if URL cannot be opened
-    ToastUtils.showError(
-        'Unable to open KSIT website. Please check your internet connection.');
+    // Enhanced error handling with more details
+    LoggerUtils.error('Error launching URL: $e');
+
+    // Check if it's a network issue or URL format issue
+    if (e.toString().contains('network') || e.toString().contains('internet')) {
+      ToastUtils.showError(
+          'Unable to open KSIT website. Please check your internet connection.');
+    } else {
+      ToastUtils.showError(
+          'Unable to open KSIT website. Please try again later.');
+    }
   }
 }
 

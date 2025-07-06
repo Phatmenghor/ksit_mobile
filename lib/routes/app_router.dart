@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/features/home/screens/schedule_detail_screen.dart';
+import 'package:ksit_mobile/features/profile/screens/change_password_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/configuration_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/edit_profile_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
@@ -55,6 +56,12 @@ class AppRouter {
         path: AppRoutes.configurationRoute,
         name: 'configuration',
         builder: (context, state) => const ConfigurationScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.changePasswordRoute,
+        name: 'change-password',
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
 
       // Main App Routes with Bottom Navigation

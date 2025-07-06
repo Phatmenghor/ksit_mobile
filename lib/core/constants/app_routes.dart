@@ -10,4 +10,5 @@ class AppRoutes {
   static const String editProfileRoute = '/edit-profile';
   static const String scheduleDetailRoute = '/schedule-detail';
   static const String configurationRoute = '/configuration';
+  static const String changePasswordRoute = '/change-password';
 }

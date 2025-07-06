@@ -2,6 +2,8 @@
 import 'package:get/get.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
+import 'package:ksit_mobile/features/auth/models/change_password_request_models.dart';
+import 'package:ksit_mobile/features/auth/models/change_password_response_model.dart';
 import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
 import 'package:ksit_mobile/features/auth/models/login_response_model.dart';
 
@@ -65,6 +67,30 @@ class AuthService extends GetxService {
     } catch (e) {
       ApiErrorUtils.throwApiError(
           e, 'Delete account failed. Please try again.');
+    }
+  }
+
+  Future<ChangePasswordResponse> changePassword(
+      ChangePasswordRequest request) async {
+    try {
+      final response = await _apiService.post(
+        '/v1/auth/change-password',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final responseData = response.data;
+
+        return ChangePasswordResponse(
+          status: responseData['status'] ?? 'success',
+          message: responseData['message'] ?? 'Password changed successfully',
+        );
+      } else {
+        throw Exception('Failed to change password: ${response.statusCode}');
+      }
+    } catch (e) {
+      ApiErrorUtils.throwApiError(
+          e, 'Failed to change password. Please try again.');
     }
   }
 }

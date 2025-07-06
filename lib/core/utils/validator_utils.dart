@@ -341,14 +341,6 @@ class ValidationUtils {
       return 'Username cannot exceed $maxLength characters';
     }
 
-    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-      return 'Username can only contain letters, numbers, and underscores';
-    }
-
-    if (value.startsWith('_') || value.endsWith('_')) {
-      return 'Username cannot start or end with underscore';
-    }
-
     return null;
   }
 
