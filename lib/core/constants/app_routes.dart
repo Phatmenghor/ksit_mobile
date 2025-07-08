@@ -12,4 +12,5 @@ class AppRoutes {
   static const String configurationRoute = '/configuration';
   static const String changePasswordRoute = '/change-password';
   static const String attendanceHistoryRoute = '/attendance-history';
+  static const String transcriptRoute = '/transcript';
 }

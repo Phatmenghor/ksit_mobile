@@ -10,6 +10,7 @@ import 'package:ksit_mobile/features/profile/screens/configuration_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/edit_profile_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
+import 'package:ksit_mobile/features/transcript/screens/student_transcript_screen.dart';
 import '../core/config/app_config.dart';
 import '../core/services/storage_service.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -69,6 +70,12 @@ class AppRouter {
         path: AppRoutes.attendanceHistoryRoute,
         name: 'attendance-history',
         builder: (context, state) => const AttendanceHistoryScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.transcriptRoute,
+        name: 'transcript',
+        builder: (context, state) => const StudentTranscriptScreen(),
       ),
 
       // Main App Routes with Bottom Navigation

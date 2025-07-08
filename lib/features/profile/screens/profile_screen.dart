@@ -68,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildMenuItem(
                           icon: Icons.description_outlined,
                           title: 'Transcript',
-                          onTap: () => _handleTranscript(),
+                          onTap: () => _handleTranscript(context),
                         ),
                         _buildMenuItem(
                           icon: Icons.history,
@@ -241,19 +241,25 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-void _handleTranscript() {
-  ToastUtils.showInfo('Transcript clicked');
-  // TODO: Add transcript logic here
-  // Example: Get.toNamed('/transcript');
-  // Or open a document viewer, etc.
+void _handleTranscript(BuildContext context) {
+  final profileController = Get.find<ProfileController>();
+
+  if (profileController.userRole.value != 'STUDENT') {
+    ToastUtils.showError('Transcript is only available for students');
+    return;
+  }
+
+  try {
+    context.push(AppRoutes.transcriptRoute);
+  } catch (e) {
+    LoggerUtils.error('Error opening transcript', e);
+    ToastUtils.showError('Unable to open transcript at this time');
+  }
 }
 
 Future<void> _handleAboutKSIT() async {
   try {
     const String websiteUrl = AppConstants.websiteKSIT;
-
-    // Log the URL for debugging
-    print('Attempting to open URL: $websiteUrl');
 
     final Uri url = Uri.parse(websiteUrl);
 
