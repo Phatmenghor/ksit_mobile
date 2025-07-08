@@ -194,13 +194,13 @@ class ErrorStateWidget extends StatelessWidget {
   final bool showIcon;
 
   const ErrorStateWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.message,
     this.actionText,
     this.onActionPressed,
     this.showIcon = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

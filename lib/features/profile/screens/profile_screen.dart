@@ -278,7 +278,7 @@ Future<void> _handleAboutKSIT() async {
     } else {
       // Show more specific error message
       ToastUtils.showError(
-          'Cannot open ${websiteUrl}. This URL is not supported on this device.');
+          'Cannot open $websiteUrl. This URL is not supported on this device.');
     }
   } catch (e) {
     // Enhanced error handling with more details

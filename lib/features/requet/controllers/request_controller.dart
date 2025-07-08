@@ -131,7 +131,7 @@ class RequestController extends GetxController {
       // Simulate API call delay
       await Future.delayed(const Duration(milliseconds: 800));
 
-      final pageSize = AppConstants.defaultPageSize;
+      const pageSize = AppConstants.defaultPageSize;
       final startIndex = (pageKey - 1) * pageSize;
 
       // Filter requests based on selected status
@@ -221,10 +221,10 @@ class RequestController extends GetxController {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       'Request Details',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),

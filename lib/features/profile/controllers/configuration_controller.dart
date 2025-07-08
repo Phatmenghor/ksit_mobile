@@ -20,8 +20,6 @@ class ConfigurationController extends GetxController {
   }
 
   void _loadSettings() {
-    // Load settings from storage or API
-    // You can implement this based on your needs
     LoggerUtils.info('Loading configuration settings');
   }
 

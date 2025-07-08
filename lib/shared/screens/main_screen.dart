@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_constants.dart';
 
 class MainScreen extends StatefulWidget {
   final Widget child;

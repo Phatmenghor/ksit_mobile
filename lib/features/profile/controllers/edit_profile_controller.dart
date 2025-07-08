@@ -5,7 +5,6 @@ import 'package:ksit_mobile/core/services/image_service.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/core/utils/enums_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
-import 'package:ksit_mobile/core/utils/validator_utils.dart';
 import 'package:ksit_mobile/features/profile/controllers/profile_controller.dart';
 import 'package:ksit_mobile/features/profile/services/profile_service.dart';
 

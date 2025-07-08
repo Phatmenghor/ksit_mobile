@@ -14,7 +14,12 @@ class AttendanceService extends GetxService {
     AttendanceHistoryFilterRequest? filter,
   }) async {
     try {
-      final requestData = filter?.toJson();
+      final requestData = filter?.toJson() ??
+          {
+            'pageNo': 1,
+            'pageSize': 10,
+          };
+
       final response = await _apiService.post(
         '/v1/attendance/history/token',
         data: requestData,
@@ -45,43 +50,6 @@ class AttendanceService extends GetxService {
         e,
         'Failed to fetch attendance history. Please try again.',
       );
-    }
-  }
-
-  /// Get attendance statistics (updated for 2 statuses only)
-  Future<Map<String, int>> getAttendanceStats() async {
-    try {
-      // Get a large sample to calculate stats
-      final response = await getAttendanceHistory(
-        filter: const AttendanceHistoryFilterRequest(pageSize: 100),
-      );
-
-      final attendances = response.content;
-      int present = 0;
-      int absent = 0;
-
-      for (final attendance in attendances) {
-        switch (attendance.status?.toUpperCase()) {
-          case 'PRESENT':
-            present++;
-            break;
-          case 'ABSENT':
-            absent++;
-            break;
-        }
-      }
-
-      return {
-        'total': response.totalElements,
-        'present': present,
-        'absent': absent,
-      };
-    } catch (e) {
-      return {
-        'total': 0,
-        'present': 0,
-        'absent': 0,
-      };
     }
   }
 }

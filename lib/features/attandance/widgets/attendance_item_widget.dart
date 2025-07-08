@@ -1,6 +1,9 @@
 // lib/features/attendance/widgets/attendance_item_widget.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ksit_mobile/core/config/app_config.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
+import 'package:ksit_mobile/core/constants/app_image.dart';
 import 'package:ksit_mobile/features/attandance/models/attendance_models.dart';
 
 class AttendanceItemWidget extends StatelessWidget {
@@ -32,19 +35,19 @@ class AttendanceItemWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // Status Badge
-                  _buildStatusBadge(),
-                  const SizedBox(width: 8),
-                  // Course Info
+                  _buildProfileAvatar(attendance.departmentImageUrl),
+
+                  const SizedBox(width: 12),
+
+                  // Course Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          attendance.displayCourseName,
+                          'Class ${attendance.displayClassCode}',
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
                             color: AppColors.textPrimary,
                           ),
                           maxLines: 1,
@@ -52,57 +55,120 @@ class AttendanceItemWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'ID: ${attendance.identifyNumber ?? 'N/A'}',
+                          '${attendance.displayDay} (${attendance.displayStartTime} - ${attendance.displayEndTime})',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
                             color: AppColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  // Date
-                  Text(
-                    attendance.displayDate,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
+
+                  // Status Badge
+                  _buildStatusBadge(),
+
+                  const SizedBox(width: 8),
+
+                  // Arrow Icon
+                  Icon(
+                    Icons.chevron_right,
+                    size: 24,
+                    color: Colors.black.withAlpha(128),
                   ),
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              // Details Row (Updated to show attendance type with colors)
+              // Course Name
+              Text(
+                attendance.displayCourseName,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 8),
+
+              const Divider(
+                color: AppColors.border,
+                thickness: 0.5,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Bottom Row with Teacher and Room
               Row(
                 children: [
-                  // Attendance Type with color
-                  _buildInfoChip(
-                    icon: _getAttendanceTypeIcon(attendance.attendanceType),
-                    label: attendance.displayAttendanceType,
-                    color:
-                        _getAttendanceTypeColor(attendance.attendanceTypeColor),
-                  ),
-                  const SizedBox(width: 8),
                   // Teacher Info
                   Expanded(
-                    child: _buildInfoChip(
-                      icon: Icons.person_outline,
-                      label: attendance.displayTeacherName,
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          AppImages.person,
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            attendance.displayTeacherName,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Room Info
+                  Row(
+                    children: [
+                      Image.asset(
+                        AppImages.pin,
+                        width: 16,
+                        height: 16,
+                        fit: BoxFit.cover,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        attendance.displayRoomName,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
 
-              if (attendance.recordedTime != null) ...[
+              // Additional information if needed
+              if (attendance.recordedTime != null &&
+                  attendance.recordedTime!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                _buildInfoChip(
-                  icon: Icons.access_time,
-                  label: 'Recorded: ${attendance.displayRecordedTime}',
+                Text(
+                  'Recorded: ${attendance.displayRecordedTime}',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
 
+              // Comment if available
               if (attendance.comment != null &&
                   attendance.comment!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -114,9 +180,9 @@ class AttendanceItemWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    'Comment: ${attendance.comment}',
+                    'Note: ${attendance.comment}',
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       color: AppColors.textSecondary,
                       fontStyle: FontStyle.italic,
                     ),
@@ -130,30 +196,60 @@ class AttendanceItemWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileAvatar(String? imageUrl) {
+    return imageUrl != null && imageUrl.isNotEmpty
+        ? ClipOval(
+            child: Image.network(
+              AppConfig.baseImageUrl + imageUrl,
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover, // This ensures image fills the circle
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.person,
+                  color: AppColors.primary,
+                  size: 28,
+                );
+              },
+            ),
+          )
+        : const Icon(
+            Icons.person,
+            color: AppColors.primary,
+            size: 28,
+          );
+  }
+
   Widget _buildStatusBadge() {
     Color backgroundColor;
     Color textColor;
+    IconData icon;
 
     switch (attendance.statusColor) {
       case 'success':
         backgroundColor = AppColors.success.withOpacity(0.1);
         textColor = AppColors.success;
+        icon = Icons.check_circle;
         break;
       case 'error':
         backgroundColor = AppColors.error.withOpacity(0.1);
         textColor = AppColors.error;
+        icon = Icons.cancel;
         break;
       case 'warning':
         backgroundColor = AppColors.warning.withOpacity(0.1);
         textColor = AppColors.warning;
+        icon = Icons.warning;
         break;
       case 'info':
         backgroundColor = AppColors.info.withOpacity(0.1);
         textColor = AppColors.info;
+        icon = Icons.info;
         break;
       default:
         backgroundColor = AppColors.textSecondary.withOpacity(0.1);
         textColor = AppColors.textSecondary;
+        icon = Icons.help;
     }
 
     return Container(
@@ -166,76 +262,25 @@ class AttendanceItemWidget extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Text(
-        attendance.displayStatus.toUpperCase(),
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: textColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String label,
-    Color? color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: (color ?? AppColors.border).withOpacity(0.3),
-        borderRadius: BorderRadius.circular(4),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
             size: 12,
-            color: color ?? AppColors.textSecondary,
+            color: textColor,
           ),
           const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: color ?? AppColors.textSecondary,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            attendance.displayStatus.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: textColor,
             ),
           ),
         ],
       ),
     );
-  }
-
-  IconData _getAttendanceTypeIcon(String? attendanceType) {
-    switch (attendanceType?.toUpperCase()) {
-      case 'NONE':
-        return Icons.check_circle_outline;
-      case 'LATE':
-        return Icons.schedule_outlined;
-      case 'PERMISSION':
-        return Icons.verified_user_outlined;
-      default:
-        return Icons.help_outline;
-    }
-  }
-
-  Color _getAttendanceTypeColor(String colorType) {
-    switch (colorType) {
-      case 'info':
-        return AppColors.info;
-      case 'warning':
-        return AppColors.warning;
-      case 'success':
-        return AppColors.success;
-      default:
-        return AppColors.textSecondary;
-    }
   }
 }

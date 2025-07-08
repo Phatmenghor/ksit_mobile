@@ -23,9 +23,6 @@ class AttendanceController extends GetxController {
   // Total elements from API response
   final RxInt totalElements = 0.obs;
 
-  // Statistics (updated for 2 statuses only)
-  final RxMap<String, int> attendanceStats = <String, int>{}.obs;
-
   // Pagination controller
   final PagingController<int, AttendanceHistoryModel> pagingController =
       PagingController(firstPageKey: 1);
@@ -65,9 +62,6 @@ class AttendanceController extends GetxController {
       // Set default values
       selectedAcademyYear.value = 0;
       selectedSemester.value = null;
-
-      // Load statistics
-      await _loadAttendanceStats();
     } catch (e) {
       ToastUtils.showError('Failed to load attendance history');
     } finally {
@@ -78,10 +72,10 @@ class AttendanceController extends GetxController {
   Future<void> _fetchAttendancePage(int pageKey) async {
     try {
       final filter = AttendanceHistoryFilterRequest(
-        // academyYear:
-        //     selectedAcademyYear.value != 0 ? selectedAcademyYear.value : null,
-        // semester: selectedSemester.value,
-        pageNo: 1,
+        academyYear:
+            selectedAcademyYear.value != 0 ? selectedAcademyYear.value : null,
+        semester: selectedSemester.value,
+        pageNo: pageKey,
         pageSize: 10,
       );
 
@@ -104,27 +98,12 @@ class AttendanceController extends GetxController {
     }
   }
 
-  Future<void> _loadAttendanceStats() async {
-    try {
-      final stats = await _attendanceService.getAttendanceStats();
-      attendanceStats.assignAll(stats);
-    } catch (e) {
-      // Use default stats if API fails (only PRESENT and ABSENT)
-      attendanceStats.assignAll({
-        'total': 0,
-        'present': 0,
-        'absent': 0,
-      });
-    }
-  }
-
   // Filter methods
   void setAcademyYear(int year) {
     if (selectedAcademyYear.value != year) {
       selectedAcademyYear.value = year;
       Future.delayed(Duration.zero, () {
         PaginationUtils.refreshPagingController(pagingController);
-        _loadAttendanceStats();
       });
     }
   }
@@ -134,7 +113,6 @@ class AttendanceController extends GetxController {
       selectedSemester.value = semester;
       Future.delayed(Duration.zero, () {
         PaginationUtils.refreshPagingController(pagingController);
-        _loadAttendanceStats();
       });
     }
   }
@@ -144,7 +122,6 @@ class AttendanceController extends GetxController {
       selectedSemester.value = null;
       Future.delayed(Duration.zero, () {
         PaginationUtils.refreshPagingController(pagingController);
-        _loadAttendanceStats();
       });
     }
   }
@@ -153,7 +130,6 @@ class AttendanceController extends GetxController {
   Future<void> refreshAttendance() async {
     try {
       PaginationUtils.refreshPagingController(pagingController);
-      await _loadAttendanceStats();
     } catch (e) {
       ToastUtils.showError('Failed to refresh attendance history');
     }
@@ -172,7 +148,6 @@ class AttendanceController extends GetxController {
 
     Future.delayed(Duration.zero, () {
       PaginationUtils.refreshPagingController(pagingController);
-      _loadAttendanceStats();
     });
 
     ToastUtils.showInfo('Filters cleared');
@@ -198,17 +173,6 @@ class AttendanceController extends GetxController {
     }
   }
 
-  // Get attendance statistics for display
-  double get attendanceRate {
-    final total = attendanceStats['total'] ?? 0;
-    final present = attendanceStats['present'] ?? 0;
-    if (total == 0) return 0.0;
-    return (present / total * 100);
-  }
-
+  // Get attendance count for display
   int get totalAttendanceCount => totalElements.value;
-
-  // Get status counts for stats display (updated for 2 statuses only)
-  int getPresentCount() => attendanceStats['present'] ?? 0;
-  int getAbsentCount() => attendanceStats['absent'] ?? 0;
 }

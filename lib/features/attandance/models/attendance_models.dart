@@ -38,6 +38,7 @@ class AttendanceHistoryModel {
   final int? semesterId;
   final String? semester;
   final String? semesterName;
+  final String? departmentImageUrl;
   final int? academyYear;
   final String? createdAt;
 
@@ -76,6 +77,7 @@ class AttendanceHistoryModel {
     this.classCode,
     this.semesterId,
     this.semester,
+    this.departmentImageUrl,
     this.semesterName,
     this.academyYear,
     this.createdAt,
@@ -111,6 +113,7 @@ class AttendanceHistoryModel {
       endTime: json['endTime'] as String?,
       day: json['day'] as String?,
       yearLevel: json['yearLevel'] as String?,
+      departmentImageUrl: json['departmentImageUrl'] as String?,
       roomId: json['roomId'] as int?,
       roomName: json['roomName'] as String?,
       classId: json['classId'] as int?,
@@ -148,6 +151,7 @@ class AttendanceHistoryModel {
       'theory': theory,
       'execute': execute,
       'apply': apply,
+      'departmentImageUrl': departmentImageUrl,
       'totalHour': totalHour,
       'startTime': startTime,
       'endTime': endTime,
@@ -252,7 +256,7 @@ class AttendanceHistoryModel {
   // Format time display
   String get displayStartTime => startTime ?? 'Unknown';
   String get displayEndTime => endTime ?? 'Unknown';
-  String get displayTimeRange => '${displayStartTime} - ${displayEndTime}';
+  String get displayTimeRange => '$displayStartTime - $displayEndTime';
 
   // Status colors (updated for 2 statuses only)
   String get statusColor {

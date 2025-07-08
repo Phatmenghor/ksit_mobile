@@ -9,11 +9,55 @@ import 'package:ksit_mobile/features/attandance/models/attendance_models.dart';
 import 'package:ksit_mobile/features/attandance/services/attendance_service.dart';
 import 'package:ksit_mobile/features/attandance/widgets/attendance_filter_widget.dart';
 import 'package:ksit_mobile/features/attandance/widgets/attendance_item_widget.dart';
+import 'package:ksit_mobile/features/attandance/widgets/attendance_details_widget.dart';
 import 'package:ksit_mobile/shared/widgets/loading_widget.dart';
 import 'package:ksit_mobile/core/utils/pagination_utils.dart';
 
-class AttendanceHistoryScreen extends StatelessWidget {
+class AttendanceHistoryScreen extends StatefulWidget {
   const AttendanceHistoryScreen({super.key});
+
+  @override
+  State<AttendanceHistoryScreen> createState() =>
+      _AttendanceHistoryScreenState();
+}
+
+class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final RxBool _showScrollToTop = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    // Show scroll to top button when scrolled down 200 pixels
+    if (_scrollController.offset >= 200) {
+      if (!_showScrollToTop.value) {
+        _showScrollToTop.value = true;
+      }
+    } else {
+      if (_showScrollToTop.value) {
+        _showScrollToTop.value = false;
+      }
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +90,6 @@ class AttendanceHistoryScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          Obx(() => attendanceController.hasActiveFilters
-              ? IconButton(
-                  icon: const Icon(Icons.clear_all, color: Colors.white),
-                  onPressed: attendanceController.clearAllFilters,
-                  tooltip: 'Clear Filters',
-                )
-              : const SizedBox()),
-        ],
       ),
       body: Obx(() {
         if (attendanceController.isInitialLoading.value) {
@@ -67,24 +102,62 @@ class AttendanceHistoryScreen extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: attendanceController.refreshAttendance,
           color: AppColors.primary,
-          child: CustomScrollView(
-            slivers: [
-              // Filter Section
-              SliverToBoxAdapter(
-                child: AttendanceFilterWidget(
-                  availableYears: attendanceController.availableAcademyYears,
-                  selectedYear: attendanceController.selectedAcademyYear.value,
-                  availableSemesters: attendanceController.availableSemesters,
-                  selectedSemester: attendanceController.selectedSemester.value,
-                  onYearChanged: attendanceController.setAcademyYear,
-                  onSemesterChanged: attendanceController.setSemester,
-                  onSemesterCleared: attendanceController.clearSemester,
-                  onClearFilters: attendanceController.clearAllFilters,
-                ),
+          child: Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  // Filter Section
+                  SliverToBoxAdapter(
+                    child: AttendanceFilterWidget(
+                      availableYears:
+                          attendanceController.availableAcademyYears,
+                      selectedYear:
+                          attendanceController.selectedAcademyYear.value,
+                      availableSemesters:
+                          attendanceController.availableSemesters,
+                      selectedSemester:
+                          attendanceController.selectedSemester.value,
+                      onYearChanged: attendanceController.setAcademyYear,
+                      onSemesterChanged: attendanceController.setSemester,
+                      onSemesterCleared: attendanceController.clearSemester,
+                      onClearFilters: attendanceController.clearAllFilters,
+                    ),
+                  ),
+
+                  // Attendance List
+                  _buildAttendanceList(attendanceController),
+                ],
               ),
 
-              // Attendance List
-              _buildAttendanceList(attendanceController),
+              // Scroll to top button
+              Obx(() => _showScrollToTop.value
+                  ? Positioned(
+                      right: 16,
+                      bottom: 32,
+                      child: Material(
+                        elevation: 8,
+                        borderRadius: BorderRadius.circular(28),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          child: InkWell(
+                            onTap: _scrollToTop,
+                            borderRadius: BorderRadius.circular(22),
+                            child: const Icon(
+                              Icons.keyboard_arrow_up,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox()),
             ],
           ),
         );
@@ -106,7 +179,8 @@ class AttendanceHistoryScreen extends StatelessWidget {
           ),
           child: AttendanceItemWidget(
             attendance: attendance,
-            onTap: () => _showAttendanceDetails(context, attendance),
+            onTap: () =>
+                _showAttendanceDetails(context, attendance, controller),
           ),
         ),
         loadingMessage: 'Loading attendance records...',
@@ -121,119 +195,15 @@ class AttendanceHistoryScreen extends StatelessWidget {
     );
   }
 
-  void _showAttendanceDetails(
-      BuildContext context, AttendanceHistoryModel attendance) {
+  void _showAttendanceDetails(BuildContext context,
+      AttendanceHistoryModel attendance, AttendanceController controller) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Handle
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  const Text(
-                    'Attendance Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(),
-
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDetailRow('Course', attendance.displayCourseName),
-                    _buildDetailRow('Status', attendance.displayStatus),
-                    _buildDetailRow(
-                        'Attendance Type', attendance.displayAttendanceType),
-                    _buildDetailRow(
-                        'Student ID', attendance.identifyNumber ?? 'N/A'),
-                    _buildDetailRow('Teacher', attendance.displayTeacherName),
-                    _buildDetailRow('Date', attendance.displayDate),
-                    if (attendance.recordedTime != null &&
-                        attendance.recordedTime!.isNotEmpty)
-                      _buildDetailRow(
-                          'Recorded Time', attendance.displayRecordedTime),
-                    _buildDetailRow('Finalization Status',
-                        attendance.displayFinalizationStatus),
-                    if (attendance.comment != null &&
-                        attendance.comment!.isNotEmpty)
-                      _buildDetailRow('Comment', attendance.comment!),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
+      builder: (context) => AttendanceDetailsWidget(
+        attendance: attendance,
+        controller: controller,
       ),
     );
   }

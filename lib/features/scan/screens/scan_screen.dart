@@ -7,7 +7,7 @@ import '../../../shared/widgets/custom_button.dart';
 import '../controllers/scan_controller.dart';
 
 class ScanScreen extends StatelessWidget {
-  const ScanScreen({Key? key}) : super(key: key);
+  const ScanScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -201,17 +201,17 @@ class ScanScreen extends StatelessWidget {
   Widget _buildInactiveCameraView(ScanController controller) {
     return Container(
       color: AppColors.border.withOpacity(0.3),
-      child: Center(
+      child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.camera_alt_outlined,
               size: 64,
               color: AppColors.iconSecondary,
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               'Camera Inactive',
               style: TextStyle(
                 fontSize: 18,
@@ -219,8 +219,8 @@ class ScanScreen extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               'Tap "Start Camera" to begin scanning',
               style: TextStyle(
                 fontSize: 14,

@@ -262,13 +262,14 @@ class RequestItemWidget extends StatelessWidget {
     switch (request.status) {
       case RequestStatus.pending:
         return [
-          QuickAction('Start', RequestStatus.inProgress, AppColors.info),
-          QuickAction('Cancel', RequestStatus.cancelled, AppColors.error),
+          const QuickAction('Start', RequestStatus.inProgress, AppColors.info),
+          const QuickAction('Cancel', RequestStatus.cancelled, AppColors.error),
         ];
       case RequestStatus.inProgress:
         return [
-          QuickAction('Complete', RequestStatus.completed, AppColors.success),
-          QuickAction('Cancel', RequestStatus.cancelled, AppColors.error),
+          const QuickAction(
+              'Complete', RequestStatus.completed, AppColors.success),
+          const QuickAction('Cancel', RequestStatus.cancelled, AppColors.error),
         ];
       case RequestStatus.completed:
       case RequestStatus.cancelled:
