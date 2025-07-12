@@ -1,167 +1,255 @@
-enum RequestStatus {
-  pending,
-  inProgress,
-  completed,
-  cancelled,
-}
+import 'package:ksit_mobile/core/utils/enums_utils.dart';
 
 extension RequestStatusExtension on RequestStatus {
   String get name {
     switch (this) {
       case RequestStatus.pending:
-        return 'pending';
-      case RequestStatus.inProgress:
-        return 'in_progress';
-      case RequestStatus.completed:
-        return 'completed';
-      case RequestStatus.cancelled:
-        return 'cancelled';
+        return 'PENDING';
+      case RequestStatus.accepted:
+        return 'ACCEPTED';
+      case RequestStatus.done:
+        return 'DONE';
+      case RequestStatus.rejected:
+        return 'REJECTED';
+      case RequestStatus.return_:
+        return 'RETURN';
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case RequestStatus.pending:
+        return 'Pending';
+      case RequestStatus.accepted:
+        return 'Accepted';
+      case RequestStatus.done:
+        return 'Done';
+      case RequestStatus.rejected:
+        return 'Rejected';
+      case RequestStatus.return_:
+        return 'Return';
     }
   }
 
   static RequestStatus fromString(String value) {
-    switch (value) {
-      case 'pending':
+    switch (value.toUpperCase()) {
+      case 'PENDING':
         return RequestStatus.pending;
-      case 'in_progress':
-        return RequestStatus.inProgress;
-      case 'completed':
-        return RequestStatus.completed;
-      case 'cancelled':
-        return RequestStatus.cancelled;
+      case 'ACCEPTED':
+        return RequestStatus.accepted;
+      case 'DONE':
+        return RequestStatus.done;
+      case 'REJECTED':
+        return RequestStatus.rejected;
+      case 'RETURN':
+        return RequestStatus.return_;
       default:
         throw ArgumentError('Invalid RequestStatus: $value');
     }
   }
 }
 
-enum RequestPriority {
-  low,
-  medium,
-  high,
-  urgent,
-}
+class UserClass {
+  final int id;
+  final String code;
+  final String createdAt;
 
-extension RequestPriorityExtension on RequestPriority {
-  String get name {
-    switch (this) {
-      case RequestPriority.low:
-        return 'low';
-      case RequestPriority.medium:
-        return 'medium';
-      case RequestPriority.high:
-        return 'high';
-      case RequestPriority.urgent:
-        return 'urgent';
-    }
+  const UserClass({
+    required this.id,
+    required this.code,
+    required this.createdAt,
+  });
+
+  factory UserClass.fromJson(Map<String, dynamic> json) {
+    return UserClass(
+      id: (json['id'] as num).toInt(),
+      code: json['code'] as String,
+      createdAt: json['createdAt'] as String,
+    );
   }
 
-  static RequestPriority fromString(String value) {
-    switch (value) {
-      case 'low':
-        return RequestPriority.low;
-      case 'medium':
-        return RequestPriority.medium;
-      case 'high':
-        return RequestPriority.high;
-      case 'urgent':
-        return RequestPriority.urgent;
-      default:
-        throw ArgumentError('Invalid RequestPriority: $value');
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'code': code,
+      'createdAt': createdAt,
+    };
+  }
+}
+
+class User {
+  final int id;
+  final String username;
+  final String? khmerFirstName;
+  final String? khmerLastName;
+  final String? englishFirstName;
+  final String? englishLastName;
+  final String? email;
+  final String? phoneNumber;
+  final String identifyNumber;
+  final String degree;
+  final String? dateOfBirth;
+  final String? gender;
+  final String? currentAddress;
+  final String? profileUrl;
+  final String majorName;
+  final String departmentName;
+  final UserClass userClass;
+  final List<String> roles;
+  final bool isStudent;
+  final String createdAt;
+
+  const User({
+    required this.id,
+    required this.username,
+    this.khmerFirstName,
+    this.khmerLastName,
+    this.englishFirstName,
+    this.englishLastName,
+    this.email,
+    this.phoneNumber,
+    required this.identifyNumber,
+    required this.degree,
+    this.dateOfBirth,
+    this.gender,
+    this.currentAddress,
+    this.profileUrl,
+    required this.majorName,
+    required this.departmentName,
+    required this.userClass,
+    required this.roles,
+    required this.isStudent,
+    required this.createdAt,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: (json['id'] as num).toInt(),
+      username: json['username'] as String,
+      khmerFirstName: json['khmerFirstName'] as String?,
+      khmerLastName: json['khmerLastName'] as String?,
+      englishFirstName: json['englishFirstName'] as String?,
+      englishLastName: json['englishLastName'] as String?,
+      email: json['email'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      identifyNumber: json['identifyNumber'] as String,
+      degree: json['degree'] as String,
+      dateOfBirth: json['dateOfBirth'] as String?,
+      gender: json['gender'] as String?,
+      currentAddress: json['currentAddress'] as String?,
+      profileUrl: json['profileUrl'] as String?,
+      majorName: json['majorName'] as String,
+      departmentName: json['departmentName'] as String,
+      userClass: UserClass.fromJson(json['userClass'] as Map<String, dynamic>),
+      roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
+      isStudent: json['isStudent'] as bool,
+      createdAt: json['createdAt'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'khmerFirstName': khmerFirstName,
+      'khmerLastName': khmerLastName,
+      'englishFirstName': englishFirstName,
+      'englishLastName': englishLastName,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'identifyNumber': identifyNumber,
+      'degree': degree,
+      'dateOfBirth': dateOfBirth,
+      'gender': gender,
+      'currentAddress': currentAddress,
+      'profileUrl': profileUrl,
+      'majorName': majorName,
+      'departmentName': departmentName,
+      'userClass': userClass.toJson(),
+      'roles': roles,
+      'isStudent': isStudent,
+      'createdAt': createdAt,
+    };
+  }
+
+  // Helper getter for display name
+  String get displayName {
+    if (englishFirstName != null && englishLastName != null) {
+      return '$englishFirstName $englishLastName';
     }
+    if (khmerFirstName != null && khmerLastName != null) {
+      return '$khmerFirstName $khmerLastName';
+    }
+    return username;
   }
 }
 
 class RequestModel {
   final int id;
   final String title;
-  final String description;
   final RequestStatus status;
-  final RequestPriority priority;
-  final String? type;
-  final String? assignedTo;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final DateTime? dueDate;
-  final Map<String, dynamic>? metadata;
+  final String requestComment;
+  final String? staffComment;
+  final User user;
+  final String createdAt;
+  final String? updatedAt;
 
   const RequestModel({
     required this.id,
     required this.title,
-    required this.description,
     required this.status,
-    required this.priority,
-    this.type,
-    this.assignedTo,
-    this.createdAt,
+    required this.requestComment,
+    this.staffComment,
+    required this.user,
+    required this.createdAt,
     this.updatedAt,
-    this.dueDate,
-    this.metadata,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'status': status.name,
-      'priority': priority.name,
-      'type': type,
-      'assignedTo': assignedTo,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'dueDate': dueDate?.toIso8601String(),
-      'metadata': metadata,
-    };
-  }
 
   factory RequestModel.fromJson(Map<String, dynamic> json) {
     return RequestModel(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
-      description: json['description'] as String,
       status: RequestStatusExtension.fromString(json['status'] as String),
-      priority: RequestPriorityExtension.fromString(json['priority'] as String),
-      type: json['type'] as String?,
-      assignedTo: json['assignedTo'] as String?,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
-      dueDate: json['dueDate'] != null
-          ? DateTime.parse(json['dueDate'] as String)
-          : null,
-      metadata: json['metadata'] as Map<String, dynamic>?,
+      requestComment: json['requestComment'] as String,
+      staffComment: json['staffComment'] as String?,
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String?,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'status': status.name,
+      'requestComment': requestComment,
+      'staffComment': staffComment,
+      'user': user.toJson(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
   }
 
   RequestModel copyWith({
     int? id,
     String? title,
-    String? description,
     RequestStatus? status,
-    RequestPriority? priority,
-    String? type,
-    String? assignedTo,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? dueDate,
-    Map<String, dynamic>? metadata,
+    String? requestComment,
+    String? staffComment,
+    User? user,
+    String? createdAt,
+    String? updatedAt,
   }) {
     return RequestModel(
       id: id ?? this.id,
       title: title ?? this.title,
-      description: description ?? this.description,
       status: status ?? this.status,
-      priority: priority ?? this.priority,
-      type: type ?? this.type,
-      assignedTo: assignedTo ?? this.assignedTo,
+      requestComment: requestComment ?? this.requestComment,
+      staffComment: staffComment ?? this.staffComment,
+      user: user ?? this.user,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      dueDate: dueDate ?? this.dueDate,
-      metadata: metadata ?? this.metadata,
     );
   }
 
@@ -171,44 +259,119 @@ class RequestModel {
     return other is RequestModel &&
         other.id == id &&
         other.title == title &&
-        other.description == description &&
         other.status == status &&
-        other.priority == priority &&
-        other.type == type &&
-        other.assignedTo == assignedTo &&
+        other.requestComment == requestComment &&
+        other.staffComment == staffComment &&
+        other.user == user &&
         other.createdAt == createdAt &&
-        other.updatedAt == updatedAt &&
-        other.dueDate == dueDate &&
-        _mapEquals(other.metadata, metadata);
+        other.updatedAt == updatedAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
         title.hashCode ^
-        description.hashCode ^
         status.hashCode ^
-        priority.hashCode ^
-        type.hashCode ^
-        assignedTo.hashCode ^
+        requestComment.hashCode ^
+        staffComment.hashCode ^
+        user.hashCode ^
         createdAt.hashCode ^
-        updatedAt.hashCode ^
-        dueDate.hashCode ^
-        metadata.hashCode;
+        updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'RequestModel(id: $id, title: $title, description: $description, status: $status, priority: $priority, type: $type, assignedTo: $assignedTo, createdAt: $createdAt, updatedAt: $updatedAt, dueDate: $dueDate, metadata: $metadata)';
+    return 'RequestModel(id: $id, title: $title, status: $status, requestComment: $requestComment, staffComment: $staffComment, user: $user, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
+}
 
-  bool _mapEquals<K, V>(Map<K, V>? a, Map<K, V>? b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    for (final key in a.keys) {
-      if (!b.containsKey(key) || a[key] != b[key]) return false;
-    }
-    return true;
+// Request creation model
+class CreateRequestModel {
+  final String title;
+  final String requestComment;
+
+  const CreateRequestModel({
+    required this.title,
+    required this.requestComment,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'status': 'PENDING',
+      'requestComment': requestComment,
+    };
+  }
+}
+
+// API response models
+class RequestListResponse {
+  final String status;
+  final String message;
+  final RequestPaginatedData data;
+
+  const RequestListResponse({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+
+  factory RequestListResponse.fromJson(Map<String, dynamic> json) {
+    return RequestListResponse(
+      status: json['status'] as String,
+      message: json['message'] as String,
+      data: RequestPaginatedData.fromJson(json['data'] as Map<String, dynamic>),
+    );
+  }
+}
+
+class RequestPaginatedData {
+  final List<RequestModel> content;
+  final int pageNo;
+  final int pageSize;
+  final int totalElements;
+  final int totalPages;
+  final bool last;
+
+  const RequestPaginatedData({
+    required this.content,
+    required this.pageNo,
+    required this.pageSize,
+    required this.totalElements,
+    required this.totalPages,
+    required this.last,
+  });
+
+  factory RequestPaginatedData.fromJson(Map<String, dynamic> json) {
+    return RequestPaginatedData(
+      content: (json['content'] as List<dynamic>)
+          .map((e) => RequestModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      pageNo: (json['pageNo'] as num).toInt(),
+      pageSize: (json['pageSize'] as num).toInt(),
+      totalElements: (json['totalElements'] as num).toInt(),
+      totalPages: (json['totalPages'] as num).toInt(),
+      last: json['last'] as bool,
+    );
+  }
+}
+
+class CreateRequestResponse {
+  final String status;
+  final String message;
+  final RequestModel data;
+
+  const CreateRequestResponse({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+
+  factory CreateRequestResponse.fromJson(Map<String, dynamic> json) {
+    return CreateRequestResponse(
+      status: json['status'] as String,
+      message: json['message'] as String,
+      data: RequestModel.fromJson(json['data'] as Map<String, dynamic>),
+    );
   }
 }

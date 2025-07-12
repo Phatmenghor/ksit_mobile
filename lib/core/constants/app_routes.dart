@@ -5,6 +5,7 @@ class AppRoutes {
   static const String homeRoute = '/home';
   static const String scanRoute = '/scan';
   static const String requestRoute = '/request';
+  static const String requestDetailRoute = '/request-detail';
   static const String profileRoute = '/profile';
   static const String profileViewRoute = '/profile-view';
   static const String editProfileRoute = '/edit-profile';

@@ -6,6 +6,8 @@ import 'package:ksit_mobile/features/auth/controllers/auth_controller.dart';
 import 'package:ksit_mobile/features/auth/services/auth_service.dart';
 import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
+import 'package:ksit_mobile/features/requet/controllers/request_controller.dart';
+import 'package:ksit_mobile/features/requet/services/request_service.dart';
 
 class InitialBinding extends Bindings {
   @override
@@ -24,5 +26,9 @@ class InitialBinding extends Bindings {
 
     Get.lazyPut<HomeService>(() => HomeService());
     Get.lazyPut<HomeController>(() => HomeController());
+
+    // Initialize request services and controllers
+    Get.lazyPut<RequestService>(() => RequestService());
+    Get.lazyPut<RequestController>(() => RequestController());
   }
 }

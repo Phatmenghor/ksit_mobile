@@ -9,7 +9,9 @@ import 'package:ksit_mobile/features/profile/screens/change_password_screen.dart
 import 'package:ksit_mobile/features/profile/screens/configuration_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/edit_profile_screen.dart';
 import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
+import 'package:ksit_mobile/features/requet/models/request_model.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
+import 'package:ksit_mobile/features/requet/screens/request_detail_screen.dart';
 import 'package:ksit_mobile/features/transcript/screens/student_transcript_screen.dart';
 import '../core/config/app_config.dart';
 import '../core/services/storage_service.dart';
@@ -26,21 +28,21 @@ class AppRouter {
     initialLocation: AppRoutes.splashRoute,
     redirect: _redirect,
     routes: [
-      // Splash Screen - No transition
+      // Splash Screen
       GoRoute(
         path: AppRoutes.splashRoute,
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
       ),
 
-      // Login Screen - Standard slide transition
+      // Login Screen
       GoRoute(
         path: AppRoutes.loginRoute,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
       ),
 
-      // Profile View Screen - Standard slide transition
+      // Profile View Screen
       GoRoute(
         path: AppRoutes.profileViewRoute,
         name: 'profile-view',
@@ -119,6 +121,31 @@ class AppRouter {
               }
 
               return ScheduleDetailScreen(scheduleId: int.parse(scheduleId));
+            },
+          ),
+          GoRoute(
+            path: '${AppRoutes.requestDetailRoute}/:id',
+            name: 'request-detail',
+            builder: (context, state) {
+              final requestIdString = state.pathParameters['id'];
+              if (requestIdString == null) {
+                return const Scaffold(
+                  body: Center(
+                    child: Text('Invalid request ID'),
+                  ),
+                );
+              }
+
+              final requestId = int.tryParse(requestIdString);
+              if (requestId == null) {
+                return const Scaffold(
+                  body: Center(
+                    child: Text('Invalid request ID format'),
+                  ),
+                );
+              }
+
+              return RequestDetailScreen(requestId: requestId);
             },
           ),
         ],

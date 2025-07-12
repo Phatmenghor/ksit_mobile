@@ -181,52 +181,10 @@ extension StatusExtension on Status {
 
 enum RequestStatus {
   pending,
-  inProgress,
-  completed,
-  cancelled,
-}
-
-extension RequestStatusExtension on RequestStatus {
-  String get name {
-    switch (this) {
-      case RequestStatus.pending:
-        return 'pending';
-      case RequestStatus.inProgress:
-        return 'in_progress';
-      case RequestStatus.completed:
-        return 'completed';
-      case RequestStatus.cancelled:
-        return 'cancelled';
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case RequestStatus.pending:
-        return 'Pending';
-      case RequestStatus.inProgress:
-        return 'In Progress';
-      case RequestStatus.completed:
-        return 'Completed';
-      case RequestStatus.cancelled:
-        return 'Cancelled';
-    }
-  }
-
-  static RequestStatus fromString(String value) {
-    switch (value.toLowerCase()) {
-      case 'pending':
-        return RequestStatus.pending;
-      case 'in_progress':
-        return RequestStatus.inProgress;
-      case 'completed':
-        return RequestStatus.completed;
-      case 'cancelled':
-        return RequestStatus.cancelled;
-      default:
-        throw ArgumentError('Invalid RequestStatus: $value');
-    }
-  }
+  accepted,
+  done,
+  rejected,
+  return_,
 }
 
 enum RequestPriority {

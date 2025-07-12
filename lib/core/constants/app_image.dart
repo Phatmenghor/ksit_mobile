@@ -8,4 +8,5 @@ class AppImages {
   static const String logout = 'assets/images/warning.png';
   static const String delete = 'assets/images/delete.png';
   static const String warningDelete = 'assets/images/warning_delete.png';
+  static const String arrowRequest = 'assets/images/arrow_request.png';
 }
