@@ -47,6 +47,10 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	
+	<!-- Add Camera permission for QR scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>Camera permission is required for QR code scanning to mark attendance</string>
+	
 	<!-- Add URL scheme queries for opening websites -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
