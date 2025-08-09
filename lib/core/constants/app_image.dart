@@ -9,4 +9,5 @@ class AppImages {
   static const String delete = 'assets/images/delete.png';
   static const String warningDelete = 'assets/images/warning_delete.png';
   static const String arrowRequest = 'assets/images/arrow_request.png';
+  static const String survey = 'assets/images/survey.png';
 }
