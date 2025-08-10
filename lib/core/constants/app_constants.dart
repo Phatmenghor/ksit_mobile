@@ -24,5 +24,5 @@ class AppConstants {
 
   // Animation Duration
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
-  static const Duration splashDuration = Duration(milliseconds: 100);
+  static const Duration splashDuration = Duration(milliseconds: 1500);
 }

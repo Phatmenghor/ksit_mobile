@@ -1,8 +1,8 @@
-// Updated lib/features/scan/controllers/scan_controller.dart
+// lib/features/scan/controllers/scan_controller.dart (Simplified Working Version)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:ksit_mobile/features/scan/models/qr_attendance_response_models.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../../../core/utils/logger_utils.dart';
 import '../../../core/utils/api_error_utils.dart';
@@ -13,54 +13,84 @@ class ScanController extends GetxController {
   final QrAttendanceService _qrAttendanceService =
       Get.put(QrAttendanceService());
 
-  // QR Scanner
-  QRViewController? qrController;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  // Mobile Scanner Controller
+  late MobileScannerController scannerController;
 
   // Observables
   final RxBool isFlashOn = false.obs;
   final RxBool isSubmittingAttendance = false.obs;
   final RxString scannedQrCode = ''.obs;
+  final RxBool isScannerReady = false.obs;
+  final RxBool canScan = true.obs;
+  final Rx<CameraFacing> cameraFacing = CameraFacing.back.obs;
 
   @override
   void onInit() {
     super.onInit();
+    _initializeScanner();
   }
 
   @override
   void onClose() {
-    qrController?.dispose();
+    scannerController.dispose();
     super.onClose();
   }
 
-  void onQRViewCreated(QRViewController controller) {
-    qrController = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!isSubmittingAttendance.value && scanData.code != null) {
-        _processScanResult(scanData.code!);
+  void _initializeScanner() {
+    try {
+      scannerController = MobileScannerController(
+        detectionSpeed: DetectionSpeed.noDuplicates,
+        facing: CameraFacing.back,
+        torchEnabled: false,
+      );
+      isScannerReady.value = true;
+      LoggerUtils.info('Scanner initialized successfully');
+    } catch (e) {
+      LoggerUtils.error('Failed to initialize scanner', e);
+    }
+  }
+
+  void onDetect(BarcodeCapture capture) {
+    if (!canScan.value || isSubmittingAttendance.value) return;
+
+    final List<Barcode> barcodes = capture.barcodes;
+    for (final barcode in barcodes) {
+      final String? code = barcode.rawValue;
+      if (code != null && code.isNotEmpty) {
+        _processScanResult(code);
+        break;
       }
-    });
+    }
   }
 
   void toggleFlash() {
-    qrController?.toggleFlash();
-    isFlashOn.value = !isFlashOn.value;
-    LoggerUtils.info('Flash toggled: ${isFlashOn.value}');
+    try {
+      scannerController.toggleTorch();
+      isFlashOn.value = !isFlashOn.value;
+      LoggerUtils.info('Flash toggled: ${isFlashOn.value}');
+    } catch (e) {
+      LoggerUtils.error('Failed to toggle flash', e);
+    }
   }
 
-  void flipCamera() {
-    qrController?.flipCamera();
-    LoggerUtils.info('Camera flipped');
+  void switchCamera() {
+    try {
+      scannerController.switchCamera();
+      cameraFacing.value = cameraFacing.value == CameraFacing.back
+          ? CameraFacing.front
+          : CameraFacing.back;
+      LoggerUtils.info('Camera switched to: ${cameraFacing.value}');
+    } catch (e) {
+      LoggerUtils.error('Failed to switch camera', e);
+    }
   }
 
   void _processScanResult(String result) {
-    if (isSubmittingAttendance.value) return;
+    if (isSubmittingAttendance.value || !canScan.value) return;
 
     scannedQrCode.value = result;
+    canScan.value = false; // Prevent multiple scans
     LoggerUtils.info('QR Code scanned: $result');
-
-    // Pause camera while processing
-    qrController?.pauseCamera();
 
     // Submit attendance immediately
     _submitAttendance(result);
@@ -93,9 +123,9 @@ class ScanController extends GetxController {
       attendanceData: response.data,
       onDone: () {
         Get.back();
-        // Resume camera for next scan
-        Future.delayed(const Duration(milliseconds: 500), () {
-          qrController?.resumeCamera();
+        // Re-enable scanning after a delay
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          canScan.value = true;
         });
       },
     );
@@ -107,19 +137,44 @@ class ScanController extends GetxController {
       message: errorMessage,
       onRetry: () {
         Get.back();
-        // Resume camera for retry
+        // Re-enable scanning immediately for retry
         Future.delayed(const Duration(milliseconds: 500), () {
-          qrController?.resumeCamera();
+          canScan.value = true;
         });
       },
     );
   }
 
-  void resumeCamera() {
-    qrController?.resumeCamera();
+  void resetScanning() {
+    canScan.value = true;
+    isSubmittingAttendance.value = false;
+    scannedQrCode.value = '';
   }
 
-  void pauseCamera() {
-    qrController?.pauseCamera();
+  void pauseScanning() {
+    canScan.value = false;
+  }
+
+  void resumeScanning() {
+    canScan.value = true;
+  }
+
+  // Simplified camera lifecycle methods
+  void startScanner() {
+    try {
+      LoggerUtils.info('Scanner start requested');
+      resetScanning();
+    } catch (e) {
+      LoggerUtils.error('Failed to start scanner', e);
+    }
+  }
+
+  void stopScanner() {
+    try {
+      pauseScanning();
+      LoggerUtils.info('Scanner stopped');
+    } catch (e) {
+      LoggerUtils.error('Failed to stop scanner', e);
+    }
   }
 }

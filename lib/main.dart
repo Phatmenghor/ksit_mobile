@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/bindings/initial_bindings.dart';
 import 'package:ksit_mobile/core/constants/app_constants.dart';
@@ -11,9 +12,14 @@ import 'routes/app_router.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Preserve native splash screen
+  final WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   try {
+    LoggerUtils.info('Starting app initialization...');
+
     // Initialize Firebase with platform-specific options
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -28,9 +34,16 @@ void main() async {
     await Get.find<FirebaseService>().initializeMessaging();
     LoggerUtils.info('Firebase messaging initialized');
 
-    LoggerUtils.info('App started successfully');
+    // Minimum splash time for better UX (optional)
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    LoggerUtils.info('App initialization completed successfully');
   } catch (e) {
     LoggerUtils.error('Failed to initialize app: $e');
+    // Continue anyway - router will handle authentication redirect
+  } finally {
+    // Remove native splash screen
+    FlutterNativeSplash.remove();
   }
 
   runApp(const MyApp());
@@ -73,6 +86,8 @@ class MyApp extends StatelessWidget {
             borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
+        splashColor: AppColors.primary.withOpacity(0.1),
+        highlightColor: AppColors.primary.withOpacity(0.05),
       ),
       routerDelegate: AppRouter.router.routerDelegate,
       routeInformationParser: AppRouter.router.routeInformationParser,

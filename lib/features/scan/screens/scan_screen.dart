@@ -1,7 +1,7 @@
-// Updated lib/features/scan/screens/scan_screen.dart
+// lib/features/scan/screens/scan_screen.dart (Simplified Working Version)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../controllers/scan_controller.dart';
@@ -30,10 +30,20 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      scanController.resumeCamera();
-    } else if (state == AppLifecycleState.paused) {
-      scanController.pauseCamera();
+    switch (state) {
+      case AppLifecycleState.resumed:
+        scanController.resumeScanning();
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        scanController.pauseScanning();
+        break;
+      case AppLifecycleState.detached:
+        scanController.stopScanner();
+        break;
+      case AppLifecycleState.hidden:
+        scanController.pauseScanning();
+        break;
     }
   }
 
@@ -55,6 +65,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
+          // Flash Toggle
           Obx(() => IconButton(
                 onPressed: scanController.toggleFlash,
                 icon: Icon(
@@ -65,134 +76,226 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                   size: 24,
                 ),
               )),
-          IconButton(
-            onPressed: scanController.flipCamera,
-            icon: const Icon(
-              Icons.flip_camera_ios,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
+
+          // Camera Switch
+          Obx(() => IconButton(
+                onPressed: scanController.switchCamera,
+                icon: Icon(
+                  scanController.cameraFacing.value == CameraFacing.back
+                      ? Icons.camera_rear
+                      : Icons.camera_front,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              )),
         ],
       ),
       body: Stack(
         children: [
-          // Full Screen QR Camera
-          _buildQRView(),
+          // Simple Mobile Scanner
+          MobileScanner(
+            controller: scanController.scannerController,
+            onDetect: scanController.onDetect,
+          ),
+
+          // Simple Scan Overlay
+          _buildScanOverlay(),
 
           // Bottom Instructions
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.4),
-                    Colors.black.withOpacity(0.8),
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: const Text(
-                        'Position QR code within the frame',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _buildInstructions(),
 
           // Processing Overlay
           Obx(() => scanController.isSubmittingAttendance.value
-              ? Container(
-                  color: Colors.black.withOpacity(0.8),
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        Text(
-                          'Processing attendance...',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Please wait',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+              ? _buildProcessingOverlay()
               : const SizedBox.shrink()),
         ],
       ),
     );
   }
 
-  Widget _buildQRView() {
-    return QRView(
-      key: scanController.qrKey,
-      onQRViewCreated: scanController.onQRViewCreated,
-      overlay: QrScannerOverlayShape(
-        borderColor: AppColors.primary,
-        borderRadius: 12,
-        borderLength: 40,
-        borderWidth: 8,
-        cutOutSize: 280,
-        cutOutBottomOffset: 80,
+  Widget _buildScanOverlay() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.5),
       ),
-      onPermissionSet: (ctrl, hasPermission) {
-        if (!hasPermission) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Camera permission is required for QR scanning'),
-              backgroundColor: Colors.red,
+      child: Center(
+        child: Container(
+          width: 280,
+          height: 280,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.primary,
+              width: 3,
             ),
-          );
-        }
-      },
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Stack(
+            children: [
+              // Corner brackets
+              ...List.generate(4, (index) {
+                return Positioned(
+                  top: index < 2 ? -3 : null,
+                  bottom: index >= 2 ? -3 : null,
+                  left: index % 2 == 0 ? -3 : null,
+                  right: index % 2 == 1 ? -3 : null,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.only(
+                        topLeft: index == 0
+                            ? const Radius.circular(17)
+                            : Radius.zero,
+                        topRight: index == 1
+                            ? const Radius.circular(17)
+                            : Radius.zero,
+                        bottomLeft: index == 2
+                            ? const Radius.circular(17)
+                            : Radius.zero,
+                        bottomRight: index == 3
+                            ? const Radius.circular(17)
+                            : Radius.zero,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+
+              // Simple scanning line animation
+              Obx(() => scanController.canScan.value &&
+                      !scanController.isSubmittingAttendance.value
+                  ? AnimatedContainer(
+                      duration: const Duration(seconds: 2),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: const Duration(seconds: 2),
+                        builder: (context, value, child) {
+                          return Positioned(
+                            top: value * 260,
+                            left: 10,
+                            right: 10,
+                            child: Container(
+                              height: 3,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    AppColors.primary,
+                                    Colors.transparent,
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.6),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        onEnd: () {
+                          if (mounted && scanController.canScan.value) {
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    )
+                  : const SizedBox.shrink()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.black.withOpacity(0.4),
+              Colors.black.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Obx(() => Text(
+                      scanController.canScan.value
+                          ? 'Position QR code within the frame'
+                          : 'Processing QR code...',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    )),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProcessingOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.8),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Processing attendance...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Please wait',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

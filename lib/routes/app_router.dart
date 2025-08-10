@@ -20,22 +20,15 @@ import '../features/auth/screens/login_screen.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/scan/screens/scan_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
-import '../shared/screens/splash_screen.dart';
 import '../shared/screens/main_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: Get.key, // Use GetX navigator key
-    initialLocation: AppRoutes.splashRoute,
+    initialLocation:
+        AppRoutes.loginRoute, // Default to login, redirect will handle auth
     redirect: _redirect,
     routes: [
-      // Splash Screen
-      GoRoute(
-        path: AppRoutes.splashRoute,
-        name: 'splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-
       // Login Screen
       GoRoute(
         path: AppRoutes.loginRoute,
@@ -50,37 +43,42 @@ class AppRouter {
         builder: (context, state) => const StduentViewScreen(),
       ),
 
-      // Profile View Screen - Standard slide transition
+      // Profile Edit Screen
       GoRoute(
         path: AppRoutes.editProfileRoute,
         name: 'edit-profile',
         builder: (context, state) => const EditProfileScreen(),
       ),
 
+      // Configuration Screen
       GoRoute(
         path: AppRoutes.configurationRoute,
         name: 'configuration',
         builder: (context, state) => const ConfigurationScreen(),
       ),
 
+      // Change Password Screen
       GoRoute(
         path: AppRoutes.changePasswordRoute,
         name: 'change-password',
         builder: (context, state) => const ChangePasswordScreen(),
       ),
 
+      // Attendance History Screen
       GoRoute(
         path: AppRoutes.attendanceHistoryRoute,
         name: 'attendance-history',
         builder: (context, state) => const AttendanceHistoryScreen(),
       ),
 
+      // Transcript Screen
       GoRoute(
         path: AppRoutes.transcriptRoute,
         name: 'transcript',
         builder: (context, state) => const StudentTranscriptScreen(),
       ),
 
+      // Survey Screen
       GoRoute(
         path: AppRoutes.surveyRoute,
         name: 'survey',
@@ -136,10 +134,8 @@ class AppRouter {
             path: AppRoutes.scheduleDetailRoute,
             name: 'schedule-detail',
             builder: (context, state) {
-              // Get the schedule ID from query parameters
               final scheduleId = state.uri.queryParameters['id'];
               if (scheduleId == null) {
-                // Redirect to home if no ID provided
                 return const Scaffold(
                   body: Center(
                     child: Text('Schedule not found'),
@@ -216,11 +212,6 @@ class AppRouter {
     final isLoggedIn = token != null && token.isNotEmpty;
     final currentLocation = state.fullPath;
 
-    // If on splash screen, don't redirect
-    if (currentLocation == AppRoutes.splashRoute) {
-      return null;
-    }
-
     // If not logged in and trying to access protected routes
     if (!isLoggedIn && _isProtectedRoute(currentLocation)) {
       return AppRoutes.loginRoute;
@@ -231,7 +222,7 @@ class AppRouter {
       return AppRoutes.homeRoute;
     }
 
-    return null;
+    return null; // No redirect needed
   }
 
   static bool _isProtectedRoute(String? path) {
@@ -243,9 +234,21 @@ class AppRouter {
       AppRoutes.requestRoute,
       AppRoutes.profileRoute,
       AppRoutes.surveyRoute,
+      AppRoutes.profileViewRoute,
+      AppRoutes.editProfileRoute,
+      AppRoutes.configurationRoute,
+      AppRoutes.changePasswordRoute,
+      AppRoutes.attendanceHistoryRoute,
+      AppRoutes.transcriptRoute,
+      AppRoutes.scheduleDetailRoute,
     ];
 
-    return protectedRoutes.contains(path);
+    // Check exact matches and route patterns
+    return protectedRoutes.any((route) =>
+        path == route ||
+        path.startsWith(route) ||
+        (route == AppRoutes.requestDetailRoute &&
+            path.contains('/request-detail/')));
   }
 
   static bool _isAuthRoute(String? path) {
