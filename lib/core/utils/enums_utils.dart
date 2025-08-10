@@ -1,4 +1,5 @@
 // lib/core/utils/enums_utils.dart
+import 'package:flutter/material.dart';
 
 enum DayOfWeek {
   monday,
@@ -233,6 +234,89 @@ extension RequestPriorityExtension on RequestPriority {
         return RequestPriority.urgent;
       default:
         throw ArgumentError('Invalid RequestPriority: $value');
+    }
+  }
+}
+
+enum SurveyStatus {
+  none,
+  notStarted,
+  completed,
+}
+
+extension SurveyStatusExtension on SurveyStatus {
+  String get name {
+    switch (this) {
+      case SurveyStatus.none:
+        return 'NONE';
+      case SurveyStatus.notStarted:
+        return 'NOT_STARTED';
+      case SurveyStatus.completed:
+        return 'COMPLETED';
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case SurveyStatus.none:
+        return 'No Survey';
+      case SurveyStatus.notStarted:
+        return 'Survey Available';
+      case SurveyStatus.completed:
+        return 'Survey Completed';
+    }
+  }
+
+  static SurveyStatus fromString(String? value) {
+    if (value == null) return SurveyStatus.none;
+    switch (value.toUpperCase()) {
+      case 'NONE':
+        return SurveyStatus.none;
+      case 'NOT_STARTED':
+        return SurveyStatus.notStarted;
+      case 'COMPLETED':
+        return SurveyStatus.completed;
+      default:
+        return SurveyStatus.none;
+    }
+  }
+
+  /// Check if survey button should be shown
+  bool get shouldShowSurveyButton => this == SurveyStatus.notStarted;
+
+  /// Get survey button text
+  String get surveyButtonText {
+    switch (this) {
+      case SurveyStatus.notStarted:
+        return 'Take Survey Now';
+      case SurveyStatus.completed:
+        return 'Survey Completed';
+      default:
+        return 'No Survey Available';
+    }
+  }
+
+  /// Get survey status color
+  Color get statusColor {
+    switch (this) {
+      case SurveyStatus.none:
+        return const Color(0xFF757575); // Gray
+      case SurveyStatus.notStarted:
+        return const Color(0xFFE4A11C); // Blue
+      case SurveyStatus.completed:
+        return const Color(0xFF4CAF50); // Green
+    }
+  }
+
+  /// Get survey status icon
+  IconData get statusIcon {
+    switch (this) {
+      case SurveyStatus.none:
+        return Icons.info_outline;
+      case SurveyStatus.notStarted:
+        return Icons.assignment_outlined;
+      case SurveyStatus.completed:
+        return Icons.assignment_turned_in;
     }
   }
 }

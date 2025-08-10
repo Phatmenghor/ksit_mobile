@@ -204,6 +204,7 @@ class HomeScreen extends StatelessWidget {
           ),
           child: ScheduleClassWidget(
             schedule: schedule,
+            onSurveyTap: () => controller.onSurveyTap(schedule),
             onTap: () => controller.onScheduleTap(schedule),
             statusText: controller.getScheduleStatusText(schedule),
             statusColor: controller.getScheduleStatusColor(schedule),
@@ -234,6 +235,7 @@ class HomeScreen extends StatelessWidget {
           ),
           child: ScheduleClassWidget(
             schedule: schedule,
+            onSurveyTap: () => controller.onSurveyTap(schedule),
             onTap: () => controller.onScheduleTap(schedule),
             statusText: controller.getScheduleStatusText(schedule),
             statusColor: controller.getScheduleStatusColor(schedule),

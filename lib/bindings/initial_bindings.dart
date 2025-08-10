@@ -8,6 +8,7 @@ import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
 import 'package:ksit_mobile/features/home/services/home_service.dart';
 import 'package:ksit_mobile/features/requet/controllers/request_controller.dart';
 import 'package:ksit_mobile/features/requet/services/request_service.dart';
+import 'package:ksit_mobile/features/survey/services/survey_service.dart';
 
 class InitialBinding extends Bindings {
   @override
@@ -30,5 +31,7 @@ class InitialBinding extends Bindings {
     // Initialize request services and controllers
     Get.lazyPut<RequestService>(() => RequestService());
     Get.lazyPut<RequestController>(() => RequestController());
+
+    Get.lazyPut<SurveyService>(() => SurveyService());
   }
 }

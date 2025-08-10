@@ -7,6 +7,7 @@ import 'package:ksit_mobile/features/home/models/schedule_models.dart';
 class ScheduleClassWidget extends StatelessWidget {
   final ScheduleModel schedule;
   final VoidCallback? onTap;
+  final VoidCallback? onSurveyTap;
   final String? statusText;
   final Color? statusColor;
 
@@ -14,6 +15,7 @@ class ScheduleClassWidget extends StatelessWidget {
     super.key,
     required this.schedule,
     this.onTap,
+    this.onSurveyTap,
     this.statusText,
     this.statusColor,
   });
@@ -70,7 +72,6 @@ class ScheduleClassWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   Icon(
                     Icons.chevron_right,
                     size: 24,
@@ -95,6 +96,8 @@ class ScheduleClassWidget extends StatelessWidget {
                 thickness: 0.5,
               ),
               const SizedBox(height: 8),
+
+              // Instructor and Location Row
               Row(
                 children: [
                   // Instructor Info using displayName from model
@@ -139,8 +142,51 @@ class ScheduleClassWidget extends StatelessWidget {
                     ],
                   ),
                 ],
-              )
+              ),
+
+              // Survey Button Section (outside of Row, as separate section)
+              if (schedule.shouldShowSurveyButton) ...[
+                const SizedBox(height: 12),
+                const Divider(
+                  color: AppColors.border,
+                  thickness: 0.5,
+                ),
+                const SizedBox(height: 8),
+                _buildSurveyButton(),
+              ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSurveyButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 36,
+      child: ElevatedButton.icon(
+        onPressed: onSurveyTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: schedule.surveyStatusColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+        ),
+        icon: Image.asset(
+          AppImages.survey,
+          width: 16,
+          height: 16,
+          color: Colors.white,
+        ),
+        label: Text(
+          schedule.surveyButtonText,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

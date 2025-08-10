@@ -19,6 +19,7 @@ class HomeController extends GetxController {
 
   // Observables
   final RxBool isInitialLoading = true.obs;
+
   final Rx<FilterType> selectedFilterType = FilterType.today.obs;
   final RxInt selectedAcademyYear = 0.obs;
   final Rx<Semester?> selectedSemester = Rx<Semester?>(null);
@@ -264,6 +265,20 @@ class HomeController extends GetxController {
       Get.context?.push('${AppRoutes.scheduleDetailRoute}?id=${schedule.id}');
     } else {
       ToastUtils.showError('Schedule ID not available');
+    }
+  }
+
+  void onSurveyTap(ScheduleModel schedule) async {
+    if (schedule.shouldShowSurveyButton && schedule.id != null) {
+      final result = await Get.context
+          ?.push('${AppRoutes.surveyRoute}?scheduleId=${schedule.id}');
+
+      // If survey was completed successfully, refresh the schedules
+      if (result == true) {
+        refreshSchedules();
+      }
+    } else {
+      ToastUtils.showInfo('Survey not available for this class');
     }
   }
 

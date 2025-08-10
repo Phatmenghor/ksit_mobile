@@ -12,6 +12,7 @@ import 'package:ksit_mobile/features/profile/screens/profile_view_screen.dart';
 import 'package:ksit_mobile/features/requet/models/request_model.dart';
 import 'package:ksit_mobile/features/requet/screens/request_screen.dart';
 import 'package:ksit_mobile/features/requet/screens/request_detail_screen.dart';
+import 'package:ksit_mobile/features/survey/screens/survey_screen.dart';
 import 'package:ksit_mobile/features/transcript/screens/student_transcript_screen.dart';
 import '../core/config/app_config.dart';
 import '../core/services/storage_service.dart';
@@ -78,6 +79,32 @@ class AppRouter {
         path: AppRoutes.transcriptRoute,
         name: 'transcript',
         builder: (context, state) => const StudentTranscriptScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.surveyRoute,
+        name: 'survey',
+        builder: (context, state) {
+          final scheduleIdString = state.uri.queryParameters['scheduleId'];
+          if (scheduleIdString == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Invalid schedule ID'),
+              ),
+            );
+          }
+
+          final scheduleId = int.tryParse(scheduleIdString);
+          if (scheduleId == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Invalid schedule ID format'),
+              ),
+            );
+          }
+
+          return SurveyScreen(scheduleId: scheduleId);
+        },
       ),
 
       // Main App Routes with Bottom Navigation
@@ -215,6 +242,7 @@ class AppRouter {
       AppRoutes.scanRoute,
       AppRoutes.requestRoute,
       AppRoutes.profileRoute,
+      AppRoutes.surveyRoute,
     ];
 
     return protectedRoutes.contains(path);

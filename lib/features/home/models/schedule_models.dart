@@ -1,6 +1,9 @@
 // lib/features/home/models/schedule_models.dart
 
 // Import the new utils instead of defining enums here
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:ksit_mobile/core/utils/enums_utils.dart';
 import 'package:ksit_mobile/core/utils/format_utils.dart';
 import 'package:ksit_mobile/core/utils/schedule_utils.dart';
@@ -620,4 +623,20 @@ class ScheduleModel {
         endTime: endTime,
         day: day,
       );
+
+  // Survey-related getters
+  SurveyStatus get surveyStatusEnum =>
+      SurveyStatusExtension.fromString(surveyStatus);
+
+  bool get shouldShowSurveyButton => surveyStatusEnum.shouldShowSurveyButton;
+
+  String get surveyButtonText => surveyStatusEnum.surveyButtonText;
+
+  Color get surveyStatusColor => surveyStatusEnum.statusColor;
+
+  IconData get surveyStatusIcon => surveyStatusEnum.statusIcon;
+
+  bool get hasSurveyCompleted => surveyStatusEnum == SurveyStatus.completed;
+
+  bool get hasSurveyAvailable => surveyStatusEnum == SurveyStatus.notStarted;
 }
