@@ -2,39 +2,68 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-		<!-- Your existing keys... -->
+		<!-- App Development Region -->
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		
+		<!-- App Display Name (what users see on home screen) -->
 		<key>CFBundleDisplayName</key>
-		<string>Ksit Mobile</string>
+		<string>KSIT Mobile</string>
+		
+		<!-- App Executable -->
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
+		
+		<!-- Bundle Identifier -->
 		<key>CFBundleIdentifier</key>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		
+		<!-- Info Dictionary Version -->
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
+		
+		<!-- Internal Bundle Name -->
 		<key>CFBundleName</key>
-		<string>ksit_mobile</string>
+		<string>KSIT Mobile</string>
+		
+		<!-- Package Type -->
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
+		
+		<!-- Version String -->
 		<key>CFBundleShortVersionString</key>
 		<string>$(FLUTTER_BUILD_NAME)</string>
+		
+		<!-- Bundle Signature -->
 		<key>CFBundleSignature</key>
 		<string>????</string>
+		
+		<!-- Build Number -->
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		
+		<!-- iOS Device Required -->
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		
+		<!-- Launch Storyboard -->
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
+		
+		<!-- Main Storyboard (legacy) -->
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
+		
+		<!-- IMPROVED: Supported Interface Orientations for iPhone -->
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
+			<!-- Uncomment if you want landscape support on iPhone -->
+			<!-- <string>UIInterfaceOrientationLandscapeLeft</string> -->
+			<!-- <string>UIInterfaceOrientationLandscapeRight</string> -->
 		</array>
+		
+		<!-- Supported Interface Orientations for iPad -->
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
@@ -42,20 +71,104 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		
+		<!-- Disable frame rate limiting -->
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
+		
+		<!-- Support indirect input events -->
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<!-- Add Camera permission for QR scanning -->
+		
+		<!-- PERMISSIONS SECTION -->
+		
+		<!-- Camera permission for QR code scanning -->
 		<key>NSCameraUsageDescription</key>
-		<string>Camera permission is required for QR code scanning to mark attendance</string>
-		<!-- Add URL scheme queries for opening websites -->
+		<string>This app needs camera access to scan QR codes for attendance marking and other features</string>
+		
+		<!-- Photo Library permission (optional, for image uploads) -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs photo library access to select images for profile pictures and documents</string>
+		
+		<!-- NETWORK & URL SCHEMES -->
+		
+		<!-- URL scheme queries for opening websites and other apps -->
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>https</string>
 			<string>http</string>
+			<string>mailto</string>
+			<string>tel</string>
+			<string>sms</string>
 		</array>
+		
+		<!-- Allow arbitrary loads in App Transport Security (for development) -->
+		<!-- REMOVE OR RESTRICT THIS IN PRODUCTION -->
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<true/>
+			<!-- More secure alternative for production: -->
+			<!--
+			<key>NSExceptionDomains</key>
+			<dict>
+				<key>your-api-domain.com</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+				</dict>
+			</dict>
+			-->
+		</dict>
+		
+		<!-- UI CONFIGURATION -->
+		
+		<!-- Status bar configuration -->
 		<key>UIStatusBarHidden</key>
+		<false/>
+		<key>UIViewControllerBasedStatusBarAppearance</key>
+		<true/>
+		
+		<!-- Background modes (if needed for notifications) -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
+		
+		<!-- ACCESSIBILITY & FEATURES -->
+		
+		<!-- Voice Over accessibility -->
+		<key>UIAccessibilityEnabled</key>
+		<true/>
+		
+		<!-- File sharing (if needed) -->
+		<key>UIFileSharingEnabled</key>
+		<false/>
+		
+		<!-- Documents support (if needed) -->
+		<key>LSSupportsOpeningDocumentsInPlace</key>
+		<false/>
+		
+		<!-- FIREBASE & NOTIFICATIONS -->
+		
+		<!-- Firebase configuration (if using Firebase) -->
+		<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+		<true/>
+		<key>FIREBASE_CRASHLYTICS_COLLECTION_ENABLED</key>
+		<true/>
+		
+		<!-- APP METADATA -->
+		
+		<!-- App category for App Store -->
+		<key>LSApplicationCategoryType</key>
+		<string>public.app-category.education</string>
+		
+		<!-- Minimum iOS version required -->
+		<key>MinimumOSVersion</key>
+		<string>12.0</string>
+		
+		<!-- App uses encryption (required for App Store) -->
+		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 	</dict>
 </plist>
