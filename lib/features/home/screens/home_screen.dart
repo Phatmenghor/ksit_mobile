@@ -214,7 +214,7 @@ class HomeScreen extends StatelessWidget {
         emptyTitle: 'No Classes Today',
         emptyMessage:
             'You don\'t have any classes scheduled for today.\nEnjoy your free time! 🎉',
-        emptyActionText: 'Refresh',
+        // emptyActionText: 'Refresh',
         onEmptyActionPressed: controller.refreshSchedules,
         onErrorRetry: () => controller.todaySchedulesPagingController.refresh(),
       ),
@@ -245,7 +245,7 @@ class HomeScreen extends StatelessWidget {
         emptyTitle: 'No Schedules Found',
         emptyMessage:
             'No schedules available for the selected filters.\nTry adjusting your selection.',
-        emptyActionText: 'Refresh',
+        // emptyActionText: 'Refresh',
         onEmptyActionPressed: controller.refreshSchedules,
         onErrorRetry: () => controller.allSchedulesPagingController.refresh(),
       ),
