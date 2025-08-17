@@ -109,26 +109,41 @@ class AppRouter {
         navigatorKey: GlobalKey<NavigatorState>(),
         builder: (context, state, child) => MainScreen(child: child),
         routes: [
+          // Bottom Navigation Routes with Pop Animation
           GoRoute(
             path: AppRoutes.homeRoute,
             name: 'home',
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) => _buildBottomNavPage(
+              state: state,
+              child: const HomeScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.scanRoute,
             name: 'scan',
-            builder: (context, state) => const ScanScreen(),
+            pageBuilder: (context, state) => _buildBottomNavPage(
+              state: state,
+              child: const ScanScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.requestRoute,
             name: 'request',
-            builder: (context, state) => const RequestScreen(),
+            pageBuilder: (context, state) => _buildBottomNavPage(
+              state: state,
+              child: const RequestScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.profileRoute,
             name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) => _buildBottomNavPage(
+              state: state,
+              child: const ProfileScreen(),
+            ),
           ),
+
+          // Other routes with default push animation
           GoRoute(
             path: AppRoutes.scheduleDetailRoute,
             name: 'schedule-detail',
@@ -205,6 +220,70 @@ class AppRouter {
     ),
   );
 
+  /// Build custom page with pop-style animation for bottom navigation
+  static CustomTransitionPage<void> _buildBottomNavPage({
+    required GoRouterState state,
+    required Widget child,
+  }) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 200),
+      reverseTransitionDuration: const Duration(milliseconds: 200),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return _buildPopTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  /// Build pop-style transition animation
+  static Widget _buildPopTransition({
+    required Animation<double> animation,
+    required Animation<double> secondaryAnimation,
+    required Widget child,
+  }) {
+    // Combine scale and fade animations for a "pop" effect
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        // Scale animation (starts small and grows to normal size)
+        final scaleAnimation = Tween<double>(
+          begin: 0.85,
+          end: 1.0,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutBack, // This gives the "pop" effect
+          ),
+        );
+
+        // Fade animation
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+          ),
+        );
+
+        return Transform.scale(
+          scale: scaleAnimation.value,
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
   static String? _redirect(BuildContext context, GoRouterState state) {
     final storageService = Get.find<StorageService>();
     final token = storageService.getString(AppConfig.tokenKey);
@@ -258,5 +337,71 @@ class AppRouter {
     ];
 
     return authRoutes.contains(path);
+  }
+}
+
+// Additional custom transition options you can use:
+
+/// Alternative slide from bottom transition (like iOS modal)
+class SlideFromBottomTransition {
+  static Widget build({
+    required Animation<double> animation,
+    required Animation<double> secondaryAnimation,
+    required Widget child,
+  }) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0.0, 1.0),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Alternative fade transition
+class FadeTransitionCustom {
+  static Widget build({
+    required Animation<double> animation,
+    required Animation<double> secondaryAnimation,
+    required Widget child,
+  }) {
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Alternative zoom transition (like Instagram navigation)
+class ZoomTransition {
+  static Widget build({
+    required Animation<double> animation,
+    required Animation<double> secondaryAnimation,
+    required Widget child,
+  }) {
+    return ScaleTransition(
+      scale: Tween<double>(
+        begin: 0.8,
+        end: 1.0,
+      ).animate(
+        CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutQuart,
+        ),
+      ),
+      child: FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
+    );
   }
 }
