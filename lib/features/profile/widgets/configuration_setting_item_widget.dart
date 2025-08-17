@@ -55,7 +55,7 @@ class ConfigurationSettingItem extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               activeTrackColor: AppColors.primary.withOpacity(0.3),
               inactiveThumbColor: Colors.grey[400],
               inactiveTrackColor: Colors.grey[300],

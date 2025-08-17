@@ -178,7 +178,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                             child: Container(
                               height: 3,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
+                                gradient: const LinearGradient(
                                   colors: [
                                     Colors.transparent,
                                     AppColors.primary,

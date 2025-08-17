@@ -1,6 +1,5 @@
 // lib/features/attendance/widgets/attendance_item_widget.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ksit_mobile/core/config/app_config.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/constants/app_image.dart';

@@ -1,5 +1,4 @@
 // lib/features/scan/controllers/scan_controller.dart (Simplified Working Version)
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:ksit_mobile/features/scan/models/qr_attendance_response_models.dart';

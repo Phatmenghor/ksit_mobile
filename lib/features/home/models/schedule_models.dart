@@ -1,7 +1,6 @@
 // lib/features/home/models/schedule_models.dart
 
 // Import the new utils instead of defining enums here
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:ksit_mobile/core/utils/enums_utils.dart';

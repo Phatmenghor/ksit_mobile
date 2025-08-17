@@ -172,9 +172,9 @@ class AttendanceResultModal {
             const SizedBox(height: 8),
 
             // Error Message
-            Text(
+            const Text(
               'Please try again...',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
               ),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_constants.dart';
-import 'enums_utils.dart';
 
 class UIUtils {
   // Private constructor to prevent instantiation
