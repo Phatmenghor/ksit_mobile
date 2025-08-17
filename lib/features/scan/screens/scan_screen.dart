@@ -1,4 +1,4 @@
-// lib/features/scan/screens/scan_screen.dart (Simple Working Version)
+// lib/features/scan/screens/scan_screen.dart (Updated with cooldown display)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -102,6 +102,11 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
               ? _buildProcessingOverlay()
               : const SizedBox.shrink()),
 
+          // Cooldown Overlay
+          Obx(() => scanController.scanCooldownSeconds.value > 0
+              ? _buildCooldownOverlay()
+              : const SizedBox.shrink()),
+
           // Bottom Instructions
           _buildInstructions(),
         ],
@@ -160,7 +165,8 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
 
               // Animated scanning line
               Obx(() => scanController.canScan.value &&
-                      !scanController.isSubmittingAttendance.value
+                      !scanController.isSubmittingAttendance.value &&
+                      scanController.scanCooldownSeconds.value == 0
                   ? AnimatedBuilder(
                       animation: _animation,
                       builder: (context, child) {
@@ -210,6 +216,64 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildCooldownOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.8),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Cooldown Timer
+            Obx(() => Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.warning,
+                      width: 4,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${scanController.scanCooldownSeconds.value}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Please wait before scanning again',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'This prevents duplicate scans',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildInstructions() {
     return Positioned(
       bottom: 0,
@@ -241,17 +305,33 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
                   color: Colors.white.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: Obx(() => Text(
-                      scanController.canScan.value
-                          ? 'Position QR code within the frame'
-                          : 'Processing QR code...',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    )),
+                child: Obx(() {
+                  String message;
+                  Color textColor = Colors.black87;
+
+                  if (scanController.isSubmittingAttendance.value) {
+                    message = 'Processing QR code...';
+                  } else if (scanController.scanCooldownSeconds.value > 0) {
+                    message =
+                        'Please wait ${scanController.scanCooldownSeconds.value}s before scanning';
+                    textColor = Colors.orange.shade800;
+                  } else if (scanController.canScan.value) {
+                    message = 'Position QR code within the frame';
+                  } else {
+                    message = 'Scanning paused';
+                    textColor = Colors.red.shade800;
+                  }
+
+                  return Text(
+                    message,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  );
+                }),
               ),
             ],
           ),

@@ -1,4 +1,4 @@
-// lib/features/scan/controllers/scan_controller.dart (Banking Style with Delay & Zoom)
+// lib/features/scan/controllers/scan_controller.dart (Fixed with immediate cooldown)
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -35,7 +35,7 @@ class ScanController extends GetxController {
   final RxDouble maxZoom = 3.0.obs;
 
   // Scan delay settings (like banking apps)
-  static const int scanDelayDuration = 3; // 3 seconds delay between scans
+  static const int scanDelayDuration = 5; // 5 seconds delay between scans
   static const int processingDelay = 1; // 1 second processing simulation
 
   Timer? _cooldownTimer;
@@ -104,6 +104,9 @@ class ScanController extends GetxController {
     canScan.value = false;
     scannedQrCode.value = result;
 
+    // Start cooldown immediately after scan detection
+    _startScanCooldown();
+
     // Haptic feedback (like banking apps)
     HapticFeedback.mediumImpact();
 
@@ -133,6 +136,7 @@ class ScanController extends GetxController {
       LoggerUtils.error('Error submitting attendance', e);
     } finally {
       isSubmittingAttendance.value = false;
+      isScanning.value = false;
     }
   }
 
@@ -146,7 +150,8 @@ class ScanController extends GetxController {
       attendanceData: response.data,
       onDone: () {
         Get.back();
-        _startScanCooldown();
+        // Cooldown already started, just log
+        LoggerUtils.info('Success modal dismissed - cooldown already active');
       },
     );
   }
@@ -160,13 +165,13 @@ class ScanController extends GetxController {
       message: errorMessage,
       onRetry: () {
         Get.back();
-        _startScanCooldown(duration: 2); // Shorter cooldown for retry
+        // Reset cooldown for retry (shorter duration)
+        _resetForRetry();
       },
     );
   }
 
   void _startScanCooldown({int duration = scanDelayDuration}) {
-    isScanning.value = false;
     scanCooldownSeconds.value = duration;
 
     _cooldownTimer?.cancel();
@@ -178,8 +183,18 @@ class ScanController extends GetxController {
         LoggerUtils.info('Scan cooldown ended - ready to scan');
       } else {
         scanCooldownSeconds.value--;
+        LoggerUtils.debug('Cooldown: ${scanCooldownSeconds.value}s remaining');
       }
     });
+
+    LoggerUtils.info('Scan cooldown started: ${duration}s');
+  }
+
+  void _resetForRetry() {
+    // For retry, use shorter cooldown
+    _cooldownTimer?.cancel();
+    _startScanCooldown(duration: 2);
+    LoggerUtils.info('Retry cooldown started: 2s');
   }
 
   // Zoom controls (UI simulation since API doesn't support real zoom)
@@ -270,6 +285,7 @@ class ScanController extends GetxController {
   // Status getters
   bool get canStartNewScan =>
       canScan.value && !isScanning.value && scanCooldownSeconds.value == 0;
+
   String get scanStatus {
     if (isSubmittingAttendance.value) return 'Processing...';
     if (isScanning.value) return 'Scanning...';
