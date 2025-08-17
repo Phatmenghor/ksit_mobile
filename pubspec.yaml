@@ -44,7 +44,7 @@ dependencies:
   modal_bottom_sheet: ^3.0.0
   url_launcher: ^6.3.1
 
-  # QR Code Scanner - Use stable version
+  # QR Code Scanner - mobile_scanner handles permissions automatically
   mobile_scanner: ^3.5.7
 
 dev_dependencies:
@@ -108,10 +108,3 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/images/logo_app.png"
-# Alternative configuration with adaptive icons for Android
-# flutter_launcher_icons:
-#   android: "launcher_icon"
-#   ios: true
-#   image_path: "assets/images/logo_screen.png"
-#   adaptive_icon_background: "#024D3E"  # Background color for adaptive icon
-#   adaptive_icon_foreground: "assets/images/logo_screen.png"  # Foreground image for adaptive icon

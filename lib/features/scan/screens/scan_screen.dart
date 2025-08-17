@@ -1,4 +1,4 @@
-// lib/features/scan/screens/scan_screen.dart (Simplified Working Version)
+// lib/features/scan/screens/scan_screen.dart (Simple Working Version)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -13,38 +13,36 @@ class ScanScreen extends StatefulWidget {
   State<ScanScreen> createState() => _ScanScreenState();
 }
 
-class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
+class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   final scanController = Get.put(ScanController());
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+
+    // Simple animation for scanning line
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _animationController.repeat();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _animationController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        scanController.resumeScanning();
-        break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.inactive:
-        scanController.pauseScanning();
-        break;
-      case AppLifecycleState.detached:
-        scanController.stopScanner();
-        break;
-      case AppLifecycleState.hidden:
-        scanController.pauseScanning();
-        break;
-    }
   }
 
   @override
@@ -92,22 +90,20 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
       ),
       body: Stack(
         children: [
-          // Simple Mobile Scanner
+          // Simple Mobile Scanner - handles permissions automatically
           MobileScanner(
             controller: scanController.scannerController,
             onDetect: scanController.onDetect,
+            overlay: _buildScanOverlay(),
           ),
-
-          // Simple Scan Overlay
-          _buildScanOverlay(),
-
-          // Bottom Instructions
-          _buildInstructions(),
 
           // Processing Overlay
           Obx(() => scanController.isSubmittingAttendance.value
               ? _buildProcessingOverlay()
               : const SizedBox.shrink()),
+
+          // Bottom Instructions
+          _buildInstructions(),
         ],
       ),
     );
@@ -162,48 +158,51 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                 );
               }),
 
-              // Simple scanning line animation
+              // Animated scanning line
               Obx(() => scanController.canScan.value &&
                       !scanController.isSubmittingAttendance.value
-                  ? AnimatedContainer(
-                      duration: const Duration(seconds: 2),
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0, end: 1),
-                        duration: const Duration(seconds: 2),
-                        builder: (context, value, child) {
-                          return Positioned(
-                            top: value * 260,
-                            left: 10,
-                            right: 10,
-                            child: Container(
-                              height: 3,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Colors.transparent,
-                                    AppColors.primary,
-                                    Colors.transparent,
-                                  ],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.6),
-                                    blurRadius: 10,
-                                    spreadRadius: 2,
-                                  ),
+                  ? AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        return Positioned(
+                          top: _animation.value * 260,
+                          left: 10,
+                          right: 10,
+                          child: Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  AppColors.primary,
+                                  Colors.transparent,
                                 ],
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.6),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                        onEnd: () {
-                          if (mounted && scanController.canScan.value) {
-                            setState(() {});
-                          }
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     )
                   : const SizedBox.shrink()),
+
+              // Center focus point
+              Center(
+                child: Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
