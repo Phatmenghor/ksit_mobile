@@ -1,4 +1,4 @@
-// lib/features/scan/controllers/scan_controller.dart (Fixed with immediate cooldown)
+// lib/features/scan/controllers/scan_controller.dart (With Detection Delay)
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -24,22 +24,27 @@ class ScanController extends GetxController {
   final RxBool canScan = true.obs;
   final Rx<CameraFacing> cameraFacing = CameraFacing.back.obs;
 
-  // Banking-style scanning controls
-  final RxBool isScanning = false.obs;
+  // Detection and scanning states
+  final RxBool isDetecting = false.obs; // When QR is detected but waiting
+  final RxBool isScanning = false.obs; // When actually processing
   final RxInt scanCooldownSeconds = 0.obs;
+  final RxInt detectionCountdown = 0.obs; // Countdown for detection delay
   final RxBool hasScannedInSession = false.obs;
 
-  // Zoom controls (UI-based since API doesn't support it)
+  // Zoom controls
   final RxDouble currentZoom = 1.0.obs;
   final RxDouble minZoom = 1.0.obs;
   final RxDouble maxZoom = 3.0.obs;
 
-  // Scan delay settings (like banking apps)
-  static const int scanDelayDuration = 5; // 5 seconds delay between scans
-  static const int processingDelay = 1; // 1 second processing simulation
+  // Timing settings
+  static const int detectionDelayDuration =
+      2; // 2 seconds to confirm QR detection
+  static const int scanCooldownDuration = 3; // 3 seconds cooldown between scans
 
   Timer? _cooldownTimer;
-  Timer? _processingTimer;
+  Timer? _detectionTimer;
+  Timer? _detectionCountdownTimer;
+  String? _pendingQrCode;
 
   @override
   void onInit() {
@@ -50,7 +55,8 @@ class ScanController extends GetxController {
   @override
   void onClose() {
     _cooldownTimer?.cancel();
-    _processingTimer?.cancel();
+    _detectionTimer?.cancel();
+    _detectionCountdownTimer?.cancel();
     try {
       scannerController.dispose();
     } catch (e) {
@@ -62,7 +68,8 @@ class ScanController extends GetxController {
   void _initializeScanner() {
     try {
       scannerController = MobileScannerController(
-        detectionSpeed: DetectionSpeed.noDuplicates,
+        detectionSpeed: DetectionSpeed
+            .normal, // Changed from noDuplicates for better control
         facing: CameraFacing.back,
         torchEnabled: false,
       );
@@ -74,15 +81,16 @@ class ScanController extends GetxController {
   }
 
   void onDetect(BarcodeCapture capture) {
-    // Banking-style scan controls
-    if (!canScan.value || isScanning.value || isSubmittingAttendance.value) {
+    // Check if we can scan
+    if (!canScan.value ||
+        isScanning.value ||
+        isSubmittingAttendance.value ||
+        isDetecting.value) {
       return;
     }
 
-    // Prevent multiple scans too quickly
+    // Check cooldown
     if (scanCooldownSeconds.value > 0) {
-      LoggerUtils.info(
-          'Scan blocked - cooldown active: ${scanCooldownSeconds.value}s');
       return;
     }
 
@@ -90,32 +98,78 @@ class ScanController extends GetxController {
     for (final barcode in barcodes) {
       final String? code = barcode.rawValue;
       if (code != null && code.isNotEmpty) {
-        _processScanResult(code);
+        _startDetectionDelay(code);
         break;
       }
     }
   }
 
-  void _processScanResult(String result) {
-    if (isScanning.value || isSubmittingAttendance.value) return;
+  void _startDetectionDelay(String qrCode) {
+    // Prevent multiple detections
+    if (isDetecting.value) return;
+
+    isDetecting.value = true;
+    _pendingQrCode = qrCode;
+    detectionCountdown.value = detectionDelayDuration;
+
+    // Light haptic feedback on detection
+    HapticFeedback.selectionClick();
+
+    LoggerUtils.info('QR Code detected, starting detection delay: $qrCode');
+
+    // Start countdown timer
+    _detectionCountdownTimer =
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (detectionCountdown.value <= 1) {
+        detectionCountdown.value = 0;
+        timer.cancel();
+        _processScanResult();
+      } else {
+        detectionCountdown.value--;
+      }
+    });
+
+    // Auto-cancel if user moves QR away
+    _detectionTimer = Timer(Duration(seconds: detectionDelayDuration), () {
+      if (isDetecting.value && _pendingQrCode == qrCode) {
+        _processScanResult();
+      }
+    });
+  }
+
+  void _cancelDetection() {
+    _detectionTimer?.cancel();
+    _detectionCountdownTimer?.cancel();
+    isDetecting.value = false;
+    detectionCountdown.value = 0;
+    _pendingQrCode = null;
+    LoggerUtils.info('Detection cancelled');
+  }
+
+  void _processScanResult() {
+    if (_pendingQrCode == null ||
+        isScanning.value ||
+        isSubmittingAttendance.value) return;
+
+    // Clear detection state
+    _detectionTimer?.cancel();
+    _detectionCountdownTimer?.cancel();
+    isDetecting.value = false;
+    detectionCountdown.value = 0;
 
     // Set scanning state
     isScanning.value = true;
     canScan.value = false;
-    scannedQrCode.value = result;
+    scannedQrCode.value = _pendingQrCode!;
 
-    // Start cooldown immediately after scan detection
-    _startScanCooldown();
-
-    // Haptic feedback (like banking apps)
+    // Medium haptic feedback for actual scan
     HapticFeedback.mediumImpact();
 
-    LoggerUtils.info('QR Code scanned: $result');
+    LoggerUtils.info('Processing QR Code: ${_pendingQrCode}');
 
-    // Banking-style processing delay
-    _processingTimer = Timer(Duration(seconds: processingDelay), () {
-      _submitAttendance(result);
-    });
+    // Start submission
+    _submitAttendance(_pendingQrCode!);
+    _pendingQrCode = null;
   }
 
   Future<void> _submitAttendance(String qrCode) async {
@@ -137,6 +191,7 @@ class ScanController extends GetxController {
     } finally {
       isSubmittingAttendance.value = false;
       isScanning.value = false;
+      _startScanCooldown();
     }
   }
 
@@ -145,13 +200,12 @@ class ScanController extends GetxController {
     HapticFeedback.lightImpact();
 
     AttendanceResultModal.showSuccess(
-      title: 'Attendance Recorded',
+      title: 'Attendance Recorded Successfully',
       message: response.message,
       attendanceData: response.data,
       onDone: () {
         Get.back();
-        // Cooldown already started, just log
-        LoggerUtils.info('Success modal dismissed - cooldown already active');
+        LoggerUtils.info('Success modal dismissed');
       },
     );
   }
@@ -161,17 +215,16 @@ class ScanController extends GetxController {
     HapticFeedback.vibrate();
 
     AttendanceResultModal.showError(
-      title: 'Scan Failed',
+      title: 'Attendance Failed',
       message: errorMessage,
       onRetry: () {
         Get.back();
-        // Reset cooldown for retry (shorter duration)
-        _resetForRetry();
+        _startScanCooldown(duration: 1); // Quick retry
       },
     );
   }
 
-  void _startScanCooldown({int duration = scanDelayDuration}) {
+  void _startScanCooldown({int duration = scanCooldownDuration}) {
     scanCooldownSeconds.value = duration;
 
     _cooldownTimer?.cancel();
@@ -183,27 +236,26 @@ class ScanController extends GetxController {
         LoggerUtils.info('Scan cooldown ended - ready to scan');
       } else {
         scanCooldownSeconds.value--;
-        LoggerUtils.debug('Cooldown: ${scanCooldownSeconds.value}s remaining');
       }
     });
 
     LoggerUtils.info('Scan cooldown started: ${duration}s');
   }
 
-  void _resetForRetry() {
-    // For retry, use shorter cooldown
-    _cooldownTimer?.cancel();
-    _startScanCooldown(duration: 2);
-    LoggerUtils.info('Retry cooldown started: 2s');
+  // Manual cancel detection (if user wants to cancel)
+  void cancelCurrentDetection() {
+    if (isDetecting.value) {
+      _cancelDetection();
+      HapticFeedback.selectionClick();
+    }
   }
 
-  // Zoom controls (UI simulation since API doesn't support real zoom)
+  // Zoom controls
   void zoomIn() {
     final newZoom =
         (currentZoom.value + 0.2).clamp(minZoom.value, maxZoom.value);
     currentZoom.value = newZoom;
     HapticFeedback.selectionClick();
-    LoggerUtils.info('Zoom in: ${currentZoom.value.toStringAsFixed(1)}x');
   }
 
   void zoomOut() {
@@ -211,13 +263,11 @@ class ScanController extends GetxController {
         (currentZoom.value - 0.2).clamp(minZoom.value, maxZoom.value);
     currentZoom.value = newZoom;
     HapticFeedback.selectionClick();
-    LoggerUtils.info('Zoom out: ${currentZoom.value.toStringAsFixed(1)}x');
   }
 
   void resetZoom() {
     currentZoom.value = 1.0;
     HapticFeedback.selectionClick();
-    LoggerUtils.info('Zoom reset to 1.0x');
   }
 
   // Flash and camera controls
@@ -226,7 +276,6 @@ class ScanController extends GetxController {
       await scannerController.toggleTorch();
       isFlashOn.value = !isFlashOn.value;
       HapticFeedback.selectionClick();
-      LoggerUtils.info('Flash toggled: ${isFlashOn.value}');
     } catch (e) {
       LoggerUtils.error('Failed to toggle flash', e);
     }
@@ -238,61 +287,48 @@ class ScanController extends GetxController {
       cameraFacing.value = cameraFacing.value == CameraFacing.back
           ? CameraFacing.front
           : CameraFacing.back;
-
       HapticFeedback.selectionClick();
-      LoggerUtils.info('Camera switched to: ${cameraFacing.value}');
     } catch (e) {
       LoggerUtils.error('Failed to switch camera', e);
-    }
-  }
-
-  // Manual scan trigger (for testing)
-  void manualScan() {
-    if (canScan.value && !isScanning.value && scanCooldownSeconds.value == 0) {
-      // Simulate a QR code scan for testing
-      _processScanResult(
-          'TEST_QR_CODE_${DateTime.now().millisecondsSinceEpoch}');
     }
   }
 
   // Reset scanning session
   void resetSession() {
     _cooldownTimer?.cancel();
-    _processingTimer?.cancel();
+    _detectionTimer?.cancel();
+    _detectionCountdownTimer?.cancel();
 
+    isDetecting.value = false;
     isScanning.value = false;
     isSubmittingAttendance.value = false;
     canScan.value = true;
     scanCooldownSeconds.value = 0;
+    detectionCountdown.value = 0;
     hasScannedInSession.value = false;
     scannedQrCode.value = '';
     currentZoom.value = 1.0;
+    _pendingQrCode = null;
 
     LoggerUtils.info('Scan session reset');
   }
 
-  void pauseScanning() {
-    canScan.value = false;
-    isScanning.value = false;
-  }
-
-  void resumeScanning() {
-    if (!isSubmittingAttendance.value && scanCooldownSeconds.value == 0) {
-      canScan.value = true;
-    }
-  }
-
   // Status getters
   bool get canStartNewScan =>
-      canScan.value && !isScanning.value && scanCooldownSeconds.value == 0;
+      canScan.value &&
+      !isScanning.value &&
+      !isDetecting.value &&
+      scanCooldownSeconds.value == 0;
 
   String get scanStatus {
     if (isSubmittingAttendance.value) return 'Processing...';
     if (isScanning.value) return 'Scanning...';
+    if (isDetecting.value)
+      return 'Detected! Scanning in ${detectionCountdown.value}s';
     if (scanCooldownSeconds.value > 0)
       return 'Wait ${scanCooldownSeconds.value}s';
     if (!canScan.value) return 'Ready';
-    return 'Scan QR Code';
+    return 'Position QR Code';
   }
 
   String get zoomDisplay => '${currentZoom.value.toStringAsFixed(1)}x';
