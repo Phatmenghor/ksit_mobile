@@ -8,6 +8,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// ADD KEYSTORE PROPERTIES HERE (after plugins block)
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     // IMPROVED: Change to a more professional package name
     namespace = "com.ksit.mobile"  // Changed from com.example.ksit_mobile
@@ -21,6 +28,10 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -42,6 +53,16 @@ android {
         buildConfigField "int", "VERSION_CODE", "${flutter.versionCode}"
     }
 
+    // ADD THIS: Signing configurations
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     buildTypes {
         debug {
             // Debug configuration
@@ -51,14 +72,11 @@ android {
         }
         
         release {
-            // IMPROVED: Better release configuration
+            // IMPROVED: Better release configuration with proper signing
+            signingConfig signingConfigs.release  // CHANGED: Use release signing instead of debug
             minifyEnabled true  // Enable code shrinking
             shrinkResources true  // Enable resource shrinking
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
     

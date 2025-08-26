@@ -48,7 +48,7 @@ class ApiErrorUtils {
           case 500:
             return 'Server error. Please try again later.';
           default:
-            return 'Network error occurred.';
+            return 'Fail to login. Please try again or contact support.';
         }
       }
 

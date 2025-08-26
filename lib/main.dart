@@ -9,7 +9,6 @@ import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';
 import 'core/utils/logger_utils.dart';
 import 'routes/app_router.dart';
-import 'firebase_options.dart';
 
 void main() async {
   // Preserve native splash screen
@@ -20,7 +19,7 @@ void main() async {
   try {
     LoggerUtils.info('Starting app initialization...');
 
-    // Initialize Firebase with platform-specific options
+    // // Initialize Firebase with platform-specific options
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
