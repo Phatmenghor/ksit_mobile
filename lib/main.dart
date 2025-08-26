@@ -4,6 +4,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:ksit_mobile/bindings/initial_bindings.dart';
 import 'package:ksit_mobile/core/constants/app_constants.dart';
+import 'package:ksit_mobile/firebase_options.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/services/firebase_service.dart';

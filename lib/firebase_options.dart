@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBseXGdQCOADedtVZ3vhksprLvHMaXHYoo',
-    appId: '1:45539224275:android:6af3f129505e7a8a954226',
+    appId: '1:45539224275:android:87353de061c1211f954226',
     messagingSenderId: '45539224275',
     projectId: 'ksit-dev',
     storageBucket: 'ksit-dev.firebasestorage.app',

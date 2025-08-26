@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:45539224275:android:6af3f129505e7a8a954226",
+        "mobilesdk_app_id": "1:45539224275:android:87353de061c1211f954226",
         "android_client_info": {
-          "package_name": "com.example.ksit_mobile"
+          "package_name": "com.ksit.mobile"
         }
       },
       "oauth_client": [],
