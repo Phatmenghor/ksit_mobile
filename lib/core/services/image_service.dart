@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ksit_mobile/core/services/api_service.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
+import 'package:ksit_mobile/core/utils/logger_utils.dart';
 import 'package:ksit_mobile/shared/models/image_upload_models.dart';
 
 class ImageService extends GetxService {
@@ -65,19 +66,31 @@ class ImageService extends GetxService {
 
   Future<ImageDto> _uploadImageFile(XFile imageFile, String category) async {
     try {
+      // Read image file as bytes
       final Uint8List imageBytes = await imageFile.readAsBytes();
+
+      // Convert to base64 (without data URL prefix)
       final String base64Image = base64Encode(imageBytes);
 
-      // Extract file extension
+      // Extract actual file extension from the file path
       final String fileExtension = imageFile.path.split('.').last.toLowerCase();
 
+      // Validate file extension
+      const validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+      if (!validExtensions.contains(fileExtension)) {
+        throw Exception('Unsupported file type: $fileExtension');
+      }
+
+      // Create upload request with correct type (file extension, not category)
       final request = ImageUploadRequest(
-        type: fileExtension,
+        type: fileExtension, // 'jpg', 'png', etc. - NOT 'profile'
         base64: base64Image,
       );
 
+      LoggerUtils.info('Sending request: ${request.toJson()}');
       return await uploadImage(request);
     } catch (e) {
+      LoggerUtils.error('Failed to process image file: $e');
       ApiErrorUtils.throwApiError(e, 'Failed to process image file');
     }
   }
@@ -86,11 +99,11 @@ class ImageService extends GetxService {
   Future<ImageDto> uploadImage(ImageUploadRequest request) async {
     try {
       final response = await _apiService.post(
-        '/api/images',
+        '/images', // Remove '/api' to match web endpoint
         data: request.toJson(),
       );
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 201 && response.data != null) {
         final responseData = response.data;
 
         return ImageDto.fromJson(responseData);

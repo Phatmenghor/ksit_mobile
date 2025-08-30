@@ -141,31 +141,6 @@ class ProfileService extends GetxService {
     }
   }
 
-  /// Get profile statistics (if needed)
-  Future<Map<String, dynamic>> getProfileStats() async {
-    try {
-      final response = await _apiService.get('/v1/profile/stats');
-
-      if (response.statusCode == 200 && response.data != null) {
-        final responseData = response.data;
-
-        if (responseData['status'] == 'success' &&
-            responseData['data'] != null) {
-          return responseData['data'] as Map<String, dynamic>;
-        } else {
-          throw Exception(
-              'API Error: ${responseData['message'] ?? 'Unknown error'}');
-        }
-      } else {
-        throw Exception(
-            'Failed to fetch profile stats: ${response.statusCode}');
-      }
-    } catch (e) {
-      ApiErrorUtils.throwApiError(
-          e, 'Failed to fetch profile statistics. Please try again.');
-    }
-  }
-
   /// Update staff profile by token
   Future<StaffProfileModel> updateStaffProfileByToken(
       Map<String, dynamic> updateData) async {

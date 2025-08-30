@@ -41,7 +41,6 @@ class ProfileController extends GetxController {
     super.onInit();
     _determineUserRole();
     _loadProfileData();
-    _loadProfileStats();
   }
 
   /// Determine user role from stored data
@@ -132,31 +131,10 @@ class ProfileController extends GetxController {
     }
   }
 
-  /// Load profile statistics
-  Future<void> _loadProfileStats() async {
-    try {
-      // Try to get stats from API
-      final stats = await _profileService.getProfileStats();
-
-      totalRequests.value = stats['totalRequests'] ?? 0;
-      completedRequests.value = stats['completedRequests'] ?? 0;
-      totalScans.value = stats['totalScans'] ?? 0;
-
-      LoggerUtils.info('Profile stats loaded successfully');
-    } catch (e) {
-      LoggerUtils.error('Error loading profile stats, using mock data', e);
-      // Use mock data as fallback
-      totalRequests.value = 25;
-      completedRequests.value = 18;
-      totalScans.value = 42;
-    }
-  }
-
   /// Refresh all profile data
   Future<void> refreshProfile() async {
     await Future.wait([
       _loadProfileData(),
-      _loadProfileStats(),
     ]);
     ToastUtils.showSuccess('Profile refreshed successfully');
   }
