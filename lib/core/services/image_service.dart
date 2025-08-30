@@ -63,18 +63,16 @@ class ImageService extends GetxService {
     }
   }
 
-  /// Upload image file
-  Future<ImageDto> _uploadImageFile(XFile imageFile, String type) async {
+  Future<ImageDto> _uploadImageFile(XFile imageFile, String category) async {
     try {
-      // Read image file as bytes
       final Uint8List imageBytes = await imageFile.readAsBytes();
-
-      // Convert to base64
       final String base64Image = base64Encode(imageBytes);
 
-      // Create upload request
+      // Extract file extension
+      final String fileExtension = imageFile.path.split('.').last.toLowerCase();
+
       final request = ImageUploadRequest(
-        type: type,
+        type: fileExtension,
         base64: base64Image,
       );
 
@@ -95,13 +93,7 @@ class ImageService extends GetxService {
       if (response.statusCode == 200 && response.data != null) {
         final responseData = response.data;
 
-        if (responseData['status'] == 'success' &&
-            responseData['data'] != null) {
-          return ImageDto.fromJson(responseData['data']);
-        } else {
-          throw Exception(
-              'API Error: ${responseData['message'] ?? 'Unknown error'}');
-        }
+        return ImageDto.fromJson(responseData);
       } else {
         throw Exception('Failed to upload image: ${response.statusCode}');
       }

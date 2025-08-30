@@ -1,4 +1,6 @@
 // lib/features/profile/screens/edit_student_profile_screen.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -62,10 +64,10 @@ class EditStudentProfileScreen extends StatelessWidget {
         );
       }),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 32,
+          bottom: _getBottomPadding(context),
           top: 16,
         ),
         child: Row(
@@ -132,6 +134,14 @@ class EditStudentProfileScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _getBottomPadding(BuildContext context) {
+    if (Platform.isAndroid) {
+      final hasBottomSystemUI = MediaQuery.of(context).padding.bottom > 0;
+      return hasBottomSystemUI ? 96 : 64; // More space for nav buttons
+    }
+    return 32; // iOS
   }
 
   Widget _buildProfileHeader(EditProfileController controller) {

@@ -5,12 +5,18 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/constants/app_routes.dart';
 import 'package:ksit_mobile/core/constants/app_storages.dart';
+import 'package:ksit_mobile/core/services/api_service.dart';
+import 'package:ksit_mobile/core/services/firebase_service.dart';
 import 'package:ksit_mobile/core/utils/api_error_utils.dart';
 import 'package:ksit_mobile/core/utils/toast_utils.dart';
 import 'package:ksit_mobile/core/utils/validator_utils.dart';
 import 'package:ksit_mobile/features/auth/models/login_request_model.dart';
 import 'package:ksit_mobile/features/auth/models/login_response_model.dart';
 import 'package:ksit_mobile/features/auth/services/auth_service.dart';
+import 'package:ksit_mobile/features/home/controllers/home_controller.dart';
+import 'package:ksit_mobile/features/profile/controllers/profile_controller.dart';
+import 'package:ksit_mobile/features/requet/controllers/request_controller.dart';
+import 'package:ksit_mobile/features/scan/controllers/scan_controller.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/ui_utils.dart';
@@ -105,31 +111,109 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Logout user and clear session
   Future<void> logout() async {
     try {
       isLoading.value = true;
 
-      final response = await _authService.logout();
+      await _authService.logout();
 
+      // Clear user data from storage
       await _clearUserData();
-      final message = response['message'] ?? 'Logged out successfully';
 
-      // Navigate to login
+      // Navigate FIRST before clearing state
       if (Get.context != null) {
-        ToastUtils.showSuccess(message);
+        ToastUtils.showSuccess("Logged out successfully");
         Get.context!.go(AppRoutes.loginRoute);
       }
+
+      // Wait for navigation to complete
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Selective clearing - only clear user-specific controllers
+      _clearUserRelatedControllers();
     } catch (e) {
-      // Still clear local data even if API call fails
+      // Still clear local data and navigate even if API call fails
       await _clearUserData();
 
       if (Get.context != null) {
         ToastUtils.showSuccess("Logged out successfully");
         Get.context!.go(AppRoutes.loginRoute);
       }
+
+      // Wait for navigation then clear state
+      await Future.delayed(const Duration(milliseconds: 300));
+      _clearUserRelatedControllers();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Clear only user-related controllers, preserve essential services
+  void _clearUserRelatedControllers() {
+    try {
+      // Clear user-specific controllers while keeping essential services
+      Get.delete<HomeController>(force: true);
+      Get.delete<RequestController>(force: true);
+      Get.delete<ProfileController>(force: true);
+      Get.delete<RequestController>(force: true);
+      Get.delete<ScanController>(force: true);
+
+      // Reset current user data in AuthController without deleting the controller
+      currentUser.value = null;
+      isLoggedIn.value = false;
+
+      // Clear form fields
+      _clearForm();
+    } catch (e) {
+      // Fallback to complete reset if selective clearing fails
+      _performCompleteReset();
+    }
+  }
+
+  /// Complete reset with service preservation (fallback method)
+  void _performCompleteReset() async {
+    try {
+      // Store essential services before reset
+      final storageService = Get.find<StorageService>();
+      final authService = Get.find<AuthService>();
+      final apiService = Get.find<ApiService>();
+      final firebaseService = Get.find<FirebaseService>();
+
+      // Clear all GetX controllers and their state
+      Get.reset();
+
+      // Re-register essential services immediately
+      Get.put<StorageService>(storageService, permanent: true);
+      Get.put<ApiService>(apiService, permanent: true);
+      Get.put<FirebaseService>(firebaseService, permanent: true);
+
+      // Re-register auth service and controller for login
+      Get.lazyPut<AuthService>(() => authService, fenix: true);
+      Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+    } catch (serviceError) {
+      // Fallback: Re-run initial binding
+      Get.reset();
+      await _reinitializeEssentialServices();
+    }
+  }
+
+  /// Fallback method to reinitialize essential services
+  Future<void> _reinitializeEssentialServices() async {
+    try {
+      // Re-initialize storage service
+      final storageService = await StorageService.getInstance();
+      Get.put<StorageService>(storageService, permanent: true);
+
+      // Re-initialize other essential services
+      Get.put<ApiService>(ApiService(), permanent: true);
+      Get.put<FirebaseService>(FirebaseService(), permanent: true);
+
+      // Re-initialize auth service and controller
+      Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
+      Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+    } catch (e) {
+      // Last resort - show error
+      ToastUtils.showError("Please restart the app");
     }
   }
 
