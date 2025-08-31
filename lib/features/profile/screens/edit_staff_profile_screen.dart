@@ -1,4 +1,6 @@
 // lib/features/profile/screens/edit_staff_profile_screen.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -38,41 +40,63 @@ class EditStaffProfileScreen extends StatelessWidget {
             color: Colors.white,
             size: 22,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            // Dismiss keyboard before navigation
+            FocusScope.of(context).unfocus();
+            context.pop();
+          },
         ),
       ),
-      body: Obx(() {
-        if (profileController.isLoading.value) {
-          return const LoadingWidget(
-            message: '',
-            overlay: false,
+      // Don't resize to avoid bottom inset - handle manually
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        // Dismiss keyboard when tapping outside form fields
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Obx(() {
+          if (profileController.isLoading.value) {
+            return const LoadingWidget(
+              message: '',
+              overlay: false,
+            );
+          }
+
+          return SingleChildScrollView(
+            // Remove automatic keyboard padding - handle it manually
+            child: Column(
+              children: [
+                // Profile Header Section
+                _buildProfileHeader(editController),
+
+                // Form Section
+                _buildFormSection(editController, context),
+
+                // Dynamic bottom padding based on keyboard state
+                SizedBox(height: _getContentBottomPadding(context)),
+              ],
+            ),
           );
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              // Profile Header Section
-              _buildProfileHeader(editController),
-
-              // Form Section
-              _buildFormSection(editController, context),
-            ],
-          ),
-        );
-      }),
+        }),
+      ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 32,
+          bottom: _getBottomPadding(context),
           top: 16,
         ),
+        // Keep it floating above keyboard
+        color: Colors.white,
         child: Row(
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  // Dismiss keyboard and navigate
+                  FocusScope.of(context).unfocus();
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    context.pop();
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
@@ -100,7 +124,11 @@ class EditStaffProfileScreen extends StatelessWidget {
               child: Obx(() => ElevatedButton(
                     onPressed: editController.isLoading.value
                         ? null
-                        : editController.saveProfile,
+                        : () {
+                            // Dismiss keyboard before saving
+                            FocusScope.of(context).unfocus();
+                            editController.saveProfile();
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.warning,
                       foregroundColor: Colors.white,
@@ -134,6 +162,35 @@ class EditStaffProfileScreen extends StatelessWidget {
     );
   }
 
+  double _getContentBottomPadding(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final buttonBarHeight = 80; // Approximate height of button bar
+
+    if (keyboardHeight > 0) {
+      // When keyboard is open, add padding to ensure content is scrollable above keyboard + buttons
+      return keyboardHeight + buttonBarHeight + 16;
+    } else {
+      // When keyboard is closed, just add space for buttons
+      return buttonBarHeight + 32;
+    }
+  }
+
+  double _getBottomPadding(BuildContext context) {
+    final bottomInsets = MediaQuery.of(context).viewInsets.bottom;
+    final systemPadding = MediaQuery.of(context).padding.bottom;
+
+    if (Platform.isAndroid) {
+      // If keyboard is open, position buttons above keyboard
+      if (bottomInsets > 0) {
+        return bottomInsets + 16;
+      }
+      final hasBottomSystemUI = systemPadding > 0;
+      return hasBottomSystemUI ? 96 : 64; // More space for nav buttons
+    }
+    // iOS - adjust for keyboard
+    return bottomInsets > 0 ? bottomInsets + 16 : 32;
+  }
+
   Widget _buildProfileHeader(EditProfileController controller) {
     return Padding(
       padding: const EdgeInsets.only(top: 32),
@@ -152,7 +209,11 @@ class EditStaffProfileScreen extends StatelessWidget {
                     bottom: 0,
                     right: 0,
                     child: GestureDetector(
-                      onTap: controller.uploadProfileImage,
+                      onTap: () {
+                        // Dismiss keyboard before opening image picker
+                        FocusScope.of(Get.context!).unfocus();
+                        controller.uploadProfileImage();
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
@@ -272,6 +333,10 @@ class EditStaffProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
+                    onSubmitted: (value) {
+                      // Move focus to next field
+                      FocusScope.of(context).nextFocus();
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -282,6 +347,9 @@ class EditStaffProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
+                    onSubmitted: (value) {
+                      FocusScope.of(context).nextFocus();
+                    },
                   ),
                 ),
               ],
@@ -307,6 +375,9 @@ class EditStaffProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
+                    onSubmitted: (value) {
+                      FocusScope.of(context).nextFocus();
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -317,6 +388,9 @@ class EditStaffProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
+                    onSubmitted: (value) {
+                      FocusScope.of(context).nextFocus();
+                    },
                   ),
                 ),
               ],
@@ -336,6 +410,8 @@ class EditStaffProfileScreen extends StatelessWidget {
             Obx(() => GenderSelectionField(
                   selectedGender: controller.selectedGender.value,
                   onChanged: (GenderEnum? value) {
+                    // Dismiss keyboard when selecting gender
+                    FocusScope.of(context).unfocus();
                     controller.selectedGender.value = value;
                   },
                   fillColor: Colors.white,
@@ -361,6 +437,9 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                FocusScope.of(context).nextFocus();
+              },
             ),
 
             const SizedBox(height: 16),
@@ -381,7 +460,11 @@ class EditStaffProfileScreen extends StatelessWidget {
               readOnly: true,
               suffixIcon: const Icon(Icons.calendar_month),
               fillColor: Colors.white,
-              onTap: () => controller.selectDate(context),
+              onTap: () {
+                // Dismiss keyboard before opening date picker
+                FocusScope.of(context).unfocus();
+                controller.selectDate(context);
+              },
               borderRadius: BorderRadius.circular(4),
             ),
 
@@ -404,6 +487,9 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                FocusScope.of(context).nextFocus();
+              },
             ),
 
             const SizedBox(height: 16),
@@ -424,6 +510,9 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                FocusScope.of(context).nextFocus();
+              },
             ),
 
             const SizedBox(height: 16),
@@ -444,6 +533,9 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                FocusScope.of(context).nextFocus();
+              },
             ),
 
             const SizedBox(height: 16),
@@ -465,6 +557,9 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                FocusScope.of(context).nextFocus();
+              },
             ),
 
             const SizedBox(height: 16),
@@ -486,6 +581,10 @@ class EditStaffProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.done,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
+              onSubmitted: (value) {
+                // This is the last field, so unfocus
+                FocusScope.of(context).unfocus();
+              },
             ),
 
             const SizedBox(height: 32),
