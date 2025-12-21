@@ -167,18 +167,27 @@ class EditStaffProfileFullScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 32),
       child: Column(
         children: [
-          Obx(() => Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: _getProfileImage(controller),
-                    child: _getProfileImageChild(controller),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
+          // Profile Image with Upload Button
+          Stack(
+            children: [
+              Obx(() {
+                final imageUrl = controller.currentImageUrl;
+                final hasImage = imageUrl.isNotEmpty;
+
+                return CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: hasImage ? _getProfileImage(imageUrl) : null,
+                  child: !hasImage
+                      ? const Icon(Icons.camera_alt,
+                          color: Colors.grey, size: 30)
+                      : null,
+                );
+              }),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Obx(() => GestureDetector(
                       onTap: () {
                         FocusScope.of(Get.context!).unfocus();
                         controller.uploadProfileImage();
@@ -209,45 +218,60 @@ class EditStaffProfileFullScreen extends StatelessWidget {
                             : const Icon(Icons.camera_alt,
                                 color: Colors.grey, size: 16),
                       ),
-                    ),
-                  ),
-                ],
-              )),
+                    )),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
-          Obx(() {
-            final staff = Get.find<ProfileController>().staffProfile.value;
-            return Text(
-              staff?.displayName ?? 'N/A',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            );
-          }),
-          const SizedBox(height: 8),
-          Obx(() {
-            final staff = Get.find<ProfileController>().staffProfile.value;
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'ID : ${staff?.identifyNumber ?? 'N/A'}',
+          // Display Name
+          Builder(
+            builder: (context) {
+              final staff = Get.find<ProfileController>().staffProfile.value;
+              return Text(
+                staff?.displayName ?? 'N/A',
                 style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          // ID Badge
+          Builder(
+            builder: (context) {
+              final staff = Get.find<ProfileController>().staffProfile.value;
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'ID : ${staff?.identifyNumber ?? 'N/A'}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.primary,
+                  ),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 16),
           const Divider(color: AppColors.border, thickness: 8),
         ],
       ),
     );
+  }
+
+  ImageProvider? _getProfileImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return NetworkImage(imageUrl);
+    } else {
+      return NetworkImage(AppConfig.baseImageUrl + imageUrl);
+    }
   }
 
   Widget _buildBasicInfoSection(
@@ -731,25 +755,5 @@ class EditStaffProfileFullScreen extends StatelessWidget {
           defaultRows: 1,
           isCollapsible: true,
         ));
-  }
-
-  ImageProvider? _getProfileImage(EditStaffProfileController controller) {
-    final imageUrl = controller.currentImageUrl;
-    if (imageUrl.isNotEmpty) {
-      if (imageUrl.startsWith('http')) {
-        return NetworkImage(imageUrl);
-      } else {
-        return NetworkImage(AppConfig.baseImageUrl + imageUrl);
-      }
-    }
-    return null;
-  }
-
-  Widget? _getProfileImageChild(EditStaffProfileController controller) {
-    final imageUrl = controller.currentImageUrl;
-    if (imageUrl.isEmpty) {
-      return const Icon(Icons.camera_alt, color: Colors.grey, size: 30);
-    }
-    return null;
   }
 }
