@@ -167,7 +167,6 @@ class EditStaffProfileFullScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 32),
       child: Column(
         children: [
-          // Profile Image with Upload Button
           Stack(
             children: [
               Obx(() {
@@ -223,7 +222,6 @@ class EditStaffProfileFullScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Display Name
           Builder(
             builder: (context) {
               final staff = Get.find<ProfileController>().staffProfile.value;
@@ -238,7 +236,6 @@ class EditStaffProfileFullScreen extends StatelessWidget {
             },
           ),
           const SizedBox(height: 8),
-          // ID Badge
           Builder(
             builder: (context) {
               final staff = Get.find<ProfileController>().staffProfile.value;
@@ -461,299 +458,298 @@ class EditStaffProfileFullScreen extends StatelessWidget {
     );
   }
 
+  // FIXED: Remove Obx wrapper and access controller properties directly
   Widget _buildProfessionalRankSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'ឋានៈវិជ្ជាជីវៈ',
-          labels: const [
-            'ប្រភេទឋានៈវិជ្ជាជីវៈ',
-            'បរិយាយ',
-            'ប្រកាសលេខ',
-            'កាលបរិច្ឆេទទទួល',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'typeOfProfessionalRank',
-                type: DynamicFieldType.text,
-                placeholder: 'ប្រភេទឋានៈវិជ្ជាជីវៈ'),
-            DynamicFieldConfig(
-                name: 'description',
-                type: DynamicFieldType.text,
-                placeholder: 'បរិយាយ'),
-            DynamicFieldConfig(
-                name: 'announcementNumber',
-                type: DynamicFieldType.text,
-                placeholder: 'ប្រកាសលេខ'),
-            DynamicFieldConfig(
-                name: 'dateAccepted',
-                type: DynamicFieldType.date,
-                placeholder: 'កាលបរិច្ឆេទទទួល'),
-          ],
-          initialData: controller.professionalRanks,
-          onDataChanged: (data) => controller.professionalRanks.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'ឋានៈវិជ្ជាជីវៈ',
+      labels: const [
+        'ប្រភេទឋានៈវិជ្ជាជីវៈ',
+        'បរិយាយ',
+        'ប្រកាសលេខ',
+        'កាលបរិច្ឆេទទទួល',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'typeOfProfessionalRank',
+            type: DynamicFieldType.text,
+            placeholder: 'ប្រភេទឋានៈវិជ្ជាជីវៈ'),
+        DynamicFieldConfig(
+            name: 'description',
+            type: DynamicFieldType.text,
+            placeholder: 'បរិយាយ'),
+        DynamicFieldConfig(
+            name: 'announcementNumber',
+            type: DynamicFieldType.text,
+            placeholder: 'ប្រកាសលេខ'),
+        DynamicFieldConfig(
+            name: 'dateAccepted',
+            type: DynamicFieldType.date,
+            placeholder: 'កាលបរិច្ឆេទទទួល'),
+      ],
+      initialData: controller.professionalRanks,
+      onDataChanged: (data) => controller.professionalRanks.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildExperienceSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'បទពិសោធន៍ការងារ',
-          labels: const [
-            'ការងារបន្តបន្ទាប់',
-            'អង្គភាពបម្រើការងារបច្ចុប្បន្ន',
-            'ថ្ងៃចាប់ផ្តើម',
-            'ថ្ងៃបញ្ចប់',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'continuousEmployment',
-                type: DynamicFieldType.text,
-                placeholder: 'ការងារបន្តបន្ទាប់'),
-            DynamicFieldConfig(
-                name: 'workPlace',
-                type: DynamicFieldType.text,
-                placeholder: 'អង្គភាពបម្រើការងារបច្ចុប្បន្ន'),
-            DynamicFieldConfig(
-                name: 'startDate',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃចាប់ផ្តើម'),
-            DynamicFieldConfig(
-                name: 'endDate',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃបញ្ចប់'),
-          ],
-          initialData: controller.experiences,
-          onDataChanged: (data) => controller.experiences.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'បទពិសោធន៍ការងារ',
+      labels: const [
+        'ការងារបន្តបន្ទាប់',
+        'អង្គភាពបម្រើការងារបច្ចុប្បន្ន',
+        'ថ្ងៃចាប់ផ្តើម',
+        'ថ្ងៃបញ្ចប់',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'continuousEmployment',
+            type: DynamicFieldType.text,
+            placeholder: 'ការងារបន្តបន្ទាប់'),
+        DynamicFieldConfig(
+            name: 'workPlace',
+            type: DynamicFieldType.text,
+            placeholder: 'អង្គភាពបម្រើការងារបច្ចុប្បន្ន'),
+        DynamicFieldConfig(
+            name: 'startDate',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃចាប់ផ្តើម'),
+        DynamicFieldConfig(
+            name: 'endDate',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃបញ្ចប់'),
+      ],
+      initialData: controller.experiences,
+      onDataChanged: (data) => controller.experiences.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildPraiseCriticismSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'ការសរសើរ/ការស្តីបន្ទោស',
-          labels: const [
-            'ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស',
-            'ផ្តល់ដោយ',
-            'កាលបរិច្ឆេទទទួល',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'typePraiseOrCriticism',
-                type: DynamicFieldType.text,
-                placeholder: 'ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស'),
-            DynamicFieldConfig(
-                name: 'giveBy',
-                type: DynamicFieldType.text,
-                placeholder: 'ផ្តល់ដោយ'),
-            DynamicFieldConfig(
-                name: 'dateAccepted',
-                type: DynamicFieldType.date,
-                placeholder: 'កាលបរិច្ឆេទទទួល'),
-          ],
-          initialData: controller.praiseCriticisms,
-          onDataChanged: (data) => controller.praiseCriticisms.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'ការសរសើរ/ការស្តីបន្ទោស',
+      labels: const [
+        'ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស',
+        'ផ្តល់ដោយ',
+        'កាលបរិច្ឆេទទទួល',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'typePraiseOrCriticism',
+            type: DynamicFieldType.text,
+            placeholder: 'ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស'),
+        DynamicFieldConfig(
+            name: 'giveBy',
+            type: DynamicFieldType.text,
+            placeholder: 'ផ្តល់ដោយ'),
+        DynamicFieldConfig(
+            name: 'dateAccepted',
+            type: DynamicFieldType.date,
+            placeholder: 'កាលបរិច្ឆេទទទួល'),
+      ],
+      initialData: controller.praiseCriticisms,
+      onDataChanged: (data) => controller.praiseCriticisms.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildEducationSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'កម្រិតវប្បធម៌',
-          labels: const [
-            'កម្រិតវប្បធម៌',
-            'ឈ្មោះជំនាញ',
-            'កាលបរិច្ឆេទទទួល',
-            'ប្រទេស',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'culturalLevel',
-                type: DynamicFieldType.text,
-                placeholder: 'កម្រិតវប្បធម៌'),
-            DynamicFieldConfig(
-                name: 'skillName',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះជំនាញ'),
-            DynamicFieldConfig(
-                name: 'dateAccepted',
-                type: DynamicFieldType.date,
-                placeholder: 'កាលបរិច្ឆេទទទួល'),
-            DynamicFieldConfig(
-                name: 'country',
-                type: DynamicFieldType.text,
-                placeholder: 'ប្រទេស'),
-          ],
-          initialData: controller.educations,
-          onDataChanged: (data) => controller.educations.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'កម្រិតវប្បធម៌',
+      labels: const [
+        'កម្រិតវប្បធម៌',
+        'ឈ្មោះជំនាញ',
+        'កាលបរិច្ឆេទទទួល',
+        'ប្រទេស',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'culturalLevel',
+            type: DynamicFieldType.text,
+            placeholder: 'កម្រិតវប្បធម៌'),
+        DynamicFieldConfig(
+            name: 'skillName',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះជំនាញ'),
+        DynamicFieldConfig(
+            name: 'dateAccepted',
+            type: DynamicFieldType.date,
+            placeholder: 'កាលបរិច្ឆេទទទួល'),
+        DynamicFieldConfig(
+            name: 'country',
+            type: DynamicFieldType.text,
+            placeholder: 'ប្រទេស'),
+      ],
+      initialData: controller.educations,
+      onDataChanged: (data) => controller.educations.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildVocationalSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'កម្រិតវិជ្ជាជីវៈ',
-          labels: const [
-            'កម្រិតវិជ្ជាជីវៈ',
-            'ឯកទេសទី១',
-            'ឯកទេសទី២',
-            'ប្រព័ន្ធបណ្តុះបណ្តាល',
-            'ថ្ងៃខែបានទទួល',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'culturalLevel',
-                type: DynamicFieldType.text,
-                placeholder: 'កម្រិតវិជ្ជាជីវៈ'),
-            DynamicFieldConfig(
-                name: 'skillOne',
-                type: DynamicFieldType.text,
-                placeholder: 'ឯកទេសទី១'),
-            DynamicFieldConfig(
-                name: 'skillTwo',
-                type: DynamicFieldType.text,
-                placeholder: 'ឯកទេសទី២'),
-            DynamicFieldConfig(
-                name: 'trainingSystem',
-                type: DynamicFieldType.text,
-                placeholder: 'ប្រព័ន្ធបណ្តុះបណ្តាល'),
-            DynamicFieldConfig(
-                name: 'dateAccepted',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃខែបានទទួល'),
-          ],
-          initialData: controller.vocational,
-          onDataChanged: (data) => controller.vocational.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'កម្រិតវិជ្ជាជីវៈ',
+      labels: const [
+        'កម្រិតវិជ្ជាជីវៈ',
+        'ឯកទេសទី១',
+        'ឯកទេសទី២',
+        'ប្រព័ន្ធបណ្តុះបណ្តាល',
+        'ថ្ងៃខែបានទទួល',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'culturalLevel',
+            type: DynamicFieldType.text,
+            placeholder: 'កម្រិតវិជ្ជាជីវៈ'),
+        DynamicFieldConfig(
+            name: 'skillOne',
+            type: DynamicFieldType.text,
+            placeholder: 'ឯកទេសទី១'),
+        DynamicFieldConfig(
+            name: 'skillTwo',
+            type: DynamicFieldType.text,
+            placeholder: 'ឯកទេសទី២'),
+        DynamicFieldConfig(
+            name: 'trainingSystem',
+            type: DynamicFieldType.text,
+            placeholder: 'ប្រព័ន្ធបណ្តុះបណ្តាល'),
+        DynamicFieldConfig(
+            name: 'dateAccepted',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃខែបានទទួល'),
+      ],
+      initialData: controller.vocational,
+      onDataChanged: (data) => controller.vocational.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildShortCourseSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'វគ្គខ្លីៗ',
-          labels: const [
-            'ផ្នែក',
-            'ឈ្មោះជំនាញ',
-            'ថ្ងៃចាប់ផ្តើម',
-            'ថ្ងៃបញ្ចប់',
-            'រយៈពេល',
-            'រៀបចំដោយ',
-            'គាំទ្រដោយ',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'skill',
-                type: DynamicFieldType.text,
-                placeholder: 'ផ្នែក'),
-            DynamicFieldConfig(
-                name: 'skillName',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះជំនាញ'),
-            DynamicFieldConfig(
-                name: 'startDate',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃចាប់ផ្តើម'),
-            DynamicFieldConfig(
-                name: 'endDate',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃបញ្ចប់'),
-            DynamicFieldConfig(
-                name: 'duration',
-                type: DynamicFieldType.text,
-                placeholder: 'រយៈពេល'),
-            DynamicFieldConfig(
-                name: 'preparedBy',
-                type: DynamicFieldType.text,
-                placeholder: 'រៀបចំដោយ'),
-            DynamicFieldConfig(
-                name: 'supportBy',
-                type: DynamicFieldType.text,
-                placeholder: 'គាំទ្រដោយ'),
-          ],
-          initialData: controller.shortCourses,
-          onDataChanged: (data) => controller.shortCourses.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'វគ្គខ្លីៗ',
+      labels: const [
+        'ផ្នែក',
+        'ឈ្មោះជំនាញ',
+        'ថ្ងៃចាប់ផ្តើម',
+        'ថ្ងៃបញ្ចប់',
+        'រយៈពេល',
+        'រៀបចំដោយ',
+        'គាំទ្រដោយ',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'skill', type: DynamicFieldType.text, placeholder: 'ផ្នែក'),
+        DynamicFieldConfig(
+            name: 'skillName',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះជំនាញ'),
+        DynamicFieldConfig(
+            name: 'startDate',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃចាប់ផ្តើម'),
+        DynamicFieldConfig(
+            name: 'endDate',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃបញ្ចប់'),
+        DynamicFieldConfig(
+            name: 'duration',
+            type: DynamicFieldType.text,
+            placeholder: 'រយៈពេល'),
+        DynamicFieldConfig(
+            name: 'preparedBy',
+            type: DynamicFieldType.text,
+            placeholder: 'រៀបចំដោយ'),
+        DynamicFieldConfig(
+            name: 'supportBy',
+            type: DynamicFieldType.text,
+            placeholder: 'គាំទ្រដោយ'),
+      ],
+      initialData: controller.shortCourses,
+      onDataChanged: (data) => controller.shortCourses.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildLanguageSection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'ភាសា',
-          labels: const [
-            'ផ្នែភាសា',
-            'ការអាន',
-            'ការសរសេរ',
-            'ការសន្ទនា',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'language',
-                type: DynamicFieldType.text,
-                placeholder: 'ផ្នែភាសា'),
-            DynamicFieldConfig(
-                name: 'reading',
-                type: DynamicFieldType.text,
-                placeholder: 'ការអាន'),
-            DynamicFieldConfig(
-                name: 'writing',
-                type: DynamicFieldType.text,
-                placeholder: 'ការសរសេរ'),
-            DynamicFieldConfig(
-                name: 'speaking',
-                type: DynamicFieldType.text,
-                placeholder: 'ការសន្ទនា'),
-          ],
-          initialData: controller.languages,
-          onDataChanged: (data) => controller.languages.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'ភាសា',
+      labels: const [
+        'ផ្នែភាសា',
+        'ការអាន',
+        'ការសរសេរ',
+        'ការសន្ទនា',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'language',
+            type: DynamicFieldType.text,
+            placeholder: 'ផ្នែភាសា'),
+        DynamicFieldConfig(
+            name: 'reading',
+            type: DynamicFieldType.text,
+            placeholder: 'ការអាន'),
+        DynamicFieldConfig(
+            name: 'writing',
+            type: DynamicFieldType.text,
+            placeholder: 'ការសរសេរ'),
+        DynamicFieldConfig(
+            name: 'speaking',
+            type: DynamicFieldType.text,
+            placeholder: 'ការសន្ទនា'),
+      ],
+      initialData: controller.languages,
+      onDataChanged: (data) => controller.languages.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildFamilySection(EditStaffProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'គ្រួសារ',
-          labels: const [
-            'ឈ្មោះកូន',
-            'ភេទ',
-            'ថ្ងៃខែឆ្នាំកំណើត',
-            'មុខរបរ',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'nameChild',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះកូន'),
-            DynamicFieldConfig(
-                name: 'gender',
-                type: DynamicFieldType.select,
-                placeholder: 'ភេទ',
-                options: ['MALE', 'FEMALE', 'OTHER']),
-            DynamicFieldConfig(
-                name: 'dateOfBirth',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃខែឆ្នាំកំណើត'),
-            DynamicFieldConfig(
-                name: 'working',
-                type: DynamicFieldType.text,
-                placeholder: 'មុខរបរ'),
-          ],
-          initialData: controller.families,
-          onDataChanged: (data) => controller.families.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'គ្រួសារ',
+      labels: const [
+        'ឈ្មោះកូន',
+        'ភេទ',
+        'ថ្ងៃខែឆ្នាំកំណើត',
+        'មុខរបរ',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'nameChild',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះកូន'),
+        DynamicFieldConfig(
+            name: 'gender',
+            type: DynamicFieldType.select,
+            placeholder: 'ភេទ',
+            options: ['MALE', 'FEMALE', 'OTHER']),
+        DynamicFieldConfig(
+            name: 'dateOfBirth',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃខែឆ្នាំកំណើត'),
+        DynamicFieldConfig(
+            name: 'working',
+            type: DynamicFieldType.text,
+            placeholder: 'មុខរបរ'),
+      ],
+      initialData: controller.families,
+      onDataChanged: (data) => controller.families.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 }
