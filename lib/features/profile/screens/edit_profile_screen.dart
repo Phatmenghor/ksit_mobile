@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/features/profile/controllers/profile_controller.dart';
-import 'package:ksit_mobile/features/profile/screens/edit_student_profile_screen.dart';
+import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/features/profile/screens/edit_staff_profile_screen.dart';
-
-import '../../../core/constants/app_colors.dart';
+import 'package:ksit_mobile/features/profile/screens/edit_student_profile_screen.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
@@ -17,9 +16,9 @@ class EditProfileScreen extends StatelessWidget {
 
     return Obx(() {
       if (profileController.userRole.value == 'STUDENT') {
-        return const EditStudentProfileScreen();
+        return const EditStudentProfileFullScreen();
       } else if (profileController.userRole.value == 'STAFF') {
-        return const EditStaffProfileScreen();
+        return const EditStaffProfileFullScreen();
       }
 
       return Scaffold(

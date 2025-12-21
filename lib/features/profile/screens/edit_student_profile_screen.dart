@@ -1,24 +1,24 @@
-// lib/features/profile/screens/edit_student_profile_screen.dart
+// lib/features/profile/screens/edit_student_profile_full_screen.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ksit_mobile/core/config/app_config.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/utils/enums_utils.dart';
-import 'package:ksit_mobile/features/profile/controllers/edit_profile_controller.dart';
+import 'package:ksit_mobile/features/profile/controllers/edit_student_profile_controller.dart';
 import 'package:ksit_mobile/features/profile/controllers/profile_controller.dart';
 import 'package:ksit_mobile/features/profile/widgets/gender_select_field_widget.dart';
 import 'package:ksit_mobile/shared/widgets/custom_text_field.dart';
 import 'package:ksit_mobile/shared/widgets/loading_widget.dart';
+import 'package:ksit_mobile/shared/widgets/dynamic_input_grid_widget.dart';
 
-class EditStudentProfileScreen extends StatelessWidget {
-  const EditStudentProfileScreen({super.key});
+class EditStudentProfileFullScreen extends StatelessWidget {
+  const EditStudentProfileFullScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final editController = Get.put(EditProfileController());
+    final editController = Get.put(EditStudentProfileController());
     final profileController = Get.find<ProfileController>();
 
     return Scaffold(
@@ -35,42 +35,28 @@ class EditStudentProfileScreen extends StatelessWidget {
         ),
         backgroundColor: AppColors.primary,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-            size: 22,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
           onPressed: () {
-            // Dismiss keyboard before navigation
             FocusScope.of(context).unfocus();
             context.pop();
           },
         ),
       ),
-      // Don't resize to avoid bottom inset - handle manually
       resizeToAvoidBottomInset: false,
       body: GestureDetector(
-        // Dismiss keyboard when tapping outside form fields
         onTap: () => FocusScope.of(context).unfocus(),
         child: Obx(() {
           if (profileController.isLoading.value) {
-            return const LoadingWidget(
-              message: '',
-              overlay: false,
-            );
+            return const LoadingWidget(message: '', overlay: false);
           }
-
           return SingleChildScrollView(
-            // Remove automatic keyboard padding - handle it manually
             child: Column(
               children: [
-                // Profile Header Section
                 _buildProfileHeader(editController),
-
-                // Form Section
-                _buildFormSection(editController, context),
-
-                // Dynamic bottom padding based on keyboard state
+                _buildBasicInfoSection(editController, context),
+                _buildStudiesHistorySection(editController),
+                _buildParentsSection(editController),
+                _buildSiblingsSection(editController),
                 SizedBox(height: _getContentBottomPadding(context)),
               ],
             ),
@@ -84,14 +70,12 @@ class EditStudentProfileScreen extends StatelessWidget {
           bottom: _getBottomPadding(context),
           top: 16,
         ),
-        // Keep it floating above keyboard
         color: Colors.white,
         child: Row(
           children: [
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  // Dismiss keyboard and navigate
                   FocusScope.of(context).unfocus();
                   Future.delayed(const Duration(milliseconds: 100), () {
                     context.pop();
@@ -104,19 +88,12 @@ class EditStudentProfileScreen extends StatelessWidget {
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
-                    side: const BorderSide(
-                      color: AppColors.border,
-                      width: 1,
-                    ),
+                    side: const BorderSide(color: AppColors.border, width: 1),
                   ),
                 ),
-                child: const Text(
-                  'Discard',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+                child: const Text('Discard',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
               ),
             ),
             const SizedBox(width: 16),
@@ -125,7 +102,6 @@ class EditStudentProfileScreen extends StatelessWidget {
                     onPressed: editController.isLoading.value
                         ? null
                         : () {
-                            // Dismiss keyboard before saving
                             FocusScope.of(context).unfocus();
                             editController.saveProfile();
                           },
@@ -147,13 +123,9 @@ class EditStudentProfileScreen extends StatelessWidget {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Save',
+                        : const Text('Save',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                fontSize: 16, fontWeight: FontWeight.w600)),
                   )),
             ),
           ],
@@ -164,13 +136,10 @@ class EditStudentProfileScreen extends StatelessWidget {
 
   double _getContentBottomPadding(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final buttonBarHeight = 80; // Approximate height of button bar
-
+    final buttonBarHeight = 80;
     if (keyboardHeight > 0) {
-      // When keyboard is open, add padding to ensure content is scrollable above keyboard + buttons
       return keyboardHeight + buttonBarHeight + 16;
     } else {
-      // When keyboard is closed, just add space for buttons
       return buttonBarHeight + 32;
     }
   }
@@ -178,25 +147,21 @@ class EditStudentProfileScreen extends StatelessWidget {
   double _getBottomPadding(BuildContext context) {
     final bottomInsets = MediaQuery.of(context).viewInsets.bottom;
     final systemPadding = MediaQuery.of(context).padding.bottom;
-
     if (Platform.isAndroid) {
-      // If keyboard is open, position buttons above keyboard
       if (bottomInsets > 0) {
         return bottomInsets + 16;
       }
       final hasBottomSystemUI = systemPadding > 0;
-      return hasBottomSystemUI ? 96 : 64; // More space for nav buttons
+      return hasBottomSystemUI ? 96 : 64;
     }
-    // iOS - adjust for keyboard
     return bottomInsets > 0 ? bottomInsets + 16 : 32;
   }
 
-  Widget _buildProfileHeader(EditProfileController controller) {
+  Widget _buildProfileHeader(EditStudentProfileController controller) {
     return Padding(
       padding: const EdgeInsets.only(top: 32),
       child: Column(
         children: [
-          // Profile Image
           Obx(() => Stack(
                 children: [
                   CircleAvatar(
@@ -210,7 +175,6 @@ class EditStudentProfileScreen extends StatelessWidget {
                     right: 0,
                     child: GestureDetector(
                       onTap: () {
-                        // Dismiss keyboard before opening image picker
                         FocusScope.of(Get.context!).unfocus();
                         controller.uploadProfileImage();
                       },
@@ -237,19 +201,14 @@ class EditStudentProfileScreen extends StatelessWidget {
                                       AppColors.primary),
                                 ),
                               )
-                            : const Icon(
-                                Icons.camera_alt,
-                                color: Colors.grey,
-                                size: 16,
-                              ),
+                            : const Icon(Icons.camera_alt,
+                                color: Colors.grey, size: 16),
                       ),
                     ),
                   ),
                 ],
               )),
-
           const SizedBox(height: 16),
-
           Obx(() {
             final student = Get.find<ProfileController>().studentProfile.value;
             return Text(
@@ -261,10 +220,7 @@ class EditStudentProfileScreen extends StatelessWidget {
               ),
             );
           }),
-
           const SizedBox(height: 8),
-
-          // ID
           Obx(() {
             final student = Get.find<ProfileController>().studentProfile.value;
             return Container(
@@ -282,20 +238,15 @@ class EditStudentProfileScreen extends StatelessWidget {
               ),
             );
           }),
-
           const SizedBox(height: 16),
-
-          const Divider(
-            color: AppColors.border,
-            thickness: 8,
-          ),
+          const Divider(color: AppColors.border, thickness: 8),
         ],
       ),
     );
   }
 
-  Widget _buildFormSection(
-      EditProfileController controller, BuildContext context) {
+  Widget _buildBasicInfoSection(
+      EditStudentProfileController controller, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -303,26 +254,17 @@ class EditStudentProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section Title
             const Text(
-              'ព័ត៌មានផ្ទាល់ខ្លួន',
+              'ព័ត៌មានផ្ទាល់ខ្លួនរបស់និស្សិត',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // Khmer Name Fields
-            const Text(
-              'នាមត្រកូល និងនាមខ្លួន',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('នាមត្រកូល និងនាមខ្លួន',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -333,10 +275,7 @@ class EditStudentProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
-                    onSubmitted: (value) {
-                      // Move focus to next field
-                      FocusScope.of(context).nextFocus();
-                    },
+                    onSubmitted: (value) => FocusScope.of(context).nextFocus(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -347,24 +286,14 @@ class EditStudentProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
-                    onSubmitted: (value) {
-                      FocusScope.of(context).nextFocus();
-                    },
+                    onSubmitted: (value) => FocusScope.of(context).nextFocus(),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // English Name Fields
-            const Text(
-              'ជាអក្សរឡាតាំង',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('ជាអក្សរឡាតាំង',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -375,9 +304,7 @@ class EditStudentProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
-                    onSubmitted: (value) {
-                      FocusScope.of(context).nextFocus();
-                    },
+                    onSubmitted: (value) => FocusScope.of(context).nextFocus(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -388,46 +315,27 @@ class EditStudentProfileScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                     fillColor: Colors.white,
                     borderRadius: BorderRadius.circular(4),
-                    onSubmitted: (value) {
-                      FocusScope.of(context).nextFocus();
-                    },
+                    onSubmitted: (value) => FocusScope.of(context).nextFocus(),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // Gender
-            const Text(
-              'ភេទ',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('ភេទ',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             Obx(() => GenderSelectionField(
                   selectedGender: controller.selectedGender.value,
                   onChanged: (GenderEnum? value) {
-                    // Dismiss keyboard when selecting gender
                     FocusScope.of(context).unfocus();
                     controller.selectedGender.value = value;
                   },
                   fillColor: Colors.white,
                   borderRadius: BorderRadius.circular(4),
                 )),
-
             const SizedBox(height: 16),
-
-            // Phone Number
-            const Text(
-              'លេខទូរស័ព្ទ',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('លេខទូរស័ព្ទ',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Phone Number',
@@ -436,21 +344,11 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                FocusScope.of(context).nextFocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).nextFocus(),
             ),
-
             const SizedBox(height: 16),
-
-            // Date Picker Field
-            const Text(
-              'ថ្ងៃខែឆ្នាំកំណើត',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('ថ្ងៃខែឆ្នាំកំណើត',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Select Date (YYYY-MM-DD)',
@@ -459,23 +357,14 @@ class EditStudentProfileScreen extends StatelessWidget {
               suffixIcon: const Icon(Icons.calendar_month),
               fillColor: Colors.white,
               onTap: () {
-                // Dismiss keyboard before opening date picker
                 FocusScope.of(context).unfocus();
                 controller.selectDate(context);
               },
               borderRadius: BorderRadius.circular(4),
             ),
-
             const SizedBox(height: 16),
-
-            // Email Field
-            const Text(
-              'អ៊ីម៊ែល',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('អ៊ីម៊ែល',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Email',
@@ -484,21 +373,11 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                FocusScope.of(context).nextFocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).nextFocus(),
             ),
-
             const SizedBox(height: 16),
-
-            // Nationality
-            const Text(
-              'សញ្ជាតិ',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('សញ្ជាតិ',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Nationality',
@@ -506,21 +385,11 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                FocusScope.of(context).nextFocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).nextFocus(),
             ),
-
             const SizedBox(height: 16),
-
-            // Ethnicity
-            const Text(
-              'ជនជាតិ',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('ជនជាតិ',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Ethnicity',
@@ -528,21 +397,11 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                FocusScope.of(context).nextFocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).nextFocus(),
             ),
-
             const SizedBox(height: 16),
-
-            // Address
-            const Text(
-              'អាសយដ្ឋានបច្ចុប្បន្ន',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('អាសយដ្ឋានបច្ចុប្បន្ន',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'អាសយដ្ឋានបច្ចុប្បន្ន',
@@ -551,21 +410,11 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.next,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                FocusScope.of(context).nextFocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).nextFocus(),
             ),
-
             const SizedBox(height: 16),
-
-            // Place of Birth
-            const Text(
-              'ទីកន្លែងកំណើត',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('ទីកន្លែងកំណើត',
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             CustomTextField(
               hint: 'Place of Birth',
@@ -574,12 +423,8 @@ class EditStudentProfileScreen extends StatelessWidget {
               textInputAction: TextInputAction.done,
               fillColor: Colors.white,
               borderRadius: BorderRadius.circular(4),
-              onSubmitted: (value) {
-                // This is the last field, so unfocus
-                FocusScope.of(context).unfocus();
-              },
+              onSubmitted: (value) => FocusScope.of(context).unfocus(),
             ),
-
             const SizedBox(height: 32),
           ],
         ),
@@ -587,7 +432,152 @@ class EditStudentProfileScreen extends StatelessWidget {
     );
   }
 
-  ImageProvider? _getProfileImage(EditProfileController controller) {
+  Widget _buildStudiesHistorySection(EditStudentProfileController controller) {
+    return Obx(() => DynamicInputGrid(
+          title: 'ប្រវត្តិសិក្សា',
+          labels: const [
+            'កម្រិតថ្នាក់',
+            'ឈ្មោះសាលារៀន',
+            'ខេត្ត/រាជធានី',
+            'ពីឆ្នាំណា',
+            'ដល់ឆ្នាំណា',
+            'សញ្ញាបត្រទទួលបាន',
+            'និទ្ទេសរួម',
+          ],
+          fields: const [
+            DynamicFieldConfig(
+                name: 'typeStudies',
+                type: DynamicFieldType.select,
+                placeholder: 'កម្រិតថ្នាក់',
+                options: [
+                  'PRIMARY_SCHOOL',
+                  'LOWER_SECONDARY_SCHOOL',
+                  'UPPER_SECONDARY_SCHOOL'
+                ]),
+            DynamicFieldConfig(
+                name: 'schoolName',
+                type: DynamicFieldType.text,
+                placeholder: 'ឈ្មោះសាលារៀន'),
+            DynamicFieldConfig(
+                name: 'location',
+                type: DynamicFieldType.text,
+                placeholder: 'ខេត្ត/រាជធានី'),
+            DynamicFieldConfig(
+                name: 'fromYear',
+                type: DynamicFieldType.date,
+                placeholder: 'ពីឆ្នាំណា'),
+            DynamicFieldConfig(
+                name: 'endYear',
+                type: DynamicFieldType.date,
+                placeholder: 'ដល់ឆ្នាំណា'),
+            DynamicFieldConfig(
+                name: 'obtainedCertificate',
+                type: DynamicFieldType.text,
+                placeholder: 'សញ្ញាបត្រទទួលបាន'),
+            DynamicFieldConfig(
+                name: 'overallGrade',
+                type: DynamicFieldType.text,
+                placeholder: 'និទ្ទេសរួម'),
+          ],
+          initialData: controller.studiesHistories,
+          onDataChanged: (data) => controller.studiesHistories.value = data,
+          isEditable: true,
+          defaultRows: 1,
+          isCollapsible: true,
+        ));
+  }
+
+  Widget _buildParentsSection(EditStudentProfileController controller) {
+    return Obx(() => DynamicInputGrid(
+          title: 'ឪពុកម្តាយ',
+          labels: const [
+            'ឈ្មោះឪពុកម្តាយ',
+            'លេខទូរស័ព្ទ',
+            'មុខរបរ',
+            'អាសយដ្ឋាន',
+            'អាយុ',
+            'ប្រភេទឪពុកម្តាយ',
+          ],
+          fields: const [
+            DynamicFieldConfig(
+                name: 'name',
+                type: DynamicFieldType.text,
+                placeholder: 'ឈ្មោះឪពុកម្តាយ'),
+            DynamicFieldConfig(
+                name: 'phone',
+                type: DynamicFieldType.text,
+                placeholder: 'លេខទូរស័ព្ទ'),
+            DynamicFieldConfig(
+                name: 'job',
+                type: DynamicFieldType.text,
+                placeholder: 'មុខរបរ'),
+            DynamicFieldConfig(
+                name: 'address',
+                type: DynamicFieldType.text,
+                placeholder: 'អាសយដ្ឋាន'),
+            DynamicFieldConfig(
+                name: 'age', type: DynamicFieldType.text, placeholder: 'អាយុ'),
+            DynamicFieldConfig(
+                name: 'parentType',
+                type: DynamicFieldType.select,
+                placeholder: 'ប្រភេទឪពុកម្តាយ',
+                options: ['MOTHER', 'FATHER']),
+          ],
+          initialData: controller.parents,
+          onDataChanged: (data) => controller.parents.value = data,
+          isEditable: true,
+          defaultRows: 1,
+          isCollapsible: true,
+        ));
+  }
+
+  Widget _buildSiblingsSection(EditStudentProfileController controller) {
+    return Obx(() => DynamicInputGrid(
+          title: 'បងប្អូន',
+          labels: const [
+            'ឈ្មោះបងប្អូន',
+            'ភេទ',
+            'ថ្ងៃខែឆ្នាំកំណើត',
+            'មុខរបរ',
+            'លេខទូរស័ព្ទ',
+            'អាសយដ្ឋាន',
+          ],
+          fields: const [
+            DynamicFieldConfig(
+                name: 'name',
+                type: DynamicFieldType.text,
+                placeholder: 'ឈ្មោះបងប្អូន'),
+            DynamicFieldConfig(
+                name: 'gender',
+                type: DynamicFieldType.select,
+                placeholder: 'ភេទ',
+                options: ['MALE', 'FEMALE', 'OTHER']),
+            DynamicFieldConfig(
+                name: 'dateOfBirth',
+                type: DynamicFieldType.date,
+                placeholder: 'ថ្ងៃខែឆ្នាំកំណើត'),
+            DynamicFieldConfig(
+                name: 'occupation',
+                type: DynamicFieldType.text,
+                placeholder: 'មុខរបរ'),
+            DynamicFieldConfig(
+                name: 'phoneNumber',
+                type: DynamicFieldType.text,
+                placeholder: 'លេខទូរស័ព្ទ'),
+            DynamicFieldConfig(
+                name: 'address',
+                type: DynamicFieldType.text,
+                placeholder: 'អាសយដ្ឋាន'),
+          ],
+          initialData: controller.siblings,
+          onDataChanged: (data) => controller.siblings.value = data,
+          isEditable: true,
+          defaultRows: 1,
+          isCollapsible: true,
+        ));
+  }
+
+  ImageProvider? _getProfileImage(EditStudentProfileController controller) {
     final imageUrl = controller.currentImageUrl;
     if (imageUrl.isNotEmpty) {
       if (imageUrl.startsWith('http')) {
@@ -599,14 +589,10 @@ class EditStudentProfileScreen extends StatelessWidget {
     return null;
   }
 
-  Widget? _getProfileImageChild(EditProfileController controller) {
+  Widget? _getProfileImageChild(EditStudentProfileController controller) {
     final imageUrl = controller.currentImageUrl;
     if (imageUrl.isEmpty) {
-      return const Icon(
-        Icons.camera_alt,
-        color: Colors.grey,
-        size: 30,
-      );
+      return const Icon(Icons.camera_alt, color: Colors.grey, size: 30);
     }
     return null;
   }

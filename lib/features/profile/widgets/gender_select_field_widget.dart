@@ -1,8 +1,7 @@
+// lib/features/profile/widgets/gender_select_field_widget.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ksit_mobile/core/constants/app_colors.dart';
 import 'package:ksit_mobile/core/utils/enums_utils.dart';
-import 'package:ksit_mobile/features/profile/controllers/edit_profile_controller.dart';
 
 class GenderSelectionField extends StatelessWidget {
   final GenderEnum? selectedGender;
@@ -11,6 +10,7 @@ class GenderSelectionField extends StatelessWidget {
   final String hint;
   final Color fillColor;
   final BorderRadius borderRadius;
+  final Map<GenderEnum, String>? customGenderOptions;
 
   const GenderSelectionField({
     super.key,
@@ -20,12 +20,21 @@ class GenderSelectionField extends StatelessWidget {
     this.hint = 'ជ្រើសរើសភេទ',
     this.fillColor = Colors.white,
     this.borderRadius = const BorderRadius.all(Radius.circular(4)),
+    this.customGenderOptions,
   });
+
+  // Default gender options in Khmer
+  static const Map<GenderEnum, String> _defaultGenderOptions = {
+    GenderEnum.male: 'ប្រុស',
+    GenderEnum.female: 'ស្រី',
+    GenderEnum.other: 'ផ្សេងៗ',
+  };
+
+  Map<GenderEnum, String> get _genderOptions =>
+      customGenderOptions ?? _defaultGenderOptions;
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<EditProfileController>();
-
     return FormField<GenderEnum>(
       validator: validator,
       builder: (FormFieldState<GenderEnum> state) {
@@ -33,7 +42,7 @@ class GenderSelectionField extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-              onTap: () => _showGenderBottomSheet(context, controller),
+              onTap: () => _showGenderBottomSheet(context),
               child: Container(
                 decoration: BoxDecoration(
                   color: fillColor,
@@ -52,7 +61,7 @@ class GenderSelectionField extends StatelessWidget {
                   children: [
                     Text(
                       selectedGender != null
-                          ? controller.genderOptions[selectedGender!]!
+                          ? _genderOptions[selectedGender!]!
                           : hint,
                       style: TextStyle(
                         fontSize: 14,
@@ -86,8 +95,7 @@ class GenderSelectionField extends StatelessWidget {
     );
   }
 
-  void _showGenderBottomSheet(
-      BuildContext context, EditProfileController controller) {
+  void _showGenderBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -149,7 +157,7 @@ class GenderSelectionField extends StatelessWidget {
               ),
 
               // Gender options
-              ...controller.genderOptions.entries.map((entry) {
+              ..._genderOptions.entries.map((entry) {
                 final isSelected = selectedGender == entry.key;
                 return InkWell(
                   onTap: () {

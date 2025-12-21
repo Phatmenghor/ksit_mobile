@@ -256,158 +256,6 @@ class StaffProfileModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'email': email,
-      'roles': roles,
-      'status': status,
-      'khmerFirstName': khmerFirstName,
-      'khmerLastName': khmerLastName,
-      'englishFirstName': englishFirstName,
-      'englishLastName': englishLastName,
-      'gender': gender,
-      'dateOfBirth': dateOfBirth,
-      'phoneNumber': phoneNumber,
-      'currentAddress': currentAddress,
-      'nationality': nationality,
-      'ethnicity': ethnicity,
-      'placeOfBirth': placeOfBirth,
-      'identifyNumber': identifyNumber,
-      'staffId': staffId,
-      'nationalId': nationalId,
-      'startWorkDate': startWorkDate,
-      'currentPositionDate': currentPositionDate,
-      'employeeWork': employeeWork,
-      'disability': disability,
-      'payrollAccountNumber': payrollAccountNumber,
-      'cppMembershipNumber': cppMembershipNumber,
-      'province': province,
-      'district': district,
-      'commune': commune,
-      'village': village,
-      'officeName': officeName,
-      'currentPosition': currentPosition,
-      'decreeFinal': decreeFinal,
-      'rankAndClass': rankAndClass,
-      'department': department?.toJson(),
-      'profileUrl': profileUrl,
-      'taughtEnglish': taughtEnglish,
-      'threeLevelClass': threeLevelClass,
-      'referenceNote': referenceNote,
-      'technicalTeamLeader': technicalTeamLeader,
-      'assistInTeaching': assistInTeaching,
-      'serialNumber': serialNumber,
-      'twoLevelClass': twoLevelClass,
-      'classResponsibility': classResponsibility,
-      'lastSalaryIncrementDate': lastSalaryIncrementDate,
-      'teachAcrossSchools': teachAcrossSchools,
-      'overtimeHours': overtimeHours,
-      'issuedDate': issuedDate,
-      'suitableClass': suitableClass,
-      'bilingual': bilingual,
-      'academicYearTaught': academicYearTaught,
-      'workHistory': workHistory,
-      'maritalStatus': maritalStatus,
-      'mustBe': mustBe,
-      'affiliatedProfession': affiliatedProfession,
-      'federationName': federationName,
-      'affiliatedOrganization': affiliatedOrganization,
-      'federationEstablishmentDate': federationEstablishmentDate,
-      'wivesSalary': wivesSalary,
-      'teachersProfessionalRank':
-          teachersProfessionalRank?.map((e) => e.toJson()).toList(),
-      'teacherExperience': teacherExperience?.map((e) => e.toJson()).toList(),
-      'teacherPraiseOrCriticism':
-          teacherPraiseOrCriticism?.map((e) => e.toJson()).toList(),
-      'teacherEducation': teacherEducation?.map((e) => e.toJson()).toList(),
-      'teacherVocational': teacherVocational?.map((e) => e.toJson()).toList(),
-      'teacherShortCourse': teacherShortCourse?.map((e) => e.toJson()).toList(),
-      'teacherLanguage': teacherLanguage?.map((e) => e.toJson()).toList(),
-      'teacherFamily': teacherFamily?.map((e) => e.toJson()).toList(),
-      'createdAt': createdAt,
-    };
-  }
-
-  StaffProfileModel copyWith({
-    int? id,
-    String? username,
-    String? email,
-    List<String>? roles,
-    String? status,
-    String? khmerFirstName,
-    String? khmerLastName,
-    String? englishFirstName,
-    String? englishLastName,
-    String? gender,
-    String? dateOfBirth,
-    String? phoneNumber,
-    String? currentAddress,
-    String? nationality,
-    String? ethnicity,
-    String? placeOfBirth,
-    String? identifyNumber,
-    String? staffId,
-    String? nationalId,
-    String? startWorkDate,
-    String? currentPositionDate,
-    String? employeeWork,
-    String? disability,
-    String? payrollAccountNumber,
-    String? cppMembershipNumber,
-    String? province,
-    String? district,
-    String? commune,
-    String? village,
-    String? officeName,
-    String? currentPosition,
-    String? decreeFinal,
-    String? rankAndClass,
-    StaffDepartmentModel? department,
-    String? profileUrl,
-    String? createdAt,
-  }) {
-    return StaffProfileModel(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      email: email ?? this.email,
-      roles: roles ?? this.roles,
-      status: status ?? this.status,
-      khmerFirstName: khmerFirstName ?? this.khmerFirstName,
-      khmerLastName: khmerLastName ?? this.khmerLastName,
-      englishFirstName: englishFirstName ?? this.englishFirstName,
-      englishLastName: englishLastName ?? this.englishLastName,
-      gender: gender ?? this.gender,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      currentAddress: currentAddress ?? this.currentAddress,
-      nationality: nationality ?? this.nationality,
-      ethnicity: ethnicity ?? this.ethnicity,
-      placeOfBirth: placeOfBirth ?? this.placeOfBirth,
-      identifyNumber: identifyNumber ?? this.identifyNumber,
-      staffId: staffId ?? this.staffId,
-      nationalId: nationalId ?? this.nationalId,
-      startWorkDate: startWorkDate ?? this.startWorkDate,
-      currentPositionDate: currentPositionDate ?? this.currentPositionDate,
-      employeeWork: employeeWork ?? this.employeeWork,
-      disability: disability ?? this.disability,
-      payrollAccountNumber: payrollAccountNumber ?? this.payrollAccountNumber,
-      cppMembershipNumber: cppMembershipNumber ?? this.cppMembershipNumber,
-      province: province ?? this.province,
-      district: district ?? this.district,
-      commune: commune ?? this.commune,
-      village: village ?? this.village,
-      officeName: officeName ?? this.officeName,
-      currentPosition: currentPosition ?? this.currentPosition,
-      decreeFinal: decreeFinal ?? this.decreeFinal,
-      rankAndClass: rankAndClass ?? this.rankAndClass,
-      department: department ?? this.department,
-      profileUrl: profileUrl ?? this.profileUrl,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
   String get displayName {
     if (englishFirstName != null && englishLastName != null) {
       return '$englishFirstName $englishLastName';
@@ -416,13 +264,6 @@ class StaffProfileModel {
       return '$khmerFirstName $khmerLastName';
     }
     return username ?? '';
-  }
-
-  String get primaryRole {
-    if (roles != null && roles!.isNotEmpty) {
-      return roles!.first;
-    }
-    return 'STAFF';
   }
 }
 
@@ -433,13 +274,8 @@ class StaffDepartmentModel {
   final String? urlLogo;
   final String? status;
 
-  const StaffDepartmentModel({
-    this.id,
-    this.code,
-    this.name,
-    this.urlLogo,
-    this.status,
-  });
+  const StaffDepartmentModel(
+      {this.id, this.code, this.name, this.urlLogo, this.status});
 
   factory StaffDepartmentModel.fromJson(Map<String, dynamic> json) {
     return StaffDepartmentModel(
@@ -457,228 +293,226 @@ class StaffDepartmentModel {
       'code': code,
       'name': name,
       'urlLogo': urlLogo,
-      'status': status,
+      'status': status
     };
   }
 }
 
-// Teacher-related models
 class TeachersProfessionalRankModel {
   final int? id;
-  final String? rank;
-  final String? date;
-  final String? reference;
+  final String? typeOfProfessionalRank;
+  final String? description;
+  final String? announcementNumber;
+  final String? dateAccepted;
 
-  const TeachersProfessionalRankModel({
-    this.id,
-    this.rank,
-    this.date,
-    this.reference,
-  });
+  const TeachersProfessionalRankModel(
+      {this.id,
+      this.typeOfProfessionalRank,
+      this.description,
+      this.announcementNumber,
+      this.dateAccepted});
 
   factory TeachersProfessionalRankModel.fromJson(Map<String, dynamic> json) {
     return TeachersProfessionalRankModel(
       id: json['id'] as int?,
-      rank: json['rank'] as String?,
-      date: json['date'] as String?,
-      reference: json['reference'] as String?,
+      typeOfProfessionalRank: json['typeOfProfessionalRank'] as String?,
+      description: json['description'] as String?,
+      announcementNumber: json['announcementNumber'] as String?,
+      dateAccepted: json['dateAccepted'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'rank': rank,
-      'date': date,
-      'reference': reference,
+      'typeOfProfessionalRank': typeOfProfessionalRank,
+      'description': description,
+      'announcementNumber': announcementNumber,
+      'dateAccepted': dateAccepted
     };
   }
 }
 
 class TeacherExperienceModel {
   final int? id;
-  final String? position;
-  final String? organization;
+  final String? continuousEmployment;
+  final String? workPlace;
   final String? startDate;
   final String? endDate;
-  final String? description;
 
-  const TeacherExperienceModel({
-    this.id,
-    this.position,
-    this.organization,
-    this.startDate,
-    this.endDate,
-    this.description,
-  });
+  const TeacherExperienceModel(
+      {this.id,
+      this.continuousEmployment,
+      this.workPlace,
+      this.startDate,
+      this.endDate});
 
   factory TeacherExperienceModel.fromJson(Map<String, dynamic> json) {
     return TeacherExperienceModel(
       id: json['id'] as int?,
-      position: json['position'] as String?,
-      organization: json['organization'] as String?,
+      continuousEmployment: json['continuousEmployment'] as String?,
+      workPlace: json['workPlace'] as String?,
       startDate: json['startDate'] as String?,
       endDate: json['endDate'] as String?,
-      description: json['description'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'position': position,
-      'organization': organization,
+      'continuousEmployment': continuousEmployment,
+      'workPlace': workPlace,
       'startDate': startDate,
-      'endDate': endDate,
-      'description': description,
+      'endDate': endDate
     };
   }
 }
 
 class TeacherPraiseOrCriticismModel {
   final int? id;
-  final String? type;
-  final String? description;
-  final String? date;
-  final String? issuedBy;
+  final String? typePraiseOrCriticism;
+  final String? giveBy;
+  final String? dateAccepted;
 
-  const TeacherPraiseOrCriticismModel({
-    this.id,
-    this.type,
-    this.description,
-    this.date,
-    this.issuedBy,
-  });
+  const TeacherPraiseOrCriticismModel(
+      {this.id, this.typePraiseOrCriticism, this.giveBy, this.dateAccepted});
 
   factory TeacherPraiseOrCriticismModel.fromJson(Map<String, dynamic> json) {
     return TeacherPraiseOrCriticismModel(
       id: json['id'] as int?,
-      type: json['type'] as String?,
-      description: json['description'] as String?,
-      date: json['date'] as String?,
-      issuedBy: json['issuedBy'] as String?,
+      typePraiseOrCriticism: json['typePraiseOrCriticism'] as String?,
+      giveBy: json['giveBy'] as String?,
+      dateAccepted: json['dateAccepted'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': type,
-      'description': description,
-      'date': date,
-      'issuedBy': issuedBy,
+      'typePraiseOrCriticism': typePraiseOrCriticism,
+      'giveBy': giveBy,
+      'dateAccepted': dateAccepted
     };
   }
 }
 
 class TeacherEducationModel {
   final int? id;
-  final String? degree;
-  final String? institution;
-  final String? yearFrom;
-  final String? yearTo;
-  final String? major;
+  final String? culturalLevel;
+  final String? skillName;
+  final String? dateAccepted;
+  final String? country;
 
-  const TeacherEducationModel({
-    this.id,
-    this.degree,
-    this.institution,
-    this.yearFrom,
-    this.yearTo,
-    this.major,
-  });
+  const TeacherEducationModel(
+      {this.id,
+      this.culturalLevel,
+      this.skillName,
+      this.dateAccepted,
+      this.country});
 
   factory TeacherEducationModel.fromJson(Map<String, dynamic> json) {
     return TeacherEducationModel(
       id: json['id'] as int?,
-      degree: json['degree'] as String?,
-      institution: json['institution'] as String?,
-      yearFrom: json['yearFrom'] as String?,
-      yearTo: json['yearTo'] as String?,
-      major: json['major'] as String?,
+      culturalLevel: json['culturalLevel'] as String?,
+      skillName: json['skillName'] as String?,
+      dateAccepted: json['dateAccepted'] as String?,
+      country: json['country'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'degree': degree,
-      'institution': institution,
-      'yearFrom': yearFrom,
-      'yearTo': yearTo,
-      'major': major,
+      'culturalLevel': culturalLevel,
+      'skillName': skillName,
+      'dateAccepted': dateAccepted,
+      'country': country
     };
   }
 }
 
 class TeacherVocationalModel {
   final int? id;
-  final String? courseName;
-  final String? institution;
-  final String? duration;
-  final String? completionDate;
+  final String? culturalLevel;
+  final String? skillOne;
+  final String? skillTwo;
+  final String? trainingSystem;
+  final String? dateAccepted;
 
-  const TeacherVocationalModel({
-    this.id,
-    this.courseName,
-    this.institution,
-    this.duration,
-    this.completionDate,
-  });
+  const TeacherVocationalModel(
+      {this.id,
+      this.culturalLevel,
+      this.skillOne,
+      this.skillTwo,
+      this.trainingSystem,
+      this.dateAccepted});
 
   factory TeacherVocationalModel.fromJson(Map<String, dynamic> json) {
     return TeacherVocationalModel(
       id: json['id'] as int?,
-      courseName: json['courseName'] as String?,
-      institution: json['institution'] as String?,
-      duration: json['duration'] as String?,
-      completionDate: json['completionDate'] as String?,
+      culturalLevel: json['culturalLevel'] as String?,
+      skillOne: json['skillOne'] as String?,
+      skillTwo: json['skillTwo'] as String?,
+      trainingSystem: json['trainingSystem'] as String?,
+      dateAccepted: json['dateAccepted'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'courseName': courseName,
-      'institution': institution,
-      'duration': duration,
-      'completionDate': completionDate,
+      'culturalLevel': culturalLevel,
+      'skillOne': skillOne,
+      'skillTwo': skillTwo,
+      'trainingSystem': trainingSystem,
+      'dateAccepted': dateAccepted
     };
   }
 }
 
 class TeacherShortCourseModel {
   final int? id;
-  final String? courseName;
-  final String? provider;
+  final String? skill;
+  final String? skillName;
+  final String? startDate;
+  final String? endDate;
   final String? duration;
-  final String? completionDate;
+  final String? preparedBy;
+  final String? supportBy;
 
-  const TeacherShortCourseModel({
-    this.id,
-    this.courseName,
-    this.provider,
-    this.duration,
-    this.completionDate,
-  });
+  const TeacherShortCourseModel(
+      {this.id,
+      this.skill,
+      this.skillName,
+      this.startDate,
+      this.endDate,
+      this.duration,
+      this.preparedBy,
+      this.supportBy});
 
   factory TeacherShortCourseModel.fromJson(Map<String, dynamic> json) {
     return TeacherShortCourseModel(
       id: json['id'] as int?,
-      courseName: json['courseName'] as String?,
-      provider: json['provider'] as String?,
+      skill: json['skill'] as String?,
+      skillName: json['skillName'] as String?,
+      startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
       duration: json['duration'] as String?,
-      completionDate: json['completionDate'] as String?,
+      preparedBy: json['preparedBy'] as String?,
+      supportBy: json['supportBy'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'courseName': courseName,
-      'provider': provider,
+      'skill': skill,
+      'skillName': skillName,
+      'startDate': startDate,
+      'endDate': endDate,
       'duration': duration,
-      'completionDate': completionDate,
+      'preparedBy': preparedBy,
+      'supportBy': supportBy
     };
   }
 }
@@ -686,22 +520,20 @@ class TeacherShortCourseModel {
 class TeacherLanguageModel {
   final int? id;
   final String? language;
-  final String? proficiencyLevel;
-  final String? certificationDate;
+  final String? reading;
+  final String? writing;
+  final String? speaking;
 
-  const TeacherLanguageModel({
-    this.id,
-    this.language,
-    this.proficiencyLevel,
-    this.certificationDate,
-  });
+  const TeacherLanguageModel(
+      {this.id, this.language, this.reading, this.writing, this.speaking});
 
   factory TeacherLanguageModel.fromJson(Map<String, dynamic> json) {
     return TeacherLanguageModel(
       id: json['id'] as int?,
       language: json['language'] as String?,
-      proficiencyLevel: json['proficiencyLevel'] as String?,
-      certificationDate: json['certificationDate'] as String?,
+      reading: json['reading'] as String?,
+      writing: json['writing'] as String?,
+      speaking: json['speaking'] as String?,
     );
   }
 
@@ -709,44 +541,40 @@ class TeacherLanguageModel {
     return {
       'id': id,
       'language': language,
-      'proficiencyLevel': proficiencyLevel,
-      'certificationDate': certificationDate,
+      'reading': reading,
+      'writing': writing,
+      'speaking': speaking
     };
   }
 }
 
 class TeacherFamilyModel {
   final int? id;
-  final String? relationship;
-  final String? name;
+  final String? nameChild;
+  final String? gender;
   final String? dateOfBirth;
-  final String? occupation;
+  final String? working;
 
-  const TeacherFamilyModel({
-    this.id,
-    this.relationship,
-    this.name,
-    this.dateOfBirth,
-    this.occupation,
-  });
+  const TeacherFamilyModel(
+      {this.id, this.nameChild, this.gender, this.dateOfBirth, this.working});
 
   factory TeacherFamilyModel.fromJson(Map<String, dynamic> json) {
     return TeacherFamilyModel(
       id: json['id'] as int?,
-      relationship: json['relationship'] as String?,
-      name: json['name'] as String?,
+      nameChild: json['nameChild'] as String?,
+      gender: json['gender'] as String?,
       dateOfBirth: json['dateOfBirth'] as String?,
-      occupation: json['occupation'] as String?,
+      working: json['working'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'relationship': relationship,
-      'name': name,
+      'nameChild': nameChild,
+      'gender': gender,
       'dateOfBirth': dateOfBirth,
-      'occupation': occupation,
+      'working': working
     };
   }
 }
