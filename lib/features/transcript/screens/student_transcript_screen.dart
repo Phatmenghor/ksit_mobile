@@ -295,21 +295,33 @@ class StudentTranscriptScreen extends StatelessWidget {
     final courseCode = course.courseCode ?? 'N/A';
 
     return Container(
-      padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 4,
-        bottom: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Course Info
+              Expanded(
+                child: Text(
+                  '$courseCode $courseName ($credits)',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
               // Grade Circle
               Container(
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: _getGradeColor(letterGrade),
                   shape: BoxShape.circle,
@@ -325,48 +337,13 @@ class StudentTranscriptScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              const SizedBox(width: 8),
-
-              // Course Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Class $courseCode',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$credits Credits',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textPrimary.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            '$courseName - ${course.credit}(${course.theory ?? 0}.${course.execute ?? 0}.${course.apply ?? 0})',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.primary,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           const Divider(
             color: AppColors.border,
             thickness: 1,
+            height: 1,
           ),
         ],
       ),

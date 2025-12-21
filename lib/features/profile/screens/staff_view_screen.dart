@@ -77,39 +77,57 @@ class StaffViewScreen extends StatelessWidget {
 
                     // Personal Information
                     DisplayRowWidget(
-                        label: "នាមត្រកូល និងនាមខ្លួន",
-                        value:
-                            '${staffProfile?.khmerFirstName ?? ""} ${staffProfile?.khmerLastName ?? "N/A"}'),
+                      label: "អត្តលេខនិស្សិត",
+                      value: staffProfile?.identifyNumber ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "ជាអក្សរឡាតាំង",
-                        value:
-                            '${staffProfile?.englishFirstName ?? ""} ${staffProfile?.englishLastName ?? "N/A"}'),
+                      label: "នាមត្រកូល និងនាម",
+                      value: staffProfile?.khmerFirstName != null ||
+                              staffProfile?.khmerLastName != null
+                          ? '${staffProfile?.khmerFirstName ?? ""} ${staffProfile?.khmerLastName ?? ""}'
+                              .trim()
+                          : "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "ថ្ងៃខែឆ្នាំកំណើត",
-                        value: staffProfile?.dateOfBirth ?? "N/A"),
-
+                      label: "អក្សរឡាតាំង",
+                      value: staffProfile?.englishFirstName != null ||
+                              staffProfile?.englishLastName != null
+                          ? '${staffProfile?.englishFirstName ?? ""} ${staffProfile?.englishLastName ?? ""}'
+                              .trim()
+                          : "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "អត្តលេខនិស្សិត",
-                        value: staffProfile?.identifyNumber ?? "N/A"),
+                      label: "ថ្ងៃខែឆ្នាំកំណើត",
+                      value: staffProfile?.dateOfBirth ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "ភេទ", value: staffProfile?.gender ?? "N/A"),
+                      label: "ភេទ",
+                      value: staffProfile?.gender ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "លេខទូរស័ព្ទ",
-                        value: staffProfile?.phoneNumber ?? "N/A"),
+                      label: "ជនជាតិ",
+                      value: staffProfile?.ethnicity ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "អ៊ីម៊ែល", value: staffProfile?.email ?? "N/A"),
+                      label: "សញ្ជាតិ",
+                      value: staffProfile?.nationality ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "ទីកន្លែងកំណើត",
-                        value: staffProfile?.placeOfBirth ?? "N/A"),
+                      label: "ទីកន្លែងកំណើត",
+                      value: staffProfile?.placeOfBirth ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "អាសយដ្ឋានបច្ចុប្បន្ន",
-                        value: staffProfile?.currentAddress ?? "N/A"),
+                      label: "អាសយដ្ឋានបច្ចុប្បន្ន",
+                      value: staffProfile?.currentAddress ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "ជនជាតិ",
-                        value: staffProfile?.ethnicity ?? "N/A"),
+                      label: "លេខទូរស័ព្ទ",
+                      value: staffProfile?.phoneNumber ?? "N/A",
+                    ),
                     DisplayRowWidget(
-                        label: "សញ្ជាតិ",
-                        value: staffProfile?.nationality ?? "N/A"),
+                      label: "អុីម៉ែល",
+                      value: staffProfile?.email ?? "N/A",
+                    ),
                   ],
                 ),
               )
@@ -137,18 +155,6 @@ class StaffViewScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Name
-              Text(
-                staffProfile?.displayName ?? "",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 8),
-
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -163,8 +169,22 @@ class StaffViewScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Name
+              Text(
+                staffProfile?.displayName ?? "N/A",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -176,28 +196,60 @@ class StaffViewScreen extends StatelessWidget {
   Widget _buildProfileAvatar() {
     final controller = Get.find<ProfileController>();
     return Obx(() {
-      final imageUrl = controller.staffProfile.value?.profileUrl;
+      final imageUrl = controller.studentProfile.value?.profileUrl;
+      final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        return CircleAvatar(
-          radius: 36,
-          backgroundImage: NetworkImage(AppConfig.baseImageUrl + imageUrl),
-          backgroundColor: Colors.white,
-          onBackgroundImageError: (exception, stackTrace) {
-            debugPrint('Image failed to load: $exception');
-          },
-        );
-      } else {
-        return const CircleAvatar(
-          radius: 36,
-          backgroundColor: Colors.white,
-          child: Icon(
-            Icons.person,
-            color: AppColors.primary,
-            size: 28,
+      return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: 3,
           ),
-        );
-      }
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: CircleAvatar(
+          radius: 32,
+          backgroundColor:
+              hasImage ? Colors.white : AppColors.primary.withOpacity(0.1),
+          backgroundImage: hasImage
+              ? NetworkImage(AppConfig.baseImageUrl + imageUrl!)
+              : null,
+          onBackgroundImageError: hasImage
+              ? (exception, stackTrace) {
+                  debugPrint('Image failed to load: $exception');
+                }
+              : null,
+          child: !hasImage
+              ? Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary.withOpacity(0.8),
+                        AppColors.primary,
+                      ],
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                )
+              : null,
+        ),
+      );
     });
   }
 }
