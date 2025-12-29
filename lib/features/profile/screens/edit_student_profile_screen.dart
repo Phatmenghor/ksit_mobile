@@ -433,148 +433,146 @@ class EditStudentProfileFullScreen extends StatelessWidget {
   }
 
   Widget _buildStudiesHistorySection(EditStudentProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'ប្រវត្តិសិក្សា',
-          labels: const [
-            'កម្រិតថ្នាក់',
-            'ឈ្មោះសាលារៀន',
-            'ខេត្ត/រាជធានី',
-            'ពីឆ្នាំណា',
-            'ដល់ឆ្នាំណា',
-            'សញ្ញាបត្រទទួលបាន',
-            'និទ្ទេសរួម',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'typeStudies',
-                type: DynamicFieldType.select,
-                placeholder: 'កម្រិតថ្នាក់',
-                options: [
-                  'PRIMARY_SCHOOL',
-                  'LOWER_SECONDARY_SCHOOL',
-                  'UPPER_SECONDARY_SCHOOL'
-                ]),
-            DynamicFieldConfig(
-                name: 'schoolName',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះសាលារៀន'),
-            DynamicFieldConfig(
-                name: 'location',
-                type: DynamicFieldType.text,
-                placeholder: 'ខេត្ត/រាជធានី'),
-            DynamicFieldConfig(
-                name: 'fromYear',
-                type: DynamicFieldType.date,
-                placeholder: 'ពីឆ្នាំណា'),
-            DynamicFieldConfig(
-                name: 'endYear',
-                type: DynamicFieldType.date,
-                placeholder: 'ដល់ឆ្នាំណា'),
-            DynamicFieldConfig(
-                name: 'obtainedCertificate',
-                type: DynamicFieldType.text,
-                placeholder: 'សញ្ញាបត្រទទួលបាន'),
-            DynamicFieldConfig(
-                name: 'overallGrade',
-                type: DynamicFieldType.text,
-                placeholder: 'និទ្ទេសរួម'),
-          ],
-          initialData: controller.studiesHistories,
-          onDataChanged: (data) => controller.studiesHistories.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'ប្រវត្តិសិក្សា',
+      labels: const [
+        'កម្រិតថ្នាក់',
+        'ឈ្មោះសាលារៀន',
+        'ខេត្ត/រាជធានី',
+        'ពីឆ្នាំណា',
+        'ដល់ឆ្នាំណា',
+        'សញ្ញាបត្រទទួលបាន',
+        'និទ្ទេសរួម',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'typeStudies',
+            type: DynamicFieldType.select,
+            placeholder: 'កម្រិតថ្នាក់',
+            options: [
+              'PRIMARY_SCHOOL',
+              'LOWER_SECONDARY_SCHOOL',
+              'UPPER_SECONDARY_SCHOOL'
+            ]),
+        DynamicFieldConfig(
+            name: 'schoolName',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះសាលារៀន'),
+        DynamicFieldConfig(
+            name: 'location',
+            type: DynamicFieldType.text,
+            placeholder: 'ខេត្ត/រាជធានី'),
+        DynamicFieldConfig(
+            name: 'fromYear',
+            type: DynamicFieldType.date,
+            placeholder: 'ពីឆ្នាំណា'),
+        DynamicFieldConfig(
+            name: 'endYear',
+            type: DynamicFieldType.date,
+            placeholder: 'ដល់ឆ្នាំណា'),
+        DynamicFieldConfig(
+            name: 'obtainedCertificate',
+            type: DynamicFieldType.text,
+            placeholder: 'សញ្ញាបត្រទទួលបាន'),
+        DynamicFieldConfig(
+            name: 'overallGrade',
+            type: DynamicFieldType.text,
+            placeholder: 'និទ្ទេសរួម'),
+      ],
+      initialData: controller.studiesHistories,
+      onDataChanged: (data) => controller.studiesHistories.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildParentsSection(EditStudentProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'ឪពុកម្តាយ',
-          labels: const [
-            'ឈ្មោះឪពុកម្តាយ',
-            'លេខទូរស័ព្ទ',
-            'មុខរបរ',
-            'អាសយដ្ឋាន',
-            'អាយុ',
-            'ប្រភេទឪពុកម្តាយ',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'name',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះឪពុកម្តាយ'),
-            DynamicFieldConfig(
-                name: 'phone',
-                type: DynamicFieldType.text,
-                placeholder: 'លេខទូរស័ព្ទ'),
-            DynamicFieldConfig(
-                name: 'job',
-                type: DynamicFieldType.text,
-                placeholder: 'មុខរបរ'),
-            DynamicFieldConfig(
-                name: 'address',
-                type: DynamicFieldType.text,
-                placeholder: 'អាសយដ្ឋាន'),
-            DynamicFieldConfig(
-                name: 'age', type: DynamicFieldType.text, placeholder: 'អាយុ'),
-            DynamicFieldConfig(
-                name: 'parentType',
-                type: DynamicFieldType.select,
-                placeholder: 'ប្រភេទឪពុកម្តាយ',
-                options: ['MOTHER', 'FATHER']),
-          ],
-          initialData: controller.parents,
-          onDataChanged: (data) => controller.parents.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'ឪពុកម្តាយ',
+      labels: const [
+        'ឈ្មោះឪពុកម្តាយ',
+        'លេខទូរស័ព្ទ',
+        'មុខរបរ',
+        'អាសយដ្ឋាន',
+        'អាយុ',
+        'ប្រភេទឪពុកម្តាយ',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'name',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះឪពុកម្តាយ'),
+        DynamicFieldConfig(
+            name: 'phone',
+            type: DynamicFieldType.text,
+            placeholder: 'លេខទូរស័ព្ទ'),
+        DynamicFieldConfig(
+            name: 'job', type: DynamicFieldType.text, placeholder: 'មុខរបរ'),
+        DynamicFieldConfig(
+            name: 'address',
+            type: DynamicFieldType.text,
+            placeholder: 'អាសយដ្ឋាន'),
+        DynamicFieldConfig(
+            name: 'age', type: DynamicFieldType.text, placeholder: 'អាយុ'),
+        DynamicFieldConfig(
+            name: 'parentType',
+            type: DynamicFieldType.select,
+            placeholder: 'ប្រភេទឪពុកម្តាយ',
+            options: ['MOTHER', 'FATHER']),
+      ],
+      initialData: controller.parents,
+      onDataChanged: (data) => controller.parents.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   Widget _buildSiblingsSection(EditStudentProfileController controller) {
-    return Obx(() => DynamicInputGrid(
-          title: 'បងប្អូន',
-          labels: const [
-            'ឈ្មោះបងប្អូន',
-            'ភេទ',
-            'ថ្ងៃខែឆ្នាំកំណើត',
-            'មុខរបរ',
-            'លេខទូរស័ព្ទ',
-            'អាសយដ្ឋាន',
-          ],
-          fields: const [
-            DynamicFieldConfig(
-                name: 'name',
-                type: DynamicFieldType.text,
-                placeholder: 'ឈ្មោះបងប្អូន'),
-            DynamicFieldConfig(
-                name: 'gender',
-                type: DynamicFieldType.select,
-                placeholder: 'ភេទ',
-                options: ['MALE', 'FEMALE', 'OTHER']),
-            DynamicFieldConfig(
-                name: 'dateOfBirth',
-                type: DynamicFieldType.date,
-                placeholder: 'ថ្ងៃខែឆ្នាំកំណើត'),
-            DynamicFieldConfig(
-                name: 'occupation',
-                type: DynamicFieldType.text,
-                placeholder: 'មុខរបរ'),
-            DynamicFieldConfig(
-                name: 'phoneNumber',
-                type: DynamicFieldType.text,
-                placeholder: 'លេខទូរស័ព្ទ'),
-            DynamicFieldConfig(
-                name: 'address',
-                type: DynamicFieldType.text,
-                placeholder: 'អាសយដ្ឋាន'),
-          ],
-          initialData: controller.siblings,
-          onDataChanged: (data) => controller.siblings.value = data,
-          isEditable: true,
-          defaultRows: 1,
-          isCollapsible: true,
-        ));
+    return DynamicInputGrid(
+      title: 'បងប្អូន',
+      labels: const [
+        'ឈ្មោះបងប្អូន',
+        'ភេទ',
+        'ថ្ងៃខែឆ្នាំកំណើត',
+        'មុខរបរ',
+        'លេខទូរស័ព្ទ',
+        'អាសយដ្ឋាន',
+      ],
+      fields: const [
+        DynamicFieldConfig(
+            name: 'name',
+            type: DynamicFieldType.text,
+            placeholder: 'ឈ្មោះបងប្អូន'),
+        DynamicFieldConfig(
+            name: 'gender',
+            type: DynamicFieldType.select,
+            placeholder: 'ភេទ',
+            options: ['MALE', 'FEMALE', 'OTHER']),
+        DynamicFieldConfig(
+            name: 'dateOfBirth',
+            type: DynamicFieldType.date,
+            placeholder: 'ថ្ងៃខែឆ្នាំកំណើត'),
+        DynamicFieldConfig(
+            name: 'occupation',
+            type: DynamicFieldType.text,
+            placeholder: 'មុខរបរ'),
+        DynamicFieldConfig(
+            name: 'phoneNumber',
+            type: DynamicFieldType.text,
+            placeholder: 'លេខទូរស័ព្ទ'),
+        DynamicFieldConfig(
+            name: 'address',
+            type: DynamicFieldType.text,
+            placeholder: 'អាសយដ្ឋាន'),
+      ],
+      initialData: controller.siblings,
+      onDataChanged: (data) => controller.siblings.value = data,
+      isEditable: true,
+      defaultRows: 1,
+      isCollapsible: true,
+    );
   }
 
   ImageProvider? _getProfileImage(EditStudentProfileController controller) {

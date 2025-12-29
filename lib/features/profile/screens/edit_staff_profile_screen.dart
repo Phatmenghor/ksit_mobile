@@ -222,40 +222,35 @@ class EditStaffProfileFullScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Builder(
-            builder: (context) {
-              final staff = Get.find<ProfileController>().staffProfile.value;
-              return Text(
-                staff?.displayName ?? 'N/A',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              );
-            },
-          ),
+          Obx(() {
+            final staff = Get.find<ProfileController>().staffProfile.value;
+            return Text(
+              staff?.displayName ?? 'N/A',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            );
+          }),
           const SizedBox(height: 8),
-          Builder(
-            builder: (context) {
-              final staff = Get.find<ProfileController>().staffProfile.value;
-              return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+          Obx(() {
+            final staff = Get.find<ProfileController>().staffProfile.value;
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'ID : ${staff?.identifyNumber ?? 'N/A'}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary,
                 ),
-                child: Text(
-                  'ID : ${staff?.identifyNumber ?? 'N/A'}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.primary,
-                  ),
-                ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
           const SizedBox(height: 16),
           const Divider(color: AppColors.border, thickness: 8),
         ],
@@ -458,7 +453,6 @@ class EditStaffProfileFullScreen extends StatelessWidget {
     );
   }
 
-  // FIXED: Remove Obx wrapper and access controller properties directly
   Widget _buildProfessionalRankSection(EditStaffProfileController controller) {
     return DynamicInputGrid(
       title: 'ឋានៈវិជ្ជាជីវៈ',
@@ -576,7 +570,7 @@ class EditStaffProfileFullScreen extends StatelessWidget {
         DynamicFieldConfig(
             name: 'skillName',
             type: DynamicFieldType.text,
-            placeholder: 'ឈ្មោះជំនាញ'),
+            placeholder: 'ឈ្មោះជំនាญ'),
         DynamicFieldConfig(
             name: 'dateAccepted',
             type: DynamicFieldType.date,

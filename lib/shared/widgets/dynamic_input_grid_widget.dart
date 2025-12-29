@@ -12,6 +12,8 @@ class DynamicInputGrid extends StatefulWidget {
   final bool isEditable;
   final int defaultRows;
   final bool isCollapsible;
+  final bool initiallyExpanded;
+  final bool isReadOnly;
 
   const DynamicInputGrid({
     super.key,
@@ -23,6 +25,8 @@ class DynamicInputGrid extends StatefulWidget {
     this.isEditable = true,
     this.defaultRows = 1,
     this.isCollapsible = true,
+    this.initiallyExpanded = false,
+    this.isReadOnly = false,
   });
 
   @override
@@ -32,11 +36,13 @@ class DynamicInputGrid extends StatefulWidget {
 class _DynamicInputGridState extends State<DynamicInputGrid> {
   late List<Map<String, dynamic>> _data;
   late List<Map<String, TextEditingController>> _controllers;
-  bool _isExpanded = false;
+  late bool _isExpanded;
 
   @override
   void initState() {
     super.initState();
+    // Default to collapsed (false), unless explicitly set to expanded
+    _isExpanded = widget.initiallyExpanded;
     _initializeData();
   }
 
@@ -148,7 +154,7 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
           fillColor: Colors.white,
           borderRadius: BorderRadius.circular(4),
           onChanged: (_) => _updateParentData(),
-          enabled: widget.isEditable,
+          enabled: widget.isEditable && !widget.isReadOnly,
         );
 
       case DynamicFieldType.date:
@@ -158,9 +164,9 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
           fillColor: Colors.white,
           borderRadius: BorderRadius.circular(4),
           readOnly: true,
-          enabled: widget.isEditable,
+          enabled: widget.isEditable && !widget.isReadOnly,
           suffixIcon: const Icon(Icons.calendar_month, size: 20),
-          onTap: widget.isEditable
+          onTap: (widget.isEditable && !widget.isReadOnly)
               ? () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -201,7 +207,7 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
                     );
                   }).toList() ??
                   [],
-              onChanged: widget.isEditable
+              onChanged: (widget.isEditable && !widget.isReadOnly)
                   ? (value) {
                       controller.text = value ?? '';
                       _updateParentData();
@@ -244,7 +250,9 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
                           fontSize: 14,
                         ),
                       ),
-                      if (widget.isEditable && _data.length > 1)
+                      if (widget.isEditable &&
+                          !widget.isReadOnly &&
+                          _data.length > 1)
                         IconButton(
                           icon: const Icon(
                             Icons.delete_outline,
@@ -288,7 +296,7 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
             );
           },
         ),
-        if (widget.isEditable)
+        if (widget.isEditable && !widget.isReadOnly)
           Center(
             child: TextButton.icon(
               onPressed: _addRow,
