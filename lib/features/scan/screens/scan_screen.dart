@@ -1,4 +1,4 @@
-// lib/features/scan/screens/scan_screen.dart (With Detection Delay UI)
+// lib/features/scan/screens/scan_screen.dart (Bank-Style - Minimal UI)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -16,41 +16,15 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   final scanController = Get.put(ScanController());
   late AnimationController _animationController;
-  late AnimationController _pulseController;
-  late Animation<double> _animation;
-  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // Animation for scanning line
     _animationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-
-    // Pulse animation for detection state
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
 
     _animationController.repeat();
   }
@@ -58,7 +32,6 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _pulseController.dispose();
     super.dispose();
   }
 
@@ -66,45 +39,6 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: const Text(
-          'QR Scan',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        actions: [
-          // Flash Toggle
-          Obx(() => IconButton(
-                onPressed: scanController.toggleFlash,
-                icon: Icon(
-                  scanController.isFlashOn.value
-                      ? Icons.flash_on
-                      : Icons.flash_off,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              )),
-
-          // Camera Switch
-          Obx(() => IconButton(
-                onPressed: scanController.switchCamera,
-                icon: Icon(
-                  scanController.cameraFacing.value == CameraFacing.back
-                      ? Icons.camera_rear
-                      : Icons.camera_front,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              )),
-        ],
-      ),
       body: Stack(
         children: [
           // Mobile Scanner
@@ -114,14 +48,17 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
             overlay: _buildScanOverlay(),
           ),
 
+          // Top Header - Minimal
+          _buildTopHeader(),
+
+          // Detection Countdown - When QR detected
+          Obx(() => scanController.isDetecting.value
+              ? _buildDetectionCountdown()
+              : const SizedBox.shrink()),
+
           // Processing Overlay
           Obx(() => scanController.isSubmittingAttendance.value
               ? _buildProcessingOverlay()
-              : const SizedBox.shrink()),
-
-          // Detection Countdown Overlay
-          Obx(() => scanController.isDetecting.value
-              ? _buildDetectionOverlay()
               : const SizedBox.shrink()),
 
           // Cooldown Overlay
@@ -129,9 +66,59 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
               ? _buildCooldownOverlay()
               : const SizedBox.shrink()),
 
-          // Bottom Instructions
-          _buildInstructions(),
+          // Bottom Info
+          _buildBottomInfo(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTopHeader() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Back Button
+            GestureDetector(
+              onTap: () => Get.back(),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+
+            // Title
+            const Text(
+              'Scan QR Code',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            // Flash Button
+            Obx(() => GestureDetector(
+                  onTap: scanController.toggleFlash,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      scanController.isFlashOn.value
+                          ? Icons.flashlight_on
+                          : Icons.flashlight_off,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                )),
+          ],
+        ),
       ),
     );
   }
@@ -139,283 +126,197 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   Widget _buildScanOverlay() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withOpacity(0.4),
       ),
       child: Center(
-        child: Obx(() {
-          // Change border color based on state
-          Color borderColor = AppColors.primary;
-          if (scanController.isDetecting.value) {
-            borderColor = AppColors.warning;
-          } else if (scanController.isScanning.value) {
-            borderColor = AppColors.success;
-          }
-
-          return AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, child) {
-              double scale = scanController.isDetecting.value
-                  ? _pulseAnimation.value
-                  : 1.0;
-
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  width: 280,
-                  height: 280,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: borderColor,
-                      width: 3,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Corner brackets
-                      ...List.generate(4, (index) {
-                        return Positioned(
-                          top: index < 2 ? -3 : null,
-                          bottom: index >= 2 ? -3 : null,
-                          left: index % 2 == 0 ? -3 : null,
-                          right: index % 2 == 1 ? -3 : null,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: borderColor,
-                              borderRadius: BorderRadius.only(
-                                topLeft: index == 0
-                                    ? const Radius.circular(17)
-                                    : Radius.zero,
-                                topRight: index == 1
-                                    ? const Radius.circular(17)
-                                    : Radius.zero,
-                                bottomLeft: index == 2
-                                    ? const Radius.circular(17)
-                                    : Radius.zero,
-                                bottomRight: index == 3
-                                    ? const Radius.circular(17)
-                                    : Radius.zero,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-
-                      // Animated scanning line (only when ready to scan)
-                      if (scanController.canScan.value &&
-                          !scanController.isSubmittingAttendance.value &&
-                          !scanController.isDetecting.value &&
-                          scanController.scanCooldownSeconds.value == 0)
-                        AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return Positioned(
-                              top: _animation.value * 260,
-                              left: 10,
-                              right: 10,
-                              child: Container(
-                                height: 3,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Colors.transparent,
-                                      AppColors.primary,
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.6),
-                                      blurRadius: 10,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+        child: Container(
+          width: 280,
+          height: 280,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.primary,
+              width: 2.5,
+            ),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Stack(
+            children: [
+              // Scanning line animation
+              AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return Positioned(
+                    top: _animationController.value * 260,
+                    left: 8,
+                    right: 8,
+                    child: Container(
+                      height: 2.5,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            AppColors.primary,
+                            Colors.transparent,
+                          ],
                         ),
-
-                      // Center focus point
-                      Center(
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: borderColor,
-                            shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.8),
+                            blurRadius: 8,
+                            spreadRadius: 1,
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildDetectionOverlay() {
-    // Start pulse animation when detecting
-    if (!_pulseController.isAnimating) {
-      _pulseController.repeat(reverse: true);
-    }
-
-    return Container(
-      color: Colors.black.withOpacity(0.7),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Detection countdown circle
-            Obx(() => Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.warning,
-                      width: 4,
                     ),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${scanController.detectionCountdown.value}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Text(
-                          'sec',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'QR Code Detected!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+                  );
+                },
               ),
-            ),
 
-            const SizedBox(height: 8),
-
-            const Text(
-              'Scanning in progress...',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Cancel button
-            TextButton(
-              onPressed: scanController.cancelCurrentDetection,
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.2),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+              // Corner indicators (subtle)
+              ..._buildCornerIndicators(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCooldownOverlay() {
+  List<Widget> _buildCornerIndicators() {
+    return [
+      // Top-left
+      Positioned(
+        top: 0,
+        left: 0,
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: AppColors.primary, width: 2.5),
+              left: BorderSide(color: AppColors.primary, width: 2.5),
+            ),
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(8)),
+          ),
+        ),
+      ),
+      // Top-right
+      Positioned(
+        top: 0,
+        right: 0,
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: AppColors.primary, width: 2.5),
+              right: BorderSide(color: AppColors.primary, width: 2.5),
+            ),
+            borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
+          ),
+        ),
+      ),
+      // Bottom-left
+      Positioned(
+        bottom: 0,
+        left: 0,
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.primary, width: 2.5),
+              left: BorderSide(color: AppColors.primary, width: 2.5),
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+            ),
+          ),
+        ),
+      ),
+      // Bottom-right
+      Positioned(
+        bottom: 0,
+        right: 0,
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.primary, width: 2.5),
+              right: BorderSide(color: AppColors.primary, width: 2.5),
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomRight: Radius.circular(8),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildDetectionCountdown() {
     return Container(
       color: Colors.black.withOpacity(0.8),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Cooldown Timer
+            // Countdown circle
             Obx(() => Container(
-                  width: 120,
-                  height: 120,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.info,
-                      width: 4,
+                      color: AppColors.warning,
+                      width: 3,
                     ),
                   ),
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${scanController.scanCooldownSeconds.value}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Text(
-                          'sec',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      '${scanController.detectionCountdown.value}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 )),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
             const Text(
-              'Ready to scan again in...',
+              'QR Code Detected',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
-            const Text(
-              'Please wait to prevent duplicate scans',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+            // Cancel button
+            GestureDetector(
+              onTap: scanController.cancelCurrentDetection,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
           ],
@@ -432,30 +333,21 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 60,
-              height: 60,
+              width: 50,
+              height: 50,
               child: CircularProgressIndicator(
-                strokeWidth: 4,
+                strokeWidth: 3,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
             SizedBox(height: 24),
             Text(
-              'Processing Attendance...',
+              'Processing...',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Please wait while we record your attendance',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -463,7 +355,50 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildInstructions() {
+  Widget _buildCooldownOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.8),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Obx(() => Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white54,
+                      width: 3,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${scanController.scanCooldownSeconds.value}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )),
+            const SizedBox(height: 24),
+            const Text(
+              'Ready to scan',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomInfo() {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -476,8 +411,8 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.4),
-              Colors.black.withOpacity(0.8),
+              Colors.black.withOpacity(0.3),
+              Colors.black.withOpacity(0.7),
             ],
           ),
         ),
@@ -485,48 +420,31 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Obx(() {
-                  String message;
-                  Color textColor = Colors.black87;
+              Obx(() {
+                String message;
 
-                  if (scanController.isSubmittingAttendance.value) {
-                    message = 'Processing attendance...';
-                  } else if (scanController.isDetecting.value) {
-                    message =
-                        'QR detected! Scanning in ${scanController.detectionCountdown.value}s';
-                    textColor = Colors.orange.shade800;
-                  } else if (scanController.scanCooldownSeconds.value > 0) {
-                    message =
-                        'Wait ${scanController.scanCooldownSeconds.value}s before next scan';
-                    textColor = Colors.blue.shade800;
-                  } else if (scanController.canScan.value) {
-                    message =
-                        'Hold steady - QR code will be detected automatically';
-                  } else {
-                    message = 'Camera not ready';
-                    textColor = Colors.red.shade800;
-                  }
+                if (scanController.isSubmittingAttendance.value) {
+                  message = 'Processing attendance...';
+                } else if (scanController.isDetecting.value) {
+                  message = 'Scanning...';
+                } else if (scanController.scanCooldownSeconds.value > 0) {
+                  message =
+                      'Ready in ${scanController.scanCooldownSeconds.value}s';
+                } else {
+                  message = 'Hold camera steady';
+                }
 
-                  return Text(
-                    message,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  );
-                }),
-              ),
+                return Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+              }),
             ],
           ),
         ),

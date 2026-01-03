@@ -17,6 +17,7 @@ class AttendanceHistoryFilterRequest {
     final Map<String, dynamic> data = {
       'pageNo': pageNo,
       'pageSize': pageSize,
+      'finalizationStatus': 'FINAL'
     };
 
     if (semester != null) {

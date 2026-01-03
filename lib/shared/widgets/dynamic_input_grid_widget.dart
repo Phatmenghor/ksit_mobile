@@ -25,7 +25,7 @@ class DynamicInputGrid extends StatefulWidget {
     this.isEditable = true,
     this.defaultRows = 1,
     this.isCollapsible = true,
-    this.initiallyExpanded = false,
+    this.initiallyExpanded = true,
     this.isReadOnly = false,
   });
 
@@ -41,7 +41,7 @@ class _DynamicInputGridState extends State<DynamicInputGrid> {
   @override
   void initState() {
     super.initState();
-    // Default to collapsed (false), unless explicitly set to expanded
+    // Default to expanded (true) - sections open by default
     _isExpanded = widget.initiallyExpanded;
     _initializeData();
   }

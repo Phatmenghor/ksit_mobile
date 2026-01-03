@@ -1,4 +1,4 @@
-// lib/features/scan/controllers/scan_controller.dart (With Detection Delay)
+// lib/features/scan/controllers/scan_controller.dart (Bank-Style - Minimal)
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -22,29 +22,31 @@ class ScanController extends GetxController {
   final RxBool isSubmittingAttendance = false.obs;
   final RxString scannedQrCode = ''.obs;
   final RxBool canScan = true.obs;
-  final Rx<CameraFacing> cameraFacing = CameraFacing.back.obs;
 
   // Detection and scanning states
-  final RxBool isDetecting = false.obs; // When QR is detected but waiting
-  final RxBool isScanning = false.obs; // When actually processing
+  final RxBool isDetecting = false.obs;
+  final RxBool isScanning = false.obs;
   final RxInt scanCooldownSeconds = 0.obs;
-  final RxInt detectionCountdown = 0.obs; // Countdown for detection delay
+  final RxInt detectionCountdown = 0.obs;
   final RxBool hasScannedInSession = false.obs;
 
-  // Zoom controls
+  // Auto-zoom
   final RxDouble currentZoom = 1.0.obs;
   final RxDouble minZoom = 1.0.obs;
   final RxDouble maxZoom = 3.0.obs;
+  final RxBool isAutoZoomEnabled = true.obs;
 
   // Timing settings
-  static const int detectionDelayDuration =
-      2; // 2 seconds to confirm QR detection
-  static const int scanCooldownDuration = 3; // 3 seconds cooldown between scans
+  static const int detectionDelayDuration = 2;
+  static const int scanCooldownDuration = 3;
+  static const double autoZoomThreshold = 0.5;
 
   Timer? _cooldownTimer;
   Timer? _detectionTimer;
   Timer? _detectionCountdownTimer;
   String? _pendingQrCode;
+  int _qrDetectionCount = 0;
+  static const int qrDetectionCountThreshold = 2;
 
   @override
   void onInit() {
@@ -68,20 +70,94 @@ class ScanController extends GetxController {
   void _initializeScanner() {
     try {
       scannerController = MobileScannerController(
-        detectionSpeed: DetectionSpeed
-            .normal, // Changed from noDuplicates for better control
+        detectionSpeed: DetectionSpeed.normal,
         facing: CameraFacing.back,
         torchEnabled: false,
+        autoStart: true,
       );
 
-      LoggerUtils.info('Scanner initialized successfully');
+      LoggerUtils.info('Scanner initialized');
     } catch (e) {
       LoggerUtils.error('Failed to initialize scanner', e);
     }
   }
 
+  /// Auto-zoom based on QR code detection
+  void _performAutoZoom(BarcodeCapture capture) {
+    if (!isAutoZoomEnabled.value) return;
+
+    try {
+      final barcodes = capture.barcodes;
+      if (barcodes.isEmpty) {
+        if (_qrDetectionCount > 0) {
+          _qrDetectionCount--;
+        }
+        if (_qrDetectionCount <= 0) {
+          _resetAutoZoom();
+        }
+        return;
+      }
+
+      final barcode = barcodes.first;
+      final boundingBox = barcode.corners;
+
+      if (boundingBox.isNotEmpty) {
+        final qrSize = _calculateQrSize(boundingBox);
+        final optimalZoom = _calculateOptimalZoom(qrSize);
+
+        _qrDetectionCount++;
+
+        if (_qrDetectionCount >= qrDetectionCountThreshold) {
+          if ((optimalZoom - currentZoom.value).abs() > 0.1) {
+            currentZoom.value = optimalZoom;
+            LoggerUtils.debug('Auto-zoom: ${optimalZoom.toStringAsFixed(2)}x');
+          }
+        }
+      }
+    } catch (e) {
+      LoggerUtils.debug('Auto-zoom error: $e');
+    }
+  }
+
+  /// Calculate QR code size from bounding box
+  double _calculateQrSize(List<Offset> corners) {
+    if (corners.isEmpty) return 0;
+
+    double minX = corners.first.dx;
+    double maxX = corners.first.dx;
+    double minY = corners.first.dy;
+    double maxY = corners.first.dy;
+
+    for (var corner in corners) {
+      minX = minX > corner.dx ? corner.dx : minX;
+      maxX = maxX < corner.dx ? corner.dx : maxX;
+      minY = minY > corner.dy ? corner.dy : minY;
+      maxY = maxY < corner.dy ? corner.dy : maxY;
+    }
+
+    return ((maxX - minX) + (maxY - minY)) / 2;
+  }
+
+  /// Calculate optimal zoom level
+  double _calculateOptimalZoom(double qrSize) {
+    const double targetQrSize = 200;
+    const double screenSize = 400;
+
+    if (qrSize <= 0) return 1.0;
+
+    final zoom = (targetQrSize / qrSize) * (screenSize / 400);
+    return zoom.clamp(minZoom.value, maxZoom.value);
+  }
+
+  /// Reset zoom to default
+  void _resetAutoZoom() {
+    if (currentZoom.value != 1.0) {
+      currentZoom.value = 1.0;
+      _qrDetectionCount = 0;
+    }
+  }
+
   void onDetect(BarcodeCapture capture) {
-    // Check if we can scan
     if (!canScan.value ||
         isScanning.value ||
         isSubmittingAttendance.value ||
@@ -89,10 +165,12 @@ class ScanController extends GetxController {
       return;
     }
 
-    // Check cooldown
     if (scanCooldownSeconds.value > 0) {
       return;
     }
+
+    // Auto-zoom when QR detected
+    _performAutoZoom(capture);
 
     final List<Barcode> barcodes = capture.barcodes;
     for (final barcode in barcodes) {
@@ -105,19 +183,16 @@ class ScanController extends GetxController {
   }
 
   void _startDetectionDelay(String qrCode) {
-    // Prevent multiple detections
     if (isDetecting.value) return;
 
     isDetecting.value = true;
     _pendingQrCode = qrCode;
     detectionCountdown.value = detectionDelayDuration;
 
-    // Light haptic feedback on detection
     HapticFeedback.selectionClick();
 
-    LoggerUtils.info('QR Code detected, starting detection delay: $qrCode');
+    LoggerUtils.info('QR Code detected: $qrCode');
 
-    // Start countdown timer
     _detectionCountdownTimer =
         Timer.periodic(const Duration(seconds: 1), (timer) {
       if (detectionCountdown.value <= 1) {
@@ -129,7 +204,6 @@ class ScanController extends GetxController {
       }
     });
 
-    // Auto-cancel if user moves QR away
     _detectionTimer = Timer(Duration(seconds: detectionDelayDuration), () {
       if (isDetecting.value && _pendingQrCode == qrCode) {
         _processScanResult();
@@ -143,7 +217,6 @@ class ScanController extends GetxController {
     isDetecting.value = false;
     detectionCountdown.value = 0;
     _pendingQrCode = null;
-    LoggerUtils.info('Detection cancelled');
   }
 
   void _processScanResult() {
@@ -151,23 +224,17 @@ class ScanController extends GetxController {
         isScanning.value ||
         isSubmittingAttendance.value) return;
 
-    // Clear detection state
     _detectionTimer?.cancel();
     _detectionCountdownTimer?.cancel();
     isDetecting.value = false;
     detectionCountdown.value = 0;
 
-    // Set scanning state
     isScanning.value = true;
     canScan.value = false;
     scannedQrCode.value = _pendingQrCode!;
 
-    // Medium haptic feedback for actual scan
     HapticFeedback.mediumImpact();
 
-    LoggerUtils.info('Processing QR Code: ${_pendingQrCode}');
-
-    // Start submission
     _submitAttendance(_pendingQrCode!);
     _pendingQrCode = null;
   }
@@ -196,30 +263,27 @@ class ScanController extends GetxController {
   }
 
   void _showSuccessModal(QrAttendanceResponse response) {
-    // Success haptic feedback
     HapticFeedback.lightImpact();
 
     AttendanceResultModal.showSuccess(
-      title: 'Attendance Recorded Successfully',
+      title: 'Attendance Recorded',
       message: response.message,
       attendanceData: response.data,
       onDone: () {
         Get.back();
-        LoggerUtils.info('Success modal dismissed');
       },
     );
   }
 
   void _showErrorModal(String errorMessage) {
-    // Error haptic feedback
     HapticFeedback.vibrate();
 
     AttendanceResultModal.showError(
-      title: 'Attendance Failed',
+      title: 'Scan Failed',
       message: errorMessage,
       onRetry: () {
         Get.back();
-        _startScanCooldown(duration: 1); // Quick retry
+        _startScanCooldown(duration: 1);
       },
     );
   }
@@ -233,16 +297,12 @@ class ScanController extends GetxController {
         scanCooldownSeconds.value = 0;
         canScan.value = true;
         timer.cancel();
-        LoggerUtils.info('Scan cooldown ended - ready to scan');
       } else {
         scanCooldownSeconds.value--;
       }
     });
-
-    LoggerUtils.info('Scan cooldown started: ${duration}s');
   }
 
-  // Manual cancel detection (if user wants to cancel)
   void cancelCurrentDetection() {
     if (isDetecting.value) {
       _cancelDetection();
@@ -250,27 +310,6 @@ class ScanController extends GetxController {
     }
   }
 
-  // Zoom controls
-  void zoomIn() {
-    final newZoom =
-        (currentZoom.value + 0.2).clamp(minZoom.value, maxZoom.value);
-    currentZoom.value = newZoom;
-    HapticFeedback.selectionClick();
-  }
-
-  void zoomOut() {
-    final newZoom =
-        (currentZoom.value - 0.2).clamp(minZoom.value, maxZoom.value);
-    currentZoom.value = newZoom;
-    HapticFeedback.selectionClick();
-  }
-
-  void resetZoom() {
-    currentZoom.value = 1.0;
-    HapticFeedback.selectionClick();
-  }
-
-  // Flash and camera controls
   Future<void> toggleFlash() async {
     try {
       await scannerController.toggleTorch();
@@ -281,19 +320,6 @@ class ScanController extends GetxController {
     }
   }
 
-  Future<void> switchCamera() async {
-    try {
-      await scannerController.switchCamera();
-      cameraFacing.value = cameraFacing.value == CameraFacing.back
-          ? CameraFacing.front
-          : CameraFacing.back;
-      HapticFeedback.selectionClick();
-    } catch (e) {
-      LoggerUtils.error('Failed to switch camera', e);
-    }
-  }
-
-  // Reset scanning session
   void resetSession() {
     _cooldownTimer?.cancel();
     _detectionTimer?.cancel();
@@ -309,11 +335,11 @@ class ScanController extends GetxController {
     scannedQrCode.value = '';
     currentZoom.value = 1.0;
     _pendingQrCode = null;
+    _qrDetectionCount = 0;
 
     LoggerUtils.info('Scan session reset');
   }
 
-  // Status getters
   bool get canStartNewScan =>
       canScan.value &&
       !isScanning.value &&
@@ -330,6 +356,4 @@ class ScanController extends GetxController {
     if (!canScan.value) return 'Ready';
     return 'Position QR Code';
   }
-
-  String get zoomDisplay => '${currentZoom.value.toStringAsFixed(1)}x';
 }
