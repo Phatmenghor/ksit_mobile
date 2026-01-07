@@ -17,22 +17,22 @@ class AppConfig {
   static String get baseUrl {
     switch (_environment) {
       case Environment.development:
-        return 'http://206.189.43.152:7000/api';
+        return 'http://165.22.247.142:7000/api';
       case Environment.staging:
-        return 'http://206.189.43.152:7000/api';
+        return 'http://165.22.247.142:7000/api';
       case Environment.production:
-        return 'http://206.189.43.152:7000/api';
+        return 'http://165.22.247.142:7000/api';
     }
   }
 
   static String get baseImageUrl {
     switch (_environment) {
       case Environment.development:
-        return 'http://206.189.43.152:7000';
+        return 'http://165.22.247.142:7000';
       case Environment.staging:
-        return 'http://206.189.43.152:7000';
+        return 'http://165.22.247.142:7000';
       case Environment.production:
-        return 'http://206.189.43.152:7000';
+        return 'http://165.22.247.142:7000';
     }
   }
 

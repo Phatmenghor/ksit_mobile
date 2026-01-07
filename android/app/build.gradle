@@ -45,8 +45,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         
-        // ADDED: App name for better branding
-        resValue "string", "app_name", "KSIT Mobile"
+        // ADDED: App name for better branding - CHANGED TO IMS KSIT
+        resValue "string", "app_name", "ims ksit"
         
         // ADDED: Version information
         buildConfigField "String", "VERSION_NAME", "\"${flutter.versionName}\""
