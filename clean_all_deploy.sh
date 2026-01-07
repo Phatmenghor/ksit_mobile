@@ -25,10 +25,10 @@ echo "🤖 Building Android APK release..."
 flutter build apk --release
 
 echo "📱 Copying APK to Desktop with date-based name..."
-cp build/app/outputs/flutter-apk/app-release.apk ~/Desktop/production/$APK_NAME
+cp build/app/outputs/flutter-apk/app-release.apk ~/Desktop/development/$APK_NAME
 
 echo "🍎 Building iOS release configuration..."
 flutter build ios --config-only --release
 
 echo "✅ Build process completed!"
-echo "📦 APK saved as: ~/Desktop/production/$APK_NAME"
+echo "📦 APK saved as: ~/Desktop/development/$APK_NAME"
