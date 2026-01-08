@@ -2,7 +2,7 @@
 
 # Set current date (YYYYMMDD)
 CURRENT_DAY=$(date +"%Y%m%d")
-APK_NAME="KSIT_v1_development_${CURRENT_DAY}.apk"
+APK_NAME="KSIT_v1_prod_${CURRENT_DAY}.apk"
 
 # Clean everything first (from project root)
 echo "🧹 Cleaning Flutter project..."
